@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8" />
+<title th:text="${bingo_welcome_title}">Welcome to ComakeIt
+	Tambola Mela Game</title>
+<link th:href="@{/styles/main.css}" rel="stylesheet" />
+
+</head>
+<body>
+	<h1 th:text="${bingo_welcome_heading}">Default Header</h1>
+	<h3 th:text="${bingo_user}">Default Header</h3>
+
+	<div th:each="slip: ${bingoData.getResponses()}">
+		<span th:text="'Slip id# ' + ${slip.slipId}"
+			style="font-size: 0.8em;"></span>
+		<table id="slips">
+			<tr th:each="item: ${slip.transformedMatrix}">
+				<td th:each="j: ${item}"><span th:if="${j != 0}" th:text="${j}"></span></td>
+			<tr>
+		</table>
+		<br>
+	</div>
+ <div class='footer' th:include="footer::footer"></div>
+</body>
+</html>

@@ -1,0 +1,109 @@
+@charset "ISO-8859-1";
+
+h1 {
+	margin: .3em 0;
+}
+
+h2 {
+	font-family: sans-serif;
+	font-size: 1.5em;
+	text-transform: uppercase;
+	display: inline-flex;
+	margin: .3em 0;
+}
+
+h4 {
+	display: inline-flex;
+	margin: 0;
+}
+
+.game-display {
+	height: 80vh;
+	display: flex;
+}
+
+.called_calls {
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+	margin-bottom: 1em;
+	flex-wrap: wrap;
+	max-height: 42vh;
+	height: 42vh;
+	font-size: 1.2em;
+}
+
+.copyright-text {
+	padding-left: 1em;
+	font-size: 1.2em;
+}
+
+.called_calls h4 {
+	margin: .1em 0;
+}
+
+.btn-info.call-number-button {
+	height: 6em;
+    border-radius: 6em;
+}
+
+.left-container {
+	width: 70%;
+}
+
+.left-container h3 {
+	margin: 0.5em 0;
+}
+
+.right-container {
+	display: flex;
+	flex-direction: column;
+	width: 30%;
+	overflow: auto;
+}
+
+.right-container h4 {
+	margin: .1em 0;
+}
+
+.all-calls-style {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	height: 12vh;
+	overflow: auto;
+	font-size: .9em;
+}
+
+.all-calls-style span {
+	padding-right: .3em;
+}
+
+#slips {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	width: 35em;
+}
+
+#slips td, #slips th {
+	border: 1px solid #d6ff90;;
+	text-align: center;
+	min-width: .7em;
+}
+
+#slips tr:nth-child(even) {
+	background-color: #eeffd1;;
+}
+
+#slips tr:hover {
+	background-color: #ddd;
+}
+
+#slips th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;
+	background-color: #4CAF50;
+	color: white;
+}
+
