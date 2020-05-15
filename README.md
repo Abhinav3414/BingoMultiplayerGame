@@ -7,7 +7,7 @@ Bingo Game for Multi players
 
 - Save emails of user participating in emails-bingo-users.xlsx file
 - Load application
-- Go to http://localhost:8080 to view game index page.
+- Go to http://localhost:8080/bingo-game to view game index page.
 - Click on start Game ( It will create a new game, and will create a folder structure for all payers and will save pdf of slips in each user's respective folder )
 - Folder structure will be : 
 -   Game folder
