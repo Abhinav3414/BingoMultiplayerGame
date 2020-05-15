@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.bingo.BingoSlipToPdfService;
-import com.bingo.EmailService;
-import com.bingo.FileIOUtility;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.utility.EmailService;
+import com.bingo.utility.FileIOService;
+import com.bingo.utility.SlipToPdfGeneratorService;
 import com.itextpdf.text.DocumentException;
 
 
@@ -35,11 +35,18 @@ import com.itextpdf.text.DocumentException;
 @Controller
 public class BingoRestController {
 
+    private static final String GAME_IS_STARTED = "Game is started";
+    private static final String BINGO_MULTIPLAYER = "Bingo Multiplayer";
+    private static final String WELCOME_TO_BINGO_GAME = "Welcome to Bingo Game";
     BingoGame game = null;
     int pdfGenerated = -1;
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private SlipToPdfGeneratorService slipToPdfGeneratorService;
+    @Autowired
+    private FileIOService fileIOService;
 
     @RequestMapping(method = RequestMethod.GET, path = "/")
     public ModelAndView homePage(Model model) {
@@ -52,7 +59,7 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/gamesetup")
     public ModelAndView generateBingoEmails(Model model) throws IOException {
 
-        List<String> emails = FileIOUtility.readEmailsFromExcel("emails-bingo-users.xlsx");
+        List<String> emails = fileIOService.readEmailsFromExcel("emails-bingo-users.xlsx");
 
         emails.forEach(e -> {
             if (game.bingoBoard.getUserSlips(e).isEmpty()) {
@@ -64,16 +71,16 @@ public class BingoRestController {
 
         System.out.println(game.calls);
 
-        String bingoFolderName = FileIOUtility.createBingoGameFolder(game.gameId);
+        String bingoFolderName = fileIOService.createBingoGameFolder(game.gameId);
 
         game.bingoBoard.bingoUsers.stream().map(bu -> bu.email).forEach(e -> {
-            FileIOUtility.createUserFolder(game.gameId, bingoFolderName, e);
+            fileIOService.createUserFolder(game.gameId, bingoFolderName, e);
         });
 
-        FileIOUtility.writeCallsToCsv(bingoFolderName, game.calls);
+        fileIOService.writeCallsToCsv(bingoFolderName, game.calls);
 
         ModelAndView mav = createModelView("setup-game");
-        mav.addObject("bingo_start_game", "Game is started");
+        mav.addObject("bingo_start_game", GAME_IS_STARTED);
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("pdfGenerated", pdfGenerated);
@@ -85,12 +92,12 @@ public class BingoRestController {
         List<String> pdfNotGenerated = new ArrayList<>();
 
         emails.forEach(email -> {
-            String slipName = FileIOUtility.getUserSlipPdfName(game.gameId, email);
+            String slipName = fileIOService.getUserSlipPdfName(game.gameId, email);
             List<BingoSlip> userSlips = game.bingoBoard.getUserSlips(email);
             List<SlipHtmlResponse> slipResponses = userSlips.stream()
                     .map(us -> new SlipHtmlResponse(us.slipId, us.bingoMatrix)).collect(Collectors.toList());
             try {
-                BingoSlipToPdfService.generateSlipPdf(slipName, email, game, slipResponses);
+                slipToPdfGeneratorService.generateSlipPdf(slipName, email, game, slipResponses);
             } catch (Exception e) {
                 System.out.println("Slip could not be generated for : " + email);
                 pdfNotGenerated.add(email);
@@ -115,7 +122,7 @@ public class BingoRestController {
         List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
 
         ModelAndView mav = createModelView("setup-game");
-        mav.addObject("bingo_start_game", "Game is started");
+        mav.addObject("bingo_start_game", GAME_IS_STARTED);
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("bingo_user_emails", emails);
@@ -141,7 +148,7 @@ public class BingoRestController {
             game.currentCall = 0;
         }
         ModelAndView mav = createModelView("setup-game");
-        mav.addObject("bingo_start_game", "Game is started");
+        mav.addObject("bingo_start_game", GAME_IS_STARTED);
         mav.addObject("bingo_game_id", game.gameId);
 
         mav.addObject("bingo_call_number", String.format("Call %d :", game.currentCall + 1));
@@ -181,8 +188,8 @@ public class BingoRestController {
 
     private ModelAndView createModelView(String name) {
         ModelAndView mav = new ModelAndView(name);
-        mav.addObject("bingo_welcome_heading", "Welcome to Bingo Game");
-        mav.addObject("bingo_welcome_title", "Bingo Multiplayer");
+        mav.addObject("bingo_welcome_heading", WELCOME_TO_BINGO_GAME);
+        mav.addObject("bingo_welcome_title", BINGO_MULTIPLAYER);
         return mav;
     }
 

@@ -1,4 +1,4 @@
-package com.bingo;
+package com.bingo.utility;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,8 +18,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.bingo.utility.ContentIdGenerator;
-
 
 /**
  * @author Abhinav Gupta
@@ -31,6 +29,9 @@ public class EmailService {
 
     private JavaMailSender javaMailSender;
 
+    @Autowired
+    FileIOService fileIOService;
+    
     @Autowired
     public EmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
@@ -87,7 +88,7 @@ public class EmailService {
 
         emails.forEach(e -> {
 
-            String userSlipPdfName = FileIOUtility.getUserSlipPdfName(gameId, e);
+            String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, e);
             Path path = Paths.get(userSlipPdfName);
             byte[] content;
             try {

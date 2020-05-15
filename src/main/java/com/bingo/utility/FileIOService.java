@@ -1,4 +1,4 @@
-package com.bingo;
+package com.bingo.utility;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,17 +15,19 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Abhinav Gupta
  * @version 1.0
  * @since 12-May-2020
  */
-public class FileIOUtility {
+@Service
+public class FileIOService {
 
     static String bingoFolderName;
 
-    public static void writeCallsToCsv(String bingoFolderName, List<Integer> calls) throws IOException {
+    public void writeCallsToCsv(String bingoFolderName, List<Integer> calls) throws IOException {
         File file = new File(bingoFolderName + "/" + bingoFolderName + "-calls.csv");
         FileWriter csvWriter = new FileWriter(file);
         csvWriter.append("Calls");
@@ -43,7 +45,7 @@ public class FileIOUtility {
         csvWriter.close();
     }
 
-    public static void createUserFolder(String gameId, String bingoFolderName, String userEmail) {
+    public void createUserFolder(String gameId, String bingoFolderName, String userEmail) {
         String userFolderName = bingoFolderName + "\\" + userEmail + "_" + gameId;
         Path userFolderPath = Paths.get(userFolderName);
 
@@ -59,7 +61,7 @@ public class FileIOUtility {
         }
     }
 
-    public static String createBingoGameFolder(String gameId) throws IOException {
+    public String createBingoGameFolder(String gameId) throws IOException {
         String bingoFolderName = "Tambola_" + gameId;
 
         Path path = Paths.get(bingoFolderName);
@@ -70,12 +72,12 @@ public class FileIOUtility {
         } else {
             System.out.println("Directory already exists");
         }
-        FileIOUtility.bingoFolderName = bingoFolderName;
+        FileIOService.bingoFolderName = bingoFolderName;
         return bingoFolderName;
     }
 
     @SuppressWarnings("deprecation")
-    public static List<String> readEmailsFromExcel(String excelFilePath) {
+    public List<String> readEmailsFromExcel(String excelFilePath) {
         List<String> emails = new ArrayList<>();
         XSSFWorkbook workbook = null;
 
@@ -117,7 +119,7 @@ public class FileIOUtility {
         return emails;
     }
 
-    public static String getUserSlipPdfName(String gameId, String userEmail) {
+    public String getUserSlipPdfName(String gameId, String userEmail) {
         return bingoFolderName + "\\" + userEmail + "_" + gameId + "\\" + userEmail + "_" + gameId + "_slips.pdf";
     }
 

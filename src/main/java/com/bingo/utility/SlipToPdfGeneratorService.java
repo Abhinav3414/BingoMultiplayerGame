@@ -1,4 +1,4 @@
-package com.bingo;
+package com.bingo.utility;
 
 import static org.thymeleaf.templatemode.TemplateMode.HTML;
 
@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -29,11 +30,12 @@ import com.bingo.dao.SlipHtmlResponse;
  * @version 1.0
  * @since 12-May-2020
  */
-public class BingoSlipToPdfService {
+@Service
+public class SlipToPdfGeneratorService {
 
     private static final String UTF_8 = "UTF-8";
 
-    public static void generateSlipPdf(String fileName, String email, BingoGame game, List<SlipHtmlResponse> responses) throws Exception {
+    public void generateSlipPdf(String fileName, String email, BingoGame game, List<SlipHtmlResponse> responses) throws Exception {
 
         Path path = Paths.get(fileName);
         if (Files.exists(path)) {
