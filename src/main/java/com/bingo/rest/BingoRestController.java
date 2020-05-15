@@ -33,7 +33,6 @@ import com.itextpdf.text.DocumentException;
  */
 
 @Controller
-@RequestMapping("/")
 public class BingoRestController {
 
     BingoGame game = null;
@@ -46,11 +45,11 @@ public class BingoRestController {
     public ModelAndView homePage(Model model) {
         ModelAndView mav = createModelView("index");
         game = new BingoGame();
-        System.out.println("game id" + game.gameId);
+        System.out.println("game id: " + game.gameId);
         return mav;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/generateEmails")
+    @RequestMapping(method = RequestMethod.GET, path = "/gamesetup")
     public ModelAndView generateBingoEmails(Model model) throws IOException {
 
         List<String> emails = FileIOUtility.readEmailsFromExcel("emails-bingo-users.xlsx");
@@ -73,7 +72,7 @@ public class BingoRestController {
 
         FileIOUtility.writeCallsToCsv(bingoFolderName, game.calls);
 
-        ModelAndView mav = createModelView("index");
+        ModelAndView mav = createModelView("setup-game");
         mav.addObject("bingo_start_game", "Game is started");
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
@@ -113,11 +112,9 @@ public class BingoRestController {
     public ModelAndView generateBingo(Model model)
             throws EncryptedDocumentException, InvalidFormatException, IOException, InterruptedException, ExecutionException {
 
-        System.out.println("start game called");
-
         List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
 
-        ModelAndView mav = createModelView("index");
+        ModelAndView mav = createModelView("setup-game");
         mav.addObject("bingo_start_game", "Game is started");
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
@@ -143,7 +140,7 @@ public class BingoRestController {
         if (game.currentCall == 89) {
             game.currentCall = 0;
         }
-        ModelAndView mav = createModelView("index");
+        ModelAndView mav = createModelView("setup-game");
         mav.addObject("bingo_start_game", "Game is started");
         mav.addObject("bingo_game_id", game.gameId);
 
@@ -184,8 +181,8 @@ public class BingoRestController {
 
     private ModelAndView createModelView(String name) {
         ModelAndView mav = new ModelAndView(name);
-        mav.addObject("bingo_welcome_heading", "Welcome to ComakeIt Tambola Mela");
-        mav.addObject("bingo_welcome_title", "Tambola-ComakeIt");
+        mav.addObject("bingo_welcome_heading", "Welcome to Bingo Game");
+        mav.addObject("bingo_welcome_title", "Bingo Multiplayer");
         return mav;
     }
 

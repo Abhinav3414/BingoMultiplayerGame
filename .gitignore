@@ -31,3 +31,5 @@ build/
 .vscode/
 Tambola_*
 application.properties
+Bingo_commands.txt
+src/main/resources/application.properties
