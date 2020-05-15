@@ -20,6 +20,12 @@ import org.springframework.stereotype.Service;
 
 import com.bingo.utility.ContentIdGenerator;
 
+
+/**
+ * @author Abhinav Gupta
+ * @version 1.0
+ * @since 12-May-2020
+ */
 @Service
 public class EmailService {
 
@@ -59,7 +65,7 @@ public class EmailService {
         }
 
     }
-    
+
     public List<String> sendMailToParticipants(List<String> emails, String gameId) {
 
         List<String> emailNotSent = new ArrayList<String>();

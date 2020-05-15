@@ -1,9 +1,0 @@
-java -jar BingoMultiplayerGame-0.0.1-SNAPSHOT.jar
-
-
-
-Helps: 
-
-https://github.com/thymeleaf/thymeleaf-spring/issues/203
-https://github.com/tuhrig/Flying_Saucer_PDF_Generation
-https://tuhrig.de/generating-pdfs-with-java-flying-saucer-and-thymeleaf/

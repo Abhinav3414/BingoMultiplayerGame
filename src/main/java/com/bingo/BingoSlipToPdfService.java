@@ -24,6 +24,11 @@ import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
 
 
+/**
+ * @author Abhinav Gupta
+ * @version 1.0
+ * @since 12-May-2020
+ */
 public class BingoSlipToPdfService {
 
     private static final String UTF_8 = "UTF-8";
@@ -56,7 +61,7 @@ public class BingoSlipToPdfService {
         //
         // Note that we could also read this data from a JSON file, a database
         // a web service or whatever.
-        
+
         BingoSlipsTemplateData bingoData = new BingoSlipsTemplateData();
         bingoData.setEmail(email);
         bingoData.setGameId(game.gameId);
