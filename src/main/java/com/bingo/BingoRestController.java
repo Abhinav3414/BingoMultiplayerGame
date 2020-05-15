@@ -1,4 +1,4 @@
-package com.bingo.rest;
+package com.bingo;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,13 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.bingo.appservice.BingoAppService;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.utility.EmailService;
-import com.bingo.utility.FileIOService;
-import com.bingo.utility.SlipToPdfGeneratorService;
 import com.itextpdf.text.DocumentException;
 
 
@@ -43,41 +42,24 @@ public class BingoRestController {
 
     @Autowired
     private EmailService emailService;
+
     @Autowired
-    private SlipToPdfGeneratorService slipToPdfGeneratorService;
-    @Autowired
-    private FileIOService fileIOService;
+    private BingoAppService bingoAppService;
 
     @RequestMapping(method = RequestMethod.GET, path = "/")
     public ModelAndView homePage(Model model) {
         ModelAndView mav = createModelView("index");
-        game = new BingoGame();
+        game = bingoAppService.startGame();
         System.out.println("game id: " + game.gameId);
+        System.out.println(game.calls);
         return mav;
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/gamesetup")
-    public ModelAndView generateBingoEmails(Model model) throws IOException {
+    public ModelAndView generateBingoEmails(Model model) {
 
-        List<String> emails = fileIOService.readEmailsFromExcel("emails-bingo-users.xlsx");
-
-        emails.forEach(e -> {
-            if (game.bingoBoard.getUserSlips(e).isEmpty()) {
-                game.bingoBoard.generateSlipsForUser(e);
-            } else {
-                System.out.println("Slips are already generated for user: " + e);
-            }
-        });
-
-        System.out.println(game.calls);
-
-        String bingoFolderName = fileIOService.createBingoGameFolder(game.gameId);
-
-        game.bingoBoard.bingoUsers.stream().map(bu -> bu.email).forEach(e -> {
-            fileIOService.createUserFolder(game.gameId, bingoFolderName, e);
-        });
-
-        fileIOService.writeCallsToCsv(bingoFolderName, game.calls);
+        bingoAppService.generateSlipsForUser();
+        bingoAppService.createBingoFolderStructure();
 
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("bingo_start_game", GAME_IS_STARTED);
@@ -85,25 +67,8 @@ public class BingoRestController {
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("pdfGenerated", pdfGenerated);
 
-        System.out.println(emails);
         List<String> userEmails = game.bingoBoard.bingoUsers.stream().map(bu -> bu.email).collect(Collectors.toList());
-        mav.addObject("bingo_user_emails", userEmails);
-
-        List<String> pdfNotGenerated = new ArrayList<>();
-
-        emails.forEach(email -> {
-            String slipName = fileIOService.getUserSlipPdfName(game.gameId, email);
-            List<BingoSlip> userSlips = game.bingoBoard.getUserSlips(email);
-            List<SlipHtmlResponse> slipResponses = userSlips.stream()
-                    .map(us -> new SlipHtmlResponse(us.slipId, us.bingoMatrix)).collect(Collectors.toList());
-            try {
-                slipToPdfGeneratorService.generateSlipPdf(slipName, email, game, slipResponses);
-            } catch (Exception e) {
-                System.out.println("Slip could not be generated for : " + email);
-                pdfNotGenerated.add(email);
-                // e.printStackTrace();
-            }
-        });
+        List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails);
 
         if (pdfNotGenerated.isEmpty()) {
             System.out.println("Pdf generated for all successfully !!!, Game id : " + game.gameId);
@@ -112,6 +77,8 @@ public class BingoRestController {
             System.out.println("Pdf could not be geneatated for: ");
             System.out.println(pdfNotGenerated);
         }
+
+        mav.addObject("bingo_user_emails", userEmails);
         return mav;
     }
 

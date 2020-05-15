@@ -17,6 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+
 /**
  * @author Abhinav Gupta
  * @version 1.0
@@ -27,22 +28,32 @@ public class FileIOService {
 
     static String bingoFolderName;
 
-    public void writeCallsToCsv(String bingoFolderName, List<Integer> calls) throws IOException {
+    public void writeCallsToCsv(String bingoFolderName, List<Integer> calls) {
         File file = new File(bingoFolderName + "/" + bingoFolderName + "-calls.csv");
-        FileWriter csvWriter = new FileWriter(file);
-        csvWriter.append("Calls");
-        csvWriter.append("\n");
-        int i = 1;
-        for (Integer rowData : calls) {
-            String data = String.valueOf(rowData);
-            String callNo = "call #" + i + ": ";
-            csvWriter.append(String.join(",", callNo));
-            csvWriter.append(String.join(",", data));
-            csvWriter.append(",\n");
-            i++;
+        FileWriter csvWriter;
+        try {
+            csvWriter = new FileWriter(file);
+
+            csvWriter.append("Calls");
+            csvWriter.append("\n");
+            int i = 1;
+            for (Integer rowData : calls) {
+                String data = String.valueOf(rowData);
+                String callNo = "call #" + i + ": ";
+                csvWriter.append(String.join(",", callNo));
+                csvWriter.append(String.join(",", data));
+                csvWriter.append(",\n");
+                i++;
+            }
+            csvWriter.flush();
+            csvWriter.close();
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+
         }
-        csvWriter.flush();
-        csvWriter.close();
     }
 
     public void createUserFolder(String gameId, String bingoFolderName, String userEmail) {
@@ -61,13 +72,17 @@ public class FileIOService {
         }
     }
 
-    public String createBingoGameFolder(String gameId) throws IOException {
+    public String createBingoGameFolder(String gameId) {
         String bingoFolderName = "Tambola_" + gameId;
 
         Path path = Paths.get(bingoFolderName);
 
         if (!Files.exists(path)) {
-            Files.createDirectory(path);
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             System.out.println("Directory created: " + bingoFolderName);
         } else {
             System.out.println("Directory already exists");
