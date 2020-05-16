@@ -21,5 +21,11 @@ $('#blogLink').click(function(e) {
 	setTimeout(function() {
 		window.location.href = "gamesetup";
 	}, 1200); // will call the function after 2 secs.
+});
 
+$('#blogLink2').click(function(e) {
+	e.preventDefault(); // will stop the link href to call the blog page
+	setTimeout(function() {
+		window.location.href = "callNextRandomNumber";
+	}, 700); // will call the function after 2 secs.
 });

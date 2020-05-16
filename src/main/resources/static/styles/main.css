@@ -17,6 +17,12 @@ h4 {
 	margin: 0;
 }
 
+.user-email-style {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
 .slip-link {
 	background: #1f8dec;
     color: white;
@@ -25,6 +31,15 @@ h4 {
     margin-left: 1em;
     width: 7em;
     white-space: nowrap;
+}
+
+.call-style {
+	font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+    font-size: 3em;
+    color: #015871;
 }
 
 .game-display {
@@ -41,6 +56,10 @@ h4 {
 	max-height: 42vh;
 	height: 42vh;
 	font-size: 1.2em;
+	background: radial-gradient(#274727, #031c23);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	padding-left: 1em;
 }
 
 .copyright-text {
@@ -59,6 +78,7 @@ h4 {
 
 .left-container {
 	width: 70%;
+	padding: 1em .5em .5em 2em;
 }
 
 .left-container h3 {

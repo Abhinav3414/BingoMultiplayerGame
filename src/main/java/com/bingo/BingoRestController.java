@@ -108,7 +108,7 @@ public class BingoRestController {
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("pdfGenerated", pdfGenerated);
-        mav.addObject("manage_players", true);
+        mav.addObject("manage_players", !isExcelUploaded);
 
         return mav;
     }
@@ -146,10 +146,11 @@ public class BingoRestController {
         List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
         System.out.println("pdfGenerated " + pdfGenerated);
         ModelAndView mav = createModelView("setup-game");
-        mav.addObject("setup_game", SETUP_GAME);
+        mav.addObject("setup_game", GAME_IS_ON);
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("bingo_user_emails", emails);
+        mav.addObject("show_call_next_button", true);
 
         List<String> emailNotSent = emailService.sendMailToParticipants(emails, game.gameId);
 
@@ -172,6 +173,7 @@ public class BingoRestController {
         mav.addObject("bingo_game_id", game.gameId);
         mav.addObject("bingo_calls", game.calls);
         mav.addObject("bingo_user_emails", emails);
+        mav.addObject("show_call_next_button", true);
 
         return mav;
     }
@@ -189,8 +191,9 @@ public class BingoRestController {
         mav.addObject("setup_game", GAME_IS_ON);
         mav.addObject("bingo_game_id", game.gameId);
 
-        mav.addObject("bingo_call_number", String.format("Call %d :", game.currentCall + 1));
+        mav.addObject("bingo_call_number", String.format("Call %d:", game.currentCall + 1));
         mav.addObject("bingo_call_value", game.calls.get(game.currentCall));
+        mav.addObject("show_call_next_button", true);
 
         List<Integer> doneCalls = new ArrayList<>();
         int b = 0;
