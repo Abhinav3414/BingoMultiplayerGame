@@ -17,8 +17,18 @@ h4 {
 	margin: 0;
 }
 
+.slip-link {
+	background: #1f8dec;
+    color: white;
+    padding: .5em 1em;
+    border-radius: 1em;
+    margin-left: 1em;
+    width: 7em;
+    white-space: nowrap;
+}
+
 .game-display {
-	height: 80vh;
+	height: 90vh;
 	display: flex;
 }
 
@@ -60,19 +70,16 @@ h4 {
 	flex-direction: column;
 	width: 30%;
 	overflow: auto;
+    padding: 1em;
+}
+
+.right-container .form-group input {
+	margin: .5em 0;
+	width: 60%;
 }
 
 .right-container h4 {
 	margin: .1em 0;
-}
-
-.all-calls-style {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	height: 12vh;
-	overflow: auto;
-	font-size: .9em;
 }
 
 .all-calls-style span {

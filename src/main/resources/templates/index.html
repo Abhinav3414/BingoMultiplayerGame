@@ -8,10 +8,10 @@
 	<meta charset="UTF-8" />
 	<title th:text="${bingo_welcome_title}">Bingo Multiplayer</title>
 	
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 	<link th:href="@{/styles/homepage-effect.css}" rel="stylesheet" />
 	<link th:href="@{/styles/button-effect.css}" rel="stylesheet" />
 </head>
@@ -21,7 +21,7 @@
 		<button id="blogLink" type="button" class="bubbly-button">Setup Game</button>
 	</div>
 	<div class="context2">
-		<<div class='footer' th:include="footer::footer"></div>
+		<div class='footer' th:include="footer::footer"></div>
 	</div>
 	<div class="area">
 		<ul class="circles">

@@ -23,6 +23,8 @@ import com.bingo.utility.SlipToPdfGeneratorService;
 @Service
 public class BingoAppService {
 
+    public static final String EMAILS_BINGO_USERS_XLSX = "emails-bingo-users.xlsx";
+
     BingoGame game = null;
 
     @Autowired
@@ -38,7 +40,7 @@ public class BingoAppService {
 
     public List<String> generateSlipsForUser() {
 
-        List<String> emails = fileIOService.readEmailsFromExcel("emails-bingo-users.xlsx");
+        List<String> emails = fileIOService.readEmailsFromExcel(EMAILS_BINGO_USERS_XLSX);
 
         emails.forEach(e -> {
             if (game.bingoBoard.getUserSlips(e).isEmpty()) {

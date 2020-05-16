@@ -6,33 +6,50 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-3.0.1.js"></script>
+
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <link th:href="@{/styles/main.css}" rel="stylesheet" />
 
 <head>
 <meta charset="UTF-8" />
-<title th:text="${bingo_welcome_title}">Welcome to ComakeIt Tambola Game</title>
 </head>
 <body>
 
-	<button type="button" th:if="${bingo_game_id}" th:onclick="|window.location.href='/bingo-game'|" class="btn btn-danger">Restart Tambola!!</button>
+	<button type="button" th:if="${bingo_game_id}" th:onclick="|window.location.href='/bingo-game'|" class="btn btn-danger">Reset And Start New Game!!</button>
 	&emsp;&emsp;&emsp;
-	<button type="button" th:if="${bingo_game_id != null}"
-		th:onclick="|window.location.href='startBingo'|" class="btn btn-success">Generate Emails !!</button>
 	
 	<div class="game-display">
 
 		<div class="left-container">
-			<h1 th:if="${bingo_start_game}" th:text="${bingo_start_game}">bingo_start_game</h1>
+			<h1 th:if="${setup_game}" th:text="${setup_game}">setup_game</h1>
 
+			<div th:if="${bingo_game_id}" th:text="'Game id# ' + ${bingo_game_id}">bingo_game_id</div>
+			
+		<div th:if="${pdfGenerated==5}">
+			<span >We have created slips for all participants.</span><br>
+			<span >All Participants' slips pdfs are also generated with us</span><br>
+			
+			<span >You can view slips by clicking on "View Slips" button next to participant's email id.</span><br>
+			
+			Choose any option from Below to Continue : 
+			
+			<span>Would you like to mail Slips to each participant ? Choose one of the below options to continue : </span>
+			<br><br>
+			<button type="button" th:onclick="|window.location.href='emailandstartbingo'|" class="btn btn-success">Send Slips over Email</button>
+			&emsp;&emsp;&emsp;
+			<button type="button" th:onclick="|window.location.href='startbingo'|" class="btn btn-success">Don't send slips</button>
+			
+		</div>
+			<br>
 			<button th:if="${bingo_game_id}" type="button" th:onclick="|window.location.href='callNextRandomNumber'|" class="btn btn-info call-number-button">
 				Call Next</button>
-
-			<div th:if="${bingo_game_id}" th:text="'Game id: ' + ${bingo_game_id}">bingo_game_id</div>
-			<span th:if="${pdfGenerated==5}">Pdfs are generated</span>
+				
 			<span>
 				<h2 th:text="${bingo_call_number}"></h2>
 				<h2 th:text="${bingo_call_value}"></h2>
@@ -47,30 +64,50 @@
 		</div>
 		<div class="right-container">
 			<div th:if="${bingo_game_id}">
-				<h3>Users</h3>
-				<div th:each="em ,iterator: ${bingo_user_emails}">
+				<div th:if="${manage_players}">
+					<h3>Manage Players</h3>
+					<span>You can upload excel if there are many players</span><br>
+					<span>Note: Excel can only have emails, Your player will be recongnised using their emails</span><br>
+					<a th:href="@{'/'}"
+							onclick="window.open(this.href, 'mywin', 'left=20,top=20,width=600,height=600,toolbar=1,resizable=0'); return false;">View Sample Excel</a>
+					<br><br>
+					<form th:action="@{/gamesetup/uploadFile}" method="post" enctype="multipart/form-data">
+						 <div class="form-group">
+	                        <input type="file" name="file" class="form-control-file">
+	                    </div>
+	                    <button type="submit" class="btn btn-primary">Upload File</button>
+					</form>
+				</div>
+				<br><br>
+				<h3 th:if="${bingo_user_emails}">Players in Game</h3>
+				<div th:if="${bingo_user_emails}"
+					th:each="em ,iterator: ${bingo_user_emails}">
 					<h4 th:text="${iterator.index+1} + ' :' "></h4>
-					<a th:text="${em}" th:href="@{'/slips/' + ${em}}"
-						onclick="window.open(this.href, 'mywin', 'left=20,top=20,width=800,height=700,toolbar=1,resizable=0'); return false;"></a>
+					<span th:text="${em}"></span>
+					<a class="slip-link" th:href="@{'/slips/' + ${em}}"
+						onclick="window.open(this.href, 'mywin', 'left=20,top=20,width=800,height=700,toolbar=1,resizable=0'); return false;">View Slips</a>
 				</div>
 
-<!-- 				<div class="form-group" id="parentElement">
-					<input type="text" class="form-control" id="usr1"
-						placeholder="Name"> <input type="text" class="form-control" id="email1" placeholder="Email">
+				<div th:if="${bingo_game_id==1}">
+					<span>Add Players Manually</span>
+					<form th:action="@{/gamesetup/uploadFile}" method="post" >
+						<div class="form-group" id="parentElement">
+							<input type="text" class="form-control name-style" id="usr1" placeholder="Player 1 Name"> <input type="text"
+								class="form-control email-style" id="email1" placeholder="Player 1 Email">
+						</div>
+						<button onclick="addInputLine()" name="addInputLine" class="btn btn-info">
+							<i class="fa fa-plus"></i>
+						</button>
+						<br>
+						<br>
+						<button type="submit" class="btn btn-info">Add PLayers</button>
+					</form>
 				</div>
-				<button onclick="addInputLine()" name="addInputLine" class="btn btn-info"><i class="fa fa-plus"></i></button>
-     -->
 			</div>
 		</div>
 
 	</div>
-	<div class="all-calls-style" th:if="1==0">
-		<span th:each="count,iterator: ${bingo_calls}"> <span
-			th:text="'Call' + ${iterator.index+1} + ':' "></span> <span
-			th:text="${count}+ ', '"></span>
-		</span>
-	</div>
- <div class='footer' th:include="footer::footer"></div>
+	<div class='footer' th:include="footer::footer"></div>
  </body>
  
  <script>
@@ -81,13 +118,16 @@
 		
 		var namenode = document.createElement("input"); // Create an <input> node   
 		namenode.classList.add("form-control");
+		namenode.classList.add("name-style");
 		namenode.setAttribute("id", "usr" + i);
-		namenode.setAttribute("placeholder", "Name");
+		var placeholder = "Player " + i; 
+		namenode.setAttribute("placeholder", placeholder + " Name");
 		
 		var emailnode = document.createElement("input"); // Create an <input> node   
 		emailnode.classList.add("form-control");
+		namenode.classList.add("email-style");
 		emailnode.setAttribute("id", "email" + i);
-		emailnode.setAttribute("placeholder", "Email");
+		emailnode.setAttribute("placeholder", placeholder + " Email");
 		
 		document.getElementById("parentElement").appendChild(namenode);
 		document.getElementById("parentElement").appendChild(emailnode); // Append it to the parent
