@@ -79,5 +79,9 @@ public class BingoAppService {
 
         fileIOService.writeCallsToCsv(bingoFolderName, game.calls);
     }
+    
+    public String getBingoUserSlipsForGame(String gameId, String email) {
+        return fileIOService.getUserSlipPdfName(gameId, email);
+    }
 
 }

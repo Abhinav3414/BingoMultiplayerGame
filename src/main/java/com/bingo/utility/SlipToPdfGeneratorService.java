@@ -97,7 +97,7 @@ public class SlipToPdfGeneratorService {
         // And finally, we create the PDF:
         OutputStream outputStream = new FileOutputStream(fileName);
         renderer.createPDF(outputStream);
-        System.out.println("Created pdf : " + fileName);
+        System.out.println("PDF created : " + fileName);
         outputStream.close();
     }
 

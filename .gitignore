@@ -29,7 +29,7 @@ build/
 
 ### VS Code ###
 .vscode/
-Tambola_*
+Bingo_*
 application.properties
 Bingo_commands.txt
 src/main/resources/application.properties

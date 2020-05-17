@@ -29,7 +29,7 @@ public class BingoSlip {
         generateBingoSlip();
     }
 
-    public int getSlipColumn(int number) {
+    public int getSlipColumnNumber(int number) {
         // 1-9, 10-19, 20-29 , 30-39 , 40-49, 50-59, 60-69, 70-79, 80-89
         if (number < 1 || number > 90) {
             return -1;
@@ -44,7 +44,7 @@ public class BingoSlip {
 
     public boolean updateNumberInBingoSlip(int number) {
 
-        int val = getSlipColumn(number);
+        int val = getSlipColumnNumber(number);
         int[] x = bingoMatrix[val];
 
         int len = -1;
@@ -109,10 +109,17 @@ public class BingoSlip {
         }
         slipRandomNumber = randomNumbersUsed;
         sortSlipColumns();
+        validateBingoMatrix();
         return bingoMatrix;
     }
 
-    public void sortSlipColumns() {
+    private void validateBingoMatrix() {
+        //validate columns 
+        //validate rows
+        // validate empty rows
+    }
+
+    private void sortSlipColumns() {
 
         for (int i = 0; i < 9; i++) {
             List<Integer> list = new ArrayList<>();

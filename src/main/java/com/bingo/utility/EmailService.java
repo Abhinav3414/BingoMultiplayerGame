@@ -27,11 +27,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailService {
 
+    private static final String EMAIL_SUBJECT = "Bingo Slips !!!";
+
+    private static final String SENDER_NAME = "Abhinav";
+
+    private static final String BINGO_SLIP_ATTACHMENT_NAME_PREFIX = "Bingo-slip-";
+
     private JavaMailSender javaMailSender;
 
     @Autowired
     FileIOService fileIOService;
-    
+
     @Autowired
     public EmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
@@ -46,13 +52,14 @@ public class EmailService {
             helper.setFrom("abhinav.g@comakeit.com");
             helper.setSubject(subject);
             helper.setTo(toEmail);
-            helper.addAttachment("Tambola-Mela-" + email + ".pdf", new ByteArrayResource(content));
+            helper.addAttachment(BINGO_SLIP_ATTACHMENT_NAME_PREFIX + email + ".pdf", new ByteArrayResource(content));
             helper.setText(textMessage, true);// true indicates body is html
 
-            ClassPathResource classPathResource = new ClassPathResource("static/tambola-mela.png");
+            ClassPathResource classPathResource = new ClassPathResource("static/excel-instructions-image.png");
             helper.addInline(contentId, classPathResource);
 
             javaMailSender.send(message);
+            
             System.out.println("Email sent successfully to : " + toEmail);
             return true;
         } catch (MessagingException e) {
@@ -73,21 +80,11 @@ public class EmailService {
 
         String contentId = ContentIdGenerator.getContentId();
 
-        String mailMessage = "Hi,<br />Hope u are having a good day. <br />"
-                + "Here are your Tambola slips. Kindly check attachment. <br />"
-                + "Please take a print out or write down the numbers of each ticket separately before the games starts &#128578<br />"
-                + "Enjoy !!!"
-                + "  <br /><br /><br /> "
-                + "Game id#" + gameId
-                + " <br />"
-                + "<img height='400' width='400' src=\"cid:" + contentId + "\" />"
-                + "<br /><br />"
-                + "Regards <br />~ Its all about Fridays & Tambola - &#129505; Abhinav";
+        String mailMessage = getEmailContent(gameId, contentId);
 
-        String mailSubject = "ComakeIt Tambola Mela !!!";
+        String mailSubject = EMAIL_SUBJECT;
 
         emails.forEach(e -> {
-
             String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, e);
             Path path = Paths.get(userSlipPdfName);
             byte[] content;
@@ -97,7 +94,7 @@ public class EmailService {
                 if (!isMailSent) {
                     emailNotSent.add(e);
                 }
-                TimeUnit.SECONDS.sleep(8);
+                TimeUnit.SECONDS.sleep(6);
             } catch (IOException e1) {
                 e1.printStackTrace();
             } catch (InterruptedException e1) {
@@ -105,5 +102,18 @@ public class EmailService {
             }
         });
         return emailNotSent;
+    }
+
+    private String getEmailContent(String gameId, String contentId) {
+        return "Hi,<br />Hope u are having a good day. <br />"
+                + "Here are your Bingo slips. Kindly check attachment. <br />"
+                + "Please take a print out or write down the numbers of each ticket separately before the games starts &#128578<br />"
+                + "Enjoy !!!"
+                + "  <br /><br /><br /> "
+                + "Game id#" + gameId
+                + " <br />"
+                + "<img height='400' width='400' src=\"cid:" + contentId + "\" />"
+                + "<br /><br />"
+                + "Regards <br />~- &#129505; " + SENDER_NAME;
     }
 }

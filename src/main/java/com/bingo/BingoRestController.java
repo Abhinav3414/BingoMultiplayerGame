@@ -8,14 +8,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +32,6 @@ import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.utility.EmailService;
-import com.itextpdf.text.DocumentException;
 
 
 /**
@@ -73,7 +69,7 @@ public class BingoRestController {
 
         // Delete email excel from local memory
         File fileToDelete = new File("emails-bingo-users.xlsx");
-        boolean success = fileToDelete.delete();
+        fileToDelete.delete();
         isExcelUploaded = false;
         pdfGenerated = -1;
         return mav;
@@ -115,7 +111,7 @@ public class BingoRestController {
 
     @ResponseBody
     @RequestMapping(value = "/gamesetup/uploadFile", method = RequestMethod.POST)
-    public ModelAndView uploadFile(@RequestParam(required = false) MultipartFile file, RedirectAttributes redirectAttributes) throws IllegalStateException, IOException {
+    public ModelAndView uploadFile(@RequestParam(required = false) MultipartFile file, RedirectAttributes redirectAttributes) {
         if (file == null || file.isEmpty()) {
             // redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
             return new ModelAndView("redirect:" + "/gamesetup");
@@ -130,7 +126,7 @@ public class BingoRestController {
                 Path path = Paths.get(UPLOAD_DIR + BingoAppService.EMAILS_BINGO_USERS_XLSX);
                 Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
                 isExcelUploaded = true;
-                System.out.println("Excel is read successfully and save in memory");
+                System.out.println("Excel is read successfully and saved in memory");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -138,6 +134,20 @@ public class BingoRestController {
             System.out.println("FileType is not correct");
         }
         return new ModelAndView("redirect:" + "/gamesetup");
+    }
+
+    @RequestMapping(value = "/download/{gameId}/{userEmail}", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId, @PathVariable("userEmail") String userEmail) throws IOException {
+        String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
+        FileSystemResource file = new FileSystemResource(new File(slipName));
+
+        return ResponseEntity
+                .ok()
+                .contentLength(file.contentLength())
+                .contentType(
+                        MediaType.parseMediaType("application/pdf"))
+                .body(file);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/emailandstartbingo")
@@ -212,7 +222,7 @@ public class BingoRestController {
     }
 
     @RequestMapping(value = "/slips/{userEmail}", method = RequestMethod.GET)
-    public ModelAndView showUserSlips(Model model, @PathVariable("userEmail") String userEmail) throws DocumentException, IOException {
+    public ModelAndView showUserSlips(Model model, @PathVariable("userEmail") String userEmail) {
 
         ModelAndView mav = createModelView("slips");
         mav.addObject("bingo_user_emails", "emails");
@@ -224,6 +234,12 @@ public class BingoRestController {
 
         mav.addObject("bingoData", new BingoSlipsTemplateData(userEmail, game.gameId, slipResponses));
 
+        return mav;
+    }
+
+    @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
+    public ModelAndView showSampleExcel(Model model) {
+        ModelAndView mav = new ModelAndView("sample-excel");
         return mav;
     }
 

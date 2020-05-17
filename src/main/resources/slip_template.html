@@ -3,24 +3,22 @@
 
 <head>
 <meta charset="UTF-8">
-<link rel="stylesheet" type="text/css" media="all" href="static/styles/style-pdf-template-style.css" />
+<link rel="stylesheet" type="text/css" media="all" href="static/styles/slip-pdf-template-style.css" />
 <link rel="stylesheet" type="text/css" media="all" href="static/styles/main.css" />
 </head>
 
 <body>
-
-	<h1>Tambola slips for user : [[${bingoData.getEmail()}]]</h1>
+	<h1>Bingo slips for : [[${bingoData.getEmail()}]]</h1>
 	<h3>Game id : [[${bingoData.getGameId()}]]</h3>
 
-	<div th:each="slip: ${bingoData.getResponses()}">
-		<span th:text="'Slip id#' + ${slip.slipId}"
-			style="font-size: 0.8em;"></span>
+	<div class="slip-wrapper-style" th:each="slip,iterator: ${bingoData.getResponses()}">
+		<span th:text="'Slip No. ' + ${iterator.index+1}"></span>
 		<table id="slips">
 			<tr th:each="item: ${slip.transformedMatrix}">
 				<td th:each="j: ${item}"><span th:if="${j != 0}" th:text="${j}"></span></td>
 			<tr>
 		</table>
-		<br>
+		<span style="font-size: 0.8em; padding-left: 20em;" th:text="'id# ' + ${slip.slipId}"></span>
 	</div>
 	<div class='footer' th:include="footer::footer"></div>
 </body>

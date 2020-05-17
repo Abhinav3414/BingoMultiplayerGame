@@ -13,10 +13,10 @@ public class SlipHtmlResponse {
 
     public SlipHtmlResponse(String slipId, int[][] matrix) {
         this.slipId = slipId;
-        this.transformedMatrix = convertExchangeRowToColumn(matrix);
+        this.transformedMatrix = exchangeRowToColumn(matrix);
     }
 
-    public int[][] convertExchangeRowToColumn(int[][] matrix) {
+    private int[][] exchangeRowToColumn(int[][] matrix) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 9; j++) {
                 transformedMatrix[i][j] = matrix[j][i];

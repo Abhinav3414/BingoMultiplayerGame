@@ -17,10 +17,29 @@ h4 {
 	margin: 0;
 }
 
+i.fa {
+    color: #57b958;
+}
+
 .user-email-style {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
+	padding-bottom: .5em;
+}
+
+.user-email-style div {
+	display: flex;
+	width: 50%;
+}
+
+.user-email-style div.player-name-wrapper {
+	flex-grow: 1;
+}
+
+.instructions-style {
+    font-size: 1.2em;
+   padding: 1em 1em 0 1em;
 }
 
 .slip-link {
@@ -28,9 +47,10 @@ h4 {
     color: white;
     padding: .5em 1em;
     border-radius: 1em;
-    margin-left: 1em;
     width: 7em;
     white-space: nowrap;
+    display: flex;
+    justify-content: center;
 }
 
 .call-style {
@@ -106,31 +126,5 @@ h4 {
 	padding-right: .3em;
 }
 
-#slips {
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-	border-collapse: collapse;
-	width: 35em;
-}
 
-#slips td, #slips th {
-	border: 1px solid #d6ff90;;
-	text-align: center;
-	min-width: .7em;
-}
-
-#slips tr:nth-child(even) {
-	background-color: #eeffd1;;
-}
-
-#slips tr:hover {
-	background-color: #ddd;
-}
-
-#slips th {
-	padding-top: 12px;
-	padding-bottom: 12px;
-	text-align: left;
-	background-color: #4CAF50;
-	color: white;
-}
 

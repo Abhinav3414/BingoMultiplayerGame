@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FileIOService {
 
+    private static final String BINGO_FOLDER_PREFIX = "Bingo_";
     static String bingoFolderName;
 
     public void writeCallsToCsv(String bingoFolderName, List<Integer> calls) {
@@ -73,7 +74,7 @@ public class FileIOService {
     }
 
     public String createBingoGameFolder(String gameId) {
-        String bingoFolderName = "Tambola_" + gameId;
+        String bingoFolderName = BINGO_FOLDER_PREFIX + gameId;
 
         Path path = Paths.get(bingoFolderName);
 

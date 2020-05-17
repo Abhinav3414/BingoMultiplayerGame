@@ -1,6 +1,24 @@
+@charset "ISO-8859-1";
+@import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+
+
 body {
     font-family: sans-serif;
     font-size: 12px;
+}
+
+.slip-wrapper-style {
+	display: flex;
+    flex-direction: column;
+    padding: .5em 0 1em 2em;
+}
+
+.slip-wrapper-style  span {
+	font-family: 'Exo', sans-serif;
+}
+
+button.btn-success {
+	margin-left: 6em;
 }
 
 @page {
@@ -111,4 +129,32 @@ hr {
 
 .next-page {
     page-break-before: always
+}
+
+#slips {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	width: 35em;
+}
+
+#slips td, #slips th {
+	border: 1px solid #d6ff90;;
+	text-align: center;
+	min-width: .7em;
+}
+
+#slips tr:nth-child(even) {
+	background-color: #eeffd1;;
+}
+
+#slips tr:hover {
+	background-color: #ddd;
+}
+
+#slips th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;
+	background-color: #4CAF50;
+	color: white;
 }

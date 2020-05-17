@@ -5,24 +5,29 @@
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
 <meta charset="UTF-8" />
-<title th:text="${bingo_welcome_title}">Welcome to ComakeIt
-	Tambola Mela Game</title>
+<title th:text="${bingo_welcome_title}"></title>
 <link th:href="@{/styles/main.css}" rel="stylesheet" />
+<link th:href="@{/styles/slip-pdf-template-style.css}" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
 </head>
 <body>
-	<h1 th:text="${bingo_welcome_heading}">Default Header</h1>
-	<h3 th:text="${bingo_user}">Default Header</h3>
+	<h1 th:text="${bingo_welcome_heading}" style="font-family: 'Exo', sans-serif; padding-left: 1em"></h1>
+	<span style="font-size: 1.2em;  padding-left: 3em; " th:text="${bingo_user}">player email</span>
 
-	<div th:each="slip: ${bingoData.getResponses()}">
-		<span th:text="'Slip id# ' + ${slip.slipId}"
-			style="font-size: 0.8em;"></span>
+	<form style="font-family: 'Exo', sans-serif; display: contents;" method="get" th:action="@{|/download/${bingoData.getGameId()}/${bingoData.getEmail()}|}">
+		<button type="submit" class="btn btn-success">Download My Slips</button>
+	</form>
+
+	<div class="slip-wrapper-style" th:each="slip,iterator: ${bingoData.getResponses()}">
+		<span th:text="'Slip No. ' + ${iterator.index+1}"></span>
 		<table id="slips">
 			<tr th:each="item: ${slip.transformedMatrix}">
 				<td th:each="j: ${item}"><span th:if="${j != 0}" th:text="${j}"></span></td>
 			<tr>
 		</table>
-		<br>
+		<span style="font-size: 0.8em; padding-left: 20em;" th:text="'id# ' + ${slip.slipId}"></span>
 	</div>
  <div class='footer' th:include="footer::footer"></div>
 </body>
