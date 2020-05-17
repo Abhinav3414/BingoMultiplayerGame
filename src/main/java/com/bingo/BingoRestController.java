@@ -86,7 +86,7 @@ public class BingoRestController {
 
             bingoAppService.createBingoFolderStructure();
 
-            List<String> userEmails = game.bingoBoard.bingoUsers.stream().map(bu -> bu.email).collect(Collectors.toList());
+            List<String> userEmails = game.bingoBoard.bingoUsers.stream().map(bu -> bu.getEmail()).collect(Collectors.toList());
             List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails);
 
             if (pdfNotGenerated.isEmpty()) {
@@ -153,7 +153,7 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/emailandstartbingo")
     public ModelAndView emailandstartbingo(Model model) {
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
+        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
         System.out.println("pdfGenerated " + pdfGenerated);
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
@@ -176,7 +176,7 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/startbingo")
     public ModelAndView startbingo(Model model) {
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
+        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
         System.out.println("pdfGenerated " + pdfGenerated);
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
@@ -214,7 +214,7 @@ public class BingoRestController {
         mav.addObject("bingo_done_calls", doneCalls);
         mav.addObject("bingo_calls", game.calls);
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.email).collect(Collectors.toList());
+        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
         mav.addObject("bingo_user_emails", emails);
         game.currentCall++;
 

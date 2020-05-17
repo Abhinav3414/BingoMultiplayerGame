@@ -46,8 +46,8 @@ public class BingoGame {
 
     public void printBoard(BingoBoard board) {
         board.bingoUsers.forEach(u -> {
-            System.out.println("---------********" + u.email + "**********--------------");
-            List<BingoSlip> x = board.getUserSlips(u.email);
+            System.out.println("---------********" + u.getEmail() + "**********--------------");
+            List<BingoSlip> x = board.getUserSlips(u.getEmail());
             x.forEach(aa -> {
                 aa.printSlip();
             });

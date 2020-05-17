@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.bingo.repository.BingoUserRepository;
+
 
 /**
  * @author Abhinav Gupta
@@ -37,7 +41,7 @@ public class BingoBoard {
             bingoSlipsMap.put(bingoSlip.slipId, bingoSlip);
         }
 
-        userAndSlipsMap.put(bingoUser.email, bingoSlipIds);
+        userAndSlipsMap.put(bingoUser.getEmail(), bingoSlipIds);
         return bingoUser;
     }
 

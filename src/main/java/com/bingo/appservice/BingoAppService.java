@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
+import com.bingo.dao.BingoUser;
 import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.repository.BingoUserRepository;
 import com.bingo.utility.FileIOService;
 import com.bingo.utility.SlipToPdfGeneratorService;
 
@@ -28,6 +30,8 @@ public class BingoAppService {
     BingoGame game = null;
 
     @Autowired
+    private BingoUserRepository bin;
+    @Autowired
     private FileIOService fileIOService;
 
     @Autowired
@@ -35,6 +39,7 @@ public class BingoAppService {
 
     public BingoGame startGame() {
         game = new BingoGame();
+        bin.save(new BingoUser("abhniav", "abc"));
         return game;
     }
 
@@ -73,7 +78,7 @@ public class BingoAppService {
     public void createBingoFolderStructure() {
         String bingoFolderName = fileIOService.createBingoGameFolder(game.gameId);
 
-        game.bingoBoard.bingoUsers.stream().map(bu -> bu.email).forEach(e -> {
+        game.bingoBoard.bingoUsers.stream().map(bu -> bu.getEmail()).forEach(e -> {
             fileIOService.createUserFolder(game.gameId, bingoFolderName, e);
         });
 
