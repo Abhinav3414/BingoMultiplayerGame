@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org"
-	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
-	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+    xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3"
+    xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
 <head>
-<meta charset="UTF-8" />
-<link th:href="@{/styles/main.css}" rel="stylesheet" />
+    <meta charset="UTF-8" />
+    <link th:href="@{/styles/main.css}" rel="stylesheet" />
 
 </head>
-<body>
-	<!-- <h1 th:text="${bingo_welcome_heading}">D</h1> -->
-	<h3>Sample Excel</h3>
 
-	<img src="excel-instructions-image.png" alt="Trulli" width="100%" height="auto">
-	<br><br>
-	<div class='footer' th:include="footer::footer"></div>
+<body>
+    <!-- <h1 th:text="${bingo_welcome_heading}">D</h1> -->
+    <h3>Sample Excel</h3>
+
+    <img src="excel-instructions-image.png" alt="Trulli" width="100%" height="auto">
+    <br><br>
+    <div class='footer' th:include="footer::footer"></div>
 </body>
+
 </html>
