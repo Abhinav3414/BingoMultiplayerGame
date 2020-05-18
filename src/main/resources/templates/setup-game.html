@@ -41,35 +41,37 @@
             New Game is created :
             <div th:if="${bingo_game_id}" th:text="'Game id# ' + ${bingo_game_id}">bingo_game_id</div>
 
-            <div th:if="${pdfGenerated==true}">
-                <div class="instructions-style">
-                    <i class="fa fa-check" aria-hidden="true"></i>
-                    <span>We have created slips for all participants.</span>
-                </div>
-                <div class="instructions-style">
-                    <i class="fa fa-check" aria-hidden="true"></i>
-                    <span>All Participants' slips pdfs are also generated with us.</span>
-                </div>
-                <div class="instructions-style">
-                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                    <span>You can view slips by clicking on "View Slips" button next to participant's email id.</span>
-                </div>
-                <div class="instructions-style">
-                    <i class="fa fa-question-circle" aria-hidden="true"></i>
-                    <span>Would you like to mail Slips to each participant ?<br><br>&emsp;Choose one of the options to
-                        continue : </span>
-                </div>
+			<div th:if="${pdfGenerated==true}">
+				<div class="instructions-style">
+					<i class="fa fa-check" aria-hidden="true"></i> <span>We have
+						created slips for all participants.</span>
+				</div>
+				<div class="instructions-style">
+					<i class="fa fa-check" aria-hidden="true"></i> <span>All
+						Participants' slips pdfs are also generated with us.</span>
+				</div>
+				<div class="instructions-style">
+					<i class="fa fa-arrow-right" aria-hidden="true"></i> <span>You
+						can view slips by clicking on "View Slips" button next to participant's email id.</span>
+				</div>
+				<div class="instructions-style">
+					<i class="fa fa-question-circle" aria-hidden="true"></i> <span>Would
+						you like to mail Slips to each participant ?<br>
+					<br>&emsp;Choose one of the options to continue :
+					</span>
+				</div>
 
-                <br>
-                &emsp;&emsp;
-                <button type="button" th:onclick="|window.location.href='emailandstartbingo'|"
-                    class="btn btn-success">Send Slips over Email</button>
-                &emsp;&emsp;&emsp;&emsp;
-                <button type="button" th:onclick="|window.location.href='startbingo'|" class="btn btn-success">Don't
-                    send slips</button>
+				<br> &emsp;&emsp;
+				<button type="button"
+					th:onclick="|window.location.href='emailandstartbingo'|"
+					class="btn btn-success">Send Slips over Email</button>
+				&emsp;&emsp;&emsp;&emsp;
+				<button type="button"
+					th:onclick="|window.location.href='startbingo'|"
+					class="btn btn-success">Don't send slips</button>
 
-            </div>
-            <br>
+			</div>
+			<br>
             <!-- <button th:if="${show_call_next_button}" type="button" th:onclick="|window.location.href='callNextRandomNumber'|" class="btn btn-info call-number-button">
 			Call Next</button> -->
 

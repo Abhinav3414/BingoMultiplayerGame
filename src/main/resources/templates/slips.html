@@ -19,7 +19,7 @@
 
     <form style="font-family: 'Exo', sans-serif; display: contents;" method="get"
         th:action="@{|/download/${bingoData.getGameId()}/${bingoData.getEmail()}|}">
-        <button type="submit" class="btn btn-success">Download My Slips</button>
+        <button type="submit" class="btn btn-success">Download Slips</button>
     </form>
 
     <div class="slip-wrapper-style" th:each="slip,iterator: ${bingoData.getResponses()}">
