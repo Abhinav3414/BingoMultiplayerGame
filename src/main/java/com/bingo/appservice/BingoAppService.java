@@ -2,15 +2,20 @@ package com.bingo.appservice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bingo.dao.BingoBoard;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoUser;
 import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.repository.BingoBoardRepository;
+import com.bingo.repository.BingoGameRepository;
+import com.bingo.repository.BingoSlipRepository;
 import com.bingo.repository.BingoUserRepository;
 import com.bingo.utility.FileIOService;
 import com.bingo.utility.SlipToPdfGeneratorService;
@@ -30,7 +35,17 @@ public class BingoAppService {
     BingoGame game = null;
 
     @Autowired
-    private BingoUserRepository bin;
+    private BingoUserRepository bingoUserRepository;
+
+    @Autowired
+    private BingoGameRepository bingoGameRepository;
+
+    @Autowired
+    private BingoBoardRepository bingoBoardRepository;
+
+    @Autowired
+    private BingoSlipRepository bingoSlipRepository;
+
     @Autowired
     private FileIOService fileIOService;
 
@@ -38,33 +53,60 @@ public class BingoAppService {
     private SlipToPdfGeneratorService slipToPdfGeneratorService;
 
     public BingoGame startGame() {
-        game = new BingoGame();
-        bin.save(new BingoUser("abhniav", "abc"));
+        BingoBoard bb = bingoBoardRepository.save(new BingoBoard());
+        BingoGame bGame = new BingoGame();
+        bGame.setBingoBoardId(bb.getBoardId());
+        game = bingoGameRepository.save(bGame);
         return game;
     }
 
     public List<String> generateSlipsForUser() {
 
         List<String> emails = fileIOService.readEmailsFromExcel(EMAILS_BINGO_USERS_XLSX);
+        List<String> userIds = new ArrayList<>();
 
         emails.forEach(e -> {
-            if (game.bingoBoard.getUserSlips(e).isEmpty()) {
-                game.bingoBoard.generateSlipsForUser(e);
-            } else {
-                System.out.println("Slips are already generated for user: " + e);
+            BingoUser bUser = bingoUserRepository.findByEmail(e);
+            if(bUser != null) {
+                bingoUserRepository.delete(bUser);
             }
+            BingoUser bu = bingoUserRepository.save(new BingoUser(e, game.getBingoBoardId()));
+            userIds.add(bu.getUserId());
         });
+
+        Optional<BingoBoard> bingoBoard = bingoBoardRepository.findById(game.getBingoBoardId());
+
+        bingoBoard.get().setUserIds(userIds);
+
+        bingoUserRepository.findByBoardId(game.getBingoBoardId()).forEach(u -> {
+            generateSlipsForUser(u);
+        });
+        
+
+        // bingoSlipRepository.save(new BingoSlip());
+        bingoBoardRepository.save(bingoBoard.get());
         return emails;
+    }
+
+    private List<BingoSlip> generateSlipsForUser(BingoUser bu) {
+
+        for (int i = 0; i < 6; i++) {
+            BingoSlip bingoSlip = new BingoSlip(bu.getUserId(), game.getBingoBoardId());
+            bingoSlipRepository.save(bingoSlip);
+        }
+
+        return bingoSlipRepository.findByUserId(bu.getUserId());
     }
 
     public List<String> generateSlipPDFForUsers(List<String> emails) {
         List<String> pdfNotGenerated = new ArrayList<>();
 
         emails.forEach(email -> {
-            String slipName = fileIOService.getUserSlipPdfName(game.gameId, email);
-            List<BingoSlip> userSlips = game.bingoBoard.getUserSlips(email);
+            String slipName = fileIOService.getUserSlipPdfName(game.getGameId(), email);
+            List<BingoSlip> userSlips = bingoSlipRepository.findByUserId(bingoUserRepository.findByEmail(email).getUserId());
+
             List<SlipHtmlResponse> slipResponses = userSlips.stream()
-                    .map(us -> new SlipHtmlResponse(us.slipId, us.bingoMatrix)).collect(Collectors.toList());
+                    .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
             try {
                 slipToPdfGeneratorService.generateSlipPdf(slipName, email, game, slipResponses);
             } catch (Exception e) {
@@ -76,15 +118,15 @@ public class BingoAppService {
     }
 
     public void createBingoFolderStructure() {
-        String bingoFolderName = fileIOService.createBingoGameFolder(game.gameId);
+        String bingoFolderName = fileIOService.createBingoGameFolder(game.getGameId());
 
-        game.bingoBoard.bingoUsers.stream().map(bu -> bu.getEmail()).forEach(e -> {
-            fileIOService.createUserFolder(game.gameId, bingoFolderName, e);
+        bingoUserRepository.findByBoardId(game.getBingoBoardId()).stream().map(bu -> bu.getEmail()).forEach(e -> {
+            fileIOService.createUserFolder(game.getGameId(), bingoFolderName, e);
         });
 
-        fileIOService.writeCallsToCsv(bingoFolderName, game.calls);
+        fileIOService.writeCallsToCsv(bingoFolderName, game.getCalls());
     }
-    
+
     public String getBingoUserSlipsForGame(String gameId, String email) {
         return fileIOService.getUserSlipPdfName(gameId, email);
     }

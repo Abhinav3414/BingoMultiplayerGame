@@ -66,7 +66,7 @@ public class SlipToPdfGeneratorService {
 
         BingoSlipsTemplateData bingoData = new BingoSlipsTemplateData();
         bingoData.setEmail(email);
-        bingoData.setGameId(game.gameId);
+        bingoData.setGameId(game.getGameId());
         bingoData.setResponses(responses);
 
         Context context = new Context();

@@ -31,6 +31,9 @@ import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.repository.BingoGameRepository;
+import com.bingo.repository.BingoSlipRepository;
+import com.bingo.repository.BingoUserRepository;
 import com.bingo.utility.EmailService;
 
 
@@ -47,11 +50,23 @@ public class BingoRestController {
     private static final String SETUP_GAME = "Setup your Game";
     private static final String BINGO_MULTIPLAYER = "Bingo Multiplayer";
     private static final String WELCOME_TO_BINGO_GAME = "Welcome to Bingo !!!";
+    
     BingoGame game = null;
+    
     int pdfGenerated = -1;
 
     private final String UPLOAD_DIR = "./";
+    
     private static boolean isExcelUploaded = false;
+
+    @Autowired
+    private BingoUserRepository bingoUserRepository;
+    
+    @Autowired
+    private BingoGameRepository bingoGameRepository;
+
+    @Autowired
+    private BingoSlipRepository bingoSlipRepository;
 
     @Autowired
     private EmailService emailService;
@@ -64,8 +79,8 @@ public class BingoRestController {
 
         ModelAndView mav = createModelView("index");
         game = bingoAppService.startGame();
-        System.out.println("game id: " + game.gameId);
-        System.out.println(game.calls);
+        System.out.println("game id: " + game.getGameId());
+        System.out.println(game.getCalls());
 
         // Delete email excel from local memory
         File fileToDelete = new File("emails-bingo-users.xlsx");
@@ -86,11 +101,11 @@ public class BingoRestController {
 
             bingoAppService.createBingoFolderStructure();
 
-            List<String> userEmails = game.bingoBoard.bingoUsers.stream().map(bu -> bu.getEmail()).collect(Collectors.toList());
+            List<String> userEmails = bingoUserRepository.findByBoardId(game.getBingoBoardId()).stream().map(bu -> bu.getEmail()).collect(Collectors.toList());
             List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails);
 
             if (pdfNotGenerated.isEmpty()) {
-                System.out.println("Pdf generated for all successfully !!!, Game id : " + game.gameId);
+                System.out.println("Pdf generated for all successfully !!!, Game id : " + game.getGameId());
                 pdfGenerated = 5;
             } else {
                 System.out.println("Pdf could not be geneatated for: ");
@@ -101,8 +116,8 @@ public class BingoRestController {
         }
 
         mav.addObject("setup_game", SETUP_GAME);
-        mav.addObject("bingo_game_id", game.gameId);
-        mav.addObject("bingo_calls", game.calls);
+        mav.addObject("bingo_game_id", game.getGameId());
+        mav.addObject("bingo_calls", game.getCalls());
         mav.addObject("pdfGenerated", pdfGenerated);
         mav.addObject("manage_players", !isExcelUploaded);
 
@@ -153,16 +168,16 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/emailandstartbingo")
     public ModelAndView emailandstartbingo(Model model) {
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
+        List<String> emails = bingoUserRepository.findByBoardId(game.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
         System.out.println("pdfGenerated " + pdfGenerated);
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", game.gameId);
-        mav.addObject("bingo_calls", game.calls);
+        mav.addObject("bingo_game_id", game.getGameId());
+        mav.addObject("bingo_calls", game.getCalls());
         mav.addObject("bingo_user_emails", emails);
         mav.addObject("show_call_next_button", true);
 
-        List<String> emailNotSent = emailService.sendMailToParticipants(emails, game.gameId);
+        List<String> emailNotSent = emailService.sendMailToParticipants(emails, game.getGameId());
 
         if (!emailNotSent.isEmpty()) {
             System.out.println("Emails could not be sent to: ");
@@ -176,12 +191,12 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "/startbingo")
     public ModelAndView startbingo(Model model) {
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
+        List<String> emails = bingoUserRepository.findByBoardId(game.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
         System.out.println("pdfGenerated " + pdfGenerated);
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", game.gameId);
-        mav.addObject("bingo_calls", game.calls);
+        mav.addObject("bingo_game_id", game.getGameId());
+        mav.addObject("bingo_calls", game.getCalls());
         mav.addObject("bingo_user_emails", emails);
         mav.addObject("show_call_next_button", true);
 
@@ -190,33 +205,38 @@ public class BingoRestController {
 
     @RequestMapping(method = RequestMethod.GET, path = "/callNextRandomNumber")
     public ModelAndView callRandomNumber(Model model) throws Exception {
-        if (game.currentCall == -1) {
-            game.currentCall = 0;
+        
+        BingoGame bGame = bingoGameRepository.findById(game.getGameId()).get();
+        
+        if (bGame.getCurrentCall() == -1) {
+            bGame.setCurrentCall(0);
         }
 
-        if (game.currentCall == 89) {
-            game.currentCall = 0;
+        if (bGame.getCurrentCall() == 89) {
+            bGame.setCurrentCall(0);
         }
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", game.gameId);
+        mav.addObject("bingo_game_id", bGame.getGameId());
 
-        mav.addObject("bingo_call_number", String.format("Call %d:", game.currentCall + 1));
-        mav.addObject("bingo_call_value", game.calls.get(game.currentCall));
+        mav.addObject("bingo_call_number", String.format("Call %d:", bGame.getCurrentCall() + 1));
+        mav.addObject("bingo_call_value", bGame.getCalls().get(bGame.getCurrentCall()));
         mav.addObject("show_call_next_button", true);
 
         List<Integer> doneCalls = new ArrayList<>();
         int b = 0;
-        while (b <= game.currentCall) {
-            doneCalls.add(game.calls.get(b));
+        while (b <= bGame.getCurrentCall()) {
+            doneCalls.add(bGame.getCalls().get(b));
             b++;
         }
         mav.addObject("bingo_done_calls", doneCalls);
-        mav.addObject("bingo_calls", game.calls);
 
-        List<String> emails = game.bingoBoard.bingoUsers.stream().map(u -> u.getEmail()).collect(Collectors.toList());
+        List<String> emails = bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
         mav.addObject("bingo_user_emails", emails);
-        game.currentCall++;
+
+        int currentCall = bGame.getCurrentCall();
+        bGame.setCurrentCall(++currentCall);
+        bingoGameRepository.save(bGame);
 
         return mav;
     }
@@ -228,11 +248,11 @@ public class BingoRestController {
         mav.addObject("bingo_user_emails", "emails");
         mav.addObject("bingo_user", userEmail);
 
-        List<BingoSlip> userSlips = game.bingoBoard.getUserSlips(userEmail);
+        List<BingoSlip> userSlips = bingoSlipRepository.findByUserId(bingoUserRepository.findByEmail(userEmail).getUserId());
         List<SlipHtmlResponse> slipResponses = userSlips.stream()
-                .map(us -> new SlipHtmlResponse(us.slipId, us.bingoMatrix)).collect(Collectors.toList());
+                .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
 
-        mav.addObject("bingoData", new BingoSlipsTemplateData(userEmail, game.gameId, slipResponses));
+        mav.addObject("bingoData", new BingoSlipsTemplateData(userEmail, game.getGameId(), slipResponses));
 
         return mav;
     }

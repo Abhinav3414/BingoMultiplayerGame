@@ -1,12 +1,13 @@
 package com.bingo.dao;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 
 /**
@@ -14,17 +15,52 @@ import java.util.UUID;
  * @version 1.0
  * @since 12-May-2020
  */
+@Document("BingoGame")
 public class BingoGame {
 
-    public String gameId;
-    public BingoBoard bingoBoard;
-    public List<Integer> calls = new ArrayList<>();
-    public int currentCall = -1;
+    @Id
+    private String gameId;
+
+    private String bingoBoardId;
+
+    private List<Integer> calls = new ArrayList<>();
+
+    private int currentCall = -1;
 
     public BingoGame() {
-        this.gameId = UUID.randomUUID().toString();
-        bingoBoard = new BingoBoard();
         generateCallSequence();
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
+    }
+
+    public String getBingoBoardId() {
+        return bingoBoardId;
+    }
+
+    public void setBingoBoardId(String bingoBoardId) {
+        this.bingoBoardId = bingoBoardId;
+    }
+
+    public List<Integer> getCalls() {
+        return calls;
+    }
+
+    public void setCalls(List<Integer> calls) {
+        this.calls = calls;
+    }
+
+    public int getCurrentCall() {
+        return currentCall;
+    }
+
+    public void setCurrentCall(int currentCall) {
+        this.currentCall = currentCall;
     }
 
     public void generateCallSequence() {
@@ -42,16 +78,6 @@ public class BingoGame {
                 }
             }
         }
-    }
-
-    public void printBoard(BingoBoard board) {
-        board.bingoUsers.forEach(u -> {
-            System.out.println("---------********" + u.getEmail() + "**********--------------");
-            List<BingoSlip> x = board.getUserSlips(u.getEmail());
-            x.forEach(aa -> {
-                aa.printSlip();
-            });
-        });
     }
 
     public void printSlipsForUser(List<BingoSlip> slips) {

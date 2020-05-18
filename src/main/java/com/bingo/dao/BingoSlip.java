@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 
 /**
@@ -14,19 +16,78 @@ import java.util.UUID;
  * @version 1.0
  * @since 12-May-2020
  */
+@Document("BingoSlip")
 public class BingoSlip {
 
-    public String slipId;
+    @Id
+    private String slipId;
 
-    public int[][] bingoMatrix = new int[9][3];
+    static int MAX_IN_EACH_ROW = 5;
 
-    public int columns[] = new int[BingoBoard.MAX_IN_EACH_COLUMN];
+    static int MAX_IN_EACH_COLUMN = 3;
 
-    public Set<Integer> slipRandomNumber = null;
+    private int[][] bingoMatrix = new int[9][3];
 
-    public BingoSlip() {
-        this.slipId = UUID.randomUUID().toString();
+    private String userId;
+
+    private String boardId;
+
+    private int columns[] = new int[MAX_IN_EACH_COLUMN];
+
+    private Set<Integer> slipRandomNumber = null;
+
+    public BingoSlip(String userId, String boardId) {
+        this.boardId = boardId;
+        this.userId = userId;
         generateBingoSlip();
+    }
+
+    public String getSlipId() {
+        return slipId;
+    }
+
+    public void setSlipId(String slipId) {
+        this.slipId = slipId;
+    }
+
+    public int[][] getBingoMatrix() {
+        return bingoMatrix;
+    }
+
+    public void setBingoMatrix(int[][] bingoMatrix) {
+        this.bingoMatrix = bingoMatrix;
+    }
+
+    public int[] getColumns() {
+        return columns;
+    }
+
+    public void setColumns(int[] columns) {
+        this.columns = columns;
+    }
+
+    public Set<Integer> getSlipRandomNumber() {
+        return slipRandomNumber;
+    }
+
+    public void setSlipRandomNumber(Set<Integer> slipRandomNumber) {
+        this.slipRandomNumber = slipRandomNumber;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getBoardId() {
+        return boardId;
+    }
+
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
 
     public int getSlipColumnNumber(int number) {
@@ -55,7 +116,7 @@ public class BingoSlip {
             }
         }
 
-        if (len == BingoBoard.MAX_IN_EACH_COLUMN) {
+        if (len == MAX_IN_EACH_COLUMN) {
             return false;
         }
 
@@ -65,7 +126,7 @@ public class BingoSlip {
             }
         }
 
-        if (columns[0] < BingoBoard.MAX_IN_EACH_ROW) {
+        if (columns[0] < MAX_IN_EACH_ROW) {
             if (bingoMatrix[val][0] != 0) {
                 return false;
             }
@@ -74,7 +135,7 @@ public class BingoSlip {
             return true;
         }
 
-        else if (columns[1] < BingoBoard.MAX_IN_EACH_ROW) {
+        else if (columns[1] < MAX_IN_EACH_ROW) {
             if (bingoMatrix[val][1] != 0) {
                 return false;
             }
@@ -83,7 +144,7 @@ public class BingoSlip {
             return true;
         }
 
-        else if (columns[2] < BingoBoard.MAX_IN_EACH_ROW) {
+        else if (columns[2] < MAX_IN_EACH_ROW) {
             if (bingoMatrix[val][2] != 0) {
                 return false;
             }
@@ -114,8 +175,8 @@ public class BingoSlip {
     }
 
     private void validateBingoMatrix() {
-        //validate columns 
-        //validate rows
+        // validate columns
+        // validate rows
         // validate empty rows
     }
 

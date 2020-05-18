@@ -19,24 +19,39 @@ public class BingoUser {
 
     private String name;
 
+    private String gameId;
+
+    private String boardId;
+
     private BingoUserType userType = BingoUserType.ORGANIZER;
 
     public BingoUser() {
     }
 
-    public BingoUser(String email) {
+    public BingoUser(String email, String boardId) {
         this.email = email;
+        this.boardId = boardId;
     }
 
-    public BingoUser(String name, String email) {
+    public BingoUser(String name, String email, String boardId) {
         this.email = email;
         this.name = name;
+        this.boardId = boardId;
     }
 
-    public BingoUser(String name, String email, BingoUserType userType) {
+    public BingoUser(String name, String email, BingoUserType userType, String boardId) {
         this.email = email;
         this.name = name;
         this.userType = userType;
+        this.boardId = boardId;
+    }
+
+    public String getBoardId() {
+        return boardId;
+    }
+
+    public void setBoardId(String boardId) {
+        this.boardId = boardId;
     }
 
     public String getUserId() {
@@ -69,6 +84,14 @@ public class BingoUser {
 
     public void setUserType(BingoUserType userType) {
         this.userType = userType;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
     }
 
 }
