@@ -138,5 +138,9 @@ public class FileIOService {
     public String getUserSlipPdfName(String gameId, String userEmail) {
         return bingoFolderName + "\\" + userEmail + "_" + gameId + "\\" + userEmail + "_" + gameId + "_slips.pdf";
     }
+    
+    public String getBingoFolder(String gameId) {
+        return BINGO_FOLDER_PREFIX + gameId;
+    }
 
 }

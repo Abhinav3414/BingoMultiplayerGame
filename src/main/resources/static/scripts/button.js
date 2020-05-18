@@ -19,7 +19,16 @@ for (var i = 0; i < bubblyButtons.length; i++) {
 $('#blogLink').click(function (e) {
     e.preventDefault(); // will stop the link href to call the blog page
     setTimeout(function () {
-        window.location.href = "gamesetup";
+       // window.location.href = "gamesetup";
+        $.ajax({  
+            type: "POST",  
+            url: "initiategame",  
+           // data: {'topic': topic},  
+            success: function(dataString) {  
+            	console.log(dataString);
+            	window.location.href = dataString + "/gamesetup";
+            }  
+        });  
     }, 1200); // will call the function after 2 secs.
 });
 

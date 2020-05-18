@@ -27,6 +27,10 @@ public class BingoGame {
 
     private int currentCall = -1;
 
+    private boolean isExcelUploaded;
+
+    private boolean pdfsGenerated;
+
     public BingoGame() {
         generateCallSequence();
     }
@@ -61,6 +65,22 @@ public class BingoGame {
 
     public void setCurrentCall(int currentCall) {
         this.currentCall = currentCall;
+    }
+
+    public boolean isExcelUploaded() {
+        return isExcelUploaded;
+    }
+
+    public void setExcelUploaded(boolean isExcelUploaded) {
+        this.isExcelUploaded = isExcelUploaded;
+    }
+
+    public boolean isPdfsGenerated() {
+        return pdfsGenerated;
+    }
+
+    public void setPdfsGenerated(boolean pdfsGenerated) {
+        this.pdfsGenerated = pdfsGenerated;
     }
 
     public void generateCallSequence() {
