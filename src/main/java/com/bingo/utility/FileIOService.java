@@ -30,7 +30,7 @@ public class FileIOService {
     static String bingoFolderName;
 
     public void writeCallsToCsv(String bingoFolderName, List<Integer> calls) {
-        File file = new File(bingoFolderName + "/" + bingoFolderName + "-calls.csv");
+        File file = new File(bingoFolderName + File.separator + bingoFolderName + "-calls.csv");
         FileWriter csvWriter;
         try {
             csvWriter = new FileWriter(file);
@@ -58,7 +58,7 @@ public class FileIOService {
     }
 
     public void createUserFolder(String gameId, String bingoFolderName, String userEmail) {
-        String userFolderName = bingoFolderName + "\\" + userEmail + "_" + gameId;
+        String userFolderName = bingoFolderName + File.separator + userEmail + "_" + gameId;
         Path userFolderPath = Paths.get(userFolderName);
 
         if (!Files.exists(userFolderPath)) {
@@ -136,7 +136,7 @@ public class FileIOService {
     }
 
     public String getUserSlipPdfName(String gameId, String userEmail) {
-        return bingoFolderName + "\\" + userEmail + "_" + gameId + "\\" + userEmail + "_" + gameId + "_slips.pdf";
+        return bingoFolderName + File.separator + userEmail + "_" + gameId + File.separator + userEmail + "_" + gameId + "_slips.pdf";
     }
     
     public String getBingoFolder(String gameId) {

@@ -1,5 +1,6 @@
 package com.bingo.appservice;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public class BingoAppService {
 
     public List<String> generateSlipsForUser(String gameId) {
 
-        List<String> emails = fileIOService.readEmailsFromExcel(fileIOService.getBingoFolder(gameId) + '\\' + EMAILS_BINGO_USERS_XLSX);
+        List<String> emails = fileIOService.readEmailsFromExcel(fileIOService.getBingoFolder(gameId) + File.separator + EMAILS_BINGO_USERS_XLSX);
         List<String> userIds = new ArrayList<>();
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
@@ -129,12 +130,12 @@ public class BingoAppService {
     public String getBingoUserSlipsForGame(String gameId, String email) {
         return fileIOService.getUserSlipPdfName(gameId, email);
     }
-    
+
     public List<BingoSlip> getUserSlips(String userEmail, BingoGame bGame) {
         return bingoSlipRepository
                 .findByUserId(bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
     }
-    
+
     public List<String> getBoardUsers(BingoGame bGame) {
         return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
     }
