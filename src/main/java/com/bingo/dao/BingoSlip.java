@@ -95,8 +95,12 @@ public class BingoSlip {
         if (number < 1 || number > 90) {
             return -1;
         }
+        if(number == 90) {
+            return 8;
+        }
+
         int val = 0;
-        while (number > 10) {
+        while (number > 9) {
             number = number - 10;
             val++;
         }
