@@ -4,7 +4,6 @@ import static org.thymeleaf.templatemode.TemplateMode.HTML;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -77,7 +76,7 @@ public class SlipToPdfGeneratorService {
         // easy, we use JTidy to convert the rendered Thymeleaf template to
         // XHTML. Note that this might not work for very complicated HTML. But
         // it's good enough for a simple letter.
-        String renderedHtmlContent = templateEngine.process("templates" + File.separator + "slip_template", context);
+        String renderedHtmlContent = templateEngine.process("slip_template", context);
         String xHtml = convertToXhtml(renderedHtmlContent);
 
         ITextRenderer renderer = new ITextRenderer();

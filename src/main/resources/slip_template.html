@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <head>
+      <meta charset="UTF-8">
+     <!--  <link rel="stylesheet" type="text/css" media="all"
+         href="slip-pdf-template-style.css" /> -->
+      <style type="text/css">
+         @charset "ISO-8859-1";
+         @import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+         body {
+	         font-family: sans-serif;
+	         font-size: 12px;
+         }
+         .slip-wrapper-style {
+			display: flex;
+			flex-direction: column;
+			padding: .5em 0 1em 2em;
+         }
+         .slip-wrapper-style  span {
+        	 font-family: 'Exo', sans-serif;
+         }
+         button.btn-success {
+      	   margin-left: 6em;
+         }
+         #slips {
+	         font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	         border-collapse: collapse;
+	         width: 35em;
+         }
+         #slips td, #slips th {
+	         border: 1px solid #d6ff90;;
+	         text-align: center;
+	         min-width: .7em;
+         }
+         #slips tr:nth-child(even) {
+     	    background-color: #eeffd1;;
+         }
+         #slips tr:hover {
+      	   background-color: #ddd;
+         }
+         #slips th {
+	         padding-top: 12px;
+	         padding-bottom: 12px;
+	         text-align: left;
+	         background-color: #4CAF50;
+	         color: white;
+         }
+         .footer {
+   			text-align: center;
+   			padding-top: 2em;
+		}
+      </style>
+   </head>
+   <body>
+      <h1>Bingo slips for : [[${bingoData.getEmail()}]]</h1>
+      <h3>Game id : [[${bingoData.getGameId()}]]</h3>
+      <div class="slip-wrapper-style"
+         th:each="slip,iterator: ${bingoData.getResponses()}">
+         <span th:text="'Slip No. ' + ${iterator.index+1}"></span>
+         <table id="slips">
+            <tr th:each="item: ${slip.transformedMatrix}">
+               <td th:each="j: ${item}"><span th:if="${j != 0}" th:text="${j}"></span></td>
+            <tr>
+         </table>
+         <span style="font-size: 0.8em; padding-left: 20em;"
+            th:text="'id# ' + ${slip.slipId}"></span>
+      </div>
+      <div class='footer' th:include="footer::footer"></div>
+   </body>
+</html>
