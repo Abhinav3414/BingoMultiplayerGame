@@ -1,0 +1,23 @@
+<p>Manage Players for Game: {{gameId}}</p>
+
+You can upload excel if there are many players
+Note: Excel can only have emails, Your player will be recongnised using their emails
+
+<a (click)="getSampleExcelLink()">View  Sample Excel</a>
+<br><br>
+
+<div *ngIf="!players">
+  <input type="file" #fileInput placeholder="Upload file..." />
+  <button type="button" (click)="upload()">Upload</button>
+</div>
+
+<div *ngIf="players">
+  <h3>Players in Game</h3>
+  <li  *ngFor="let player of players; index as i;">
+    <span>{{i + 1}}</span>
+    <span>{{player.email}}</span>
+    <a (click)="getUserSlips(player.email)"> view slips</a>
+  </li>
+</div>
+
+

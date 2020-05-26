@@ -136,8 +136,11 @@ public class BingoAppService {
                 .findByUserId(bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
     }
 
-    public List<String> getBoardUsers(BingoGame bGame) {
+    public List<String> getBoardUserEmails(BingoGame bGame) {
         return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
     }
 
+    public List<BingoUser> getBoardUsers(BingoGame bGame) {
+        return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().collect(Collectors.toList());
+    }
 }

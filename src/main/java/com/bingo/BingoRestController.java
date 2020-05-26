@@ -1,23 +1,31 @@
 package com.bingo;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +39,8 @@ import com.bingo.appservice.BingoAppService;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
+import com.bingo.dao.BingoUser;
+import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.repository.BingoGameRepository;
 import com.bingo.utility.EmailService;
@@ -70,23 +80,26 @@ public class BingoRestController {
 
         ModelAndView mav = createModelView("index");
 
-        // Delete email excel from local memory
-        File fileToDelete = new File("emails-bingo-users.xlsx");
-        fileToDelete.delete();
         return mav;
     }
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, path = "/initiategame")
-    public String initiategame(Model model) {
+    public ResponseEntity<Map<String, String>> initiategame(Model model) {
+
+        // Delete email excel from local memory
+        File fileToDelete = new File("emails-bingo-users.xlsx");
+        fileToDelete.delete();
 
         BingoGame game = bingoAppService.startGame();
-        System.out.println("game id: " + game.getGameId());
+        System.out.println("Game id: " + game.getGameId());
         System.out.println(game.getCalls());
 
-        return game.getGameId();
+        return new ResponseEntity<>(Collections.singletonMap("gameId", game.getGameId()), HttpStatus.OK);
     }
 
+
+    
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/gamesetup")
     public ModelAndView generateBingoEmails(Model model, @PathVariable("gameId") String gameId) {
 
@@ -101,7 +114,7 @@ public class BingoRestController {
 
             bingoAppService.createBingoFolderStructure(bGame);
 
-            List<String> userEmails = bingoAppService.getBoardUsers(bGame);
+            List<String> userEmails = bingoAppService.getBoardUserEmails(bGame);
             List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails, bGame);
 
             if (pdfNotGenerated.isEmpty()) {
@@ -132,6 +145,7 @@ public class BingoRestController {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         fileIOService.createBingoGameFolder(bGame.getGameId());
 
+        System.out.println(file);
         if (file == null || file.isEmpty()) {
             // redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
             return new ModelAndView("redirect:" + gameId + "/gamesetup");
@@ -177,7 +191,7 @@ public class BingoRestController {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
-        List<String> emails = bingoAppService.getBoardUsers(bGame);
+        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
         System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
@@ -200,7 +214,7 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/startbingo")
     public ModelAndView startbingo(Model model, @PathVariable("gameId") String gameId) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        List<String> emails = bingoAppService.getBoardUsers(bGame);
+        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
         System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
         ModelAndView mav = createModelView("setup-game");
         mav.addObject("setup_game", GAME_IS_ON);
@@ -239,7 +253,7 @@ public class BingoRestController {
         }
         mav.addObject("bingo_done_calls", doneCalls);
 
-        List<String> emails = bingoAppService.getBoardUsers(bGame);
+        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
         mav.addObject("bingo_user_emails", emails);
 
         int currentCall = bGame.getCurrentCall();
@@ -268,9 +282,25 @@ public class BingoRestController {
     }
 
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
-    public ModelAndView showSampleExcel(Model model) {
-        ModelAndView mav = new ModelAndView("sample-excel");
-        return mav;
+    public @ResponseBody ResponseEntity<byte[]> getSampleExcel(Model model) throws IOException {
+
+// File img = ResourceUtils.getFile("classpath:static/excel-instructions-image.png");
+// System.out.println(img.toURI());
+// InputStreamResource resource = new InputStreamResource(new FileInputStream(img));
+
+// return ResponseEntity.ok()
+// // Content-Disposition
+// .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + img.getName())
+// // Content-Type
+// .contentType(MediaType.IMAGE_PNG)
+// // Contet-Length
+// .contentLength(img.length())
+// .body(resource);
+//
+        ClassPathResource imageFile = new ClassPathResource("static/excel-instructions-image.png");
+        byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
     }
 
     private ModelAndView createModelView(String name) {
@@ -279,5 +309,77 @@ public class BingoRestController {
         mav.addObject("bingo_welcome_title", BINGO_MULTIPLAYER);
         return mav;
     }
+    
+    @ResponseBody
+    @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
+    public ResponseEntity uploadExcelFile(@RequestParam(required = false) MultipartFile file, RedirectAttributes redirectAttributes,
+            @PathVariable("gameId") String gameId) {
 
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+        fileIOService.createBingoGameFolder(bGame.getGameId());
+
+        System.out.println(file);
+        if (file == null || file.isEmpty()) {
+            // redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
+            return ResponseEntity.notFound().build();
+        }
+        // normalize the file path
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+        if (fileName.endsWith(".xlsx")) {
+
+            // save the file on the local file system
+            try {
+                Path path = Paths.get(UPLOAD_DIR + '/' + fileIOService.getBingoFolder(gameId) + '/' + BingoAppService.EMAILS_BINGO_USERS_XLSX);
+                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+                bGame.setExcelUploaded(true);
+                bingoGameRepository.save(bGame);
+                System.out.println("Excel is read successfully and saved in memory");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("FileType is not correct");
+        }
+        
+     // read excel, import participants and generateSlipsForUser
+        bingoAppService.generateSlipsForUser(gameId);
+
+        bingoAppService.createBingoFolderStructure(bGame);
+
+        List<String> userEmails = bingoAppService.getBoardUserEmails(bGame);
+        List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails, bGame);
+
+        if (pdfNotGenerated.isEmpty()) {
+            System.out.println("Pdf generated for all successfully !!!, Game id : " + bGame.getGameId());
+            bGame.setPdfsGenerated(true);
+            bingoGameRepository.save(bGame);
+        } else {
+            System.out.println("Pdf could not be geneatated for: ");
+            System.out.println(pdfNotGenerated);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
+    public ResponseEntity<List<PlayerResponse>> getBingoPlayers(Model model, @PathVariable("gameId") String gameId) {
+        List<PlayerResponse> boardUsers = bingoAppService.getBoardUsers(bingoGameRepository.findById(gameId).get()).stream()
+                .map(p -> new PlayerResponse(p.getUserId(), p.getEmail())).collect(Collectors.toList());
+        return new ResponseEntity<>(boardUsers, HttpStatus.OK);
+    }
+    
+    @RequestMapping(value = "{gameId}/playerslips/{userEmail}", method = RequestMethod.GET)
+    public ResponseEntity<BingoSlipsTemplateData> getUserSlips(Model model, @PathVariable("userEmail") String userEmail, @PathVariable("gameId") String gameId) {
+
+
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+        List<BingoSlip> userSlips = bingoAppService.getUserSlips(userEmail, bGame);
+
+        List<SlipHtmlResponse> slipResponses = userSlips.stream()
+                .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
+
+        return new ResponseEntity<>(new BingoSlipsTemplateData(userEmail, gameId, slipResponses), HttpStatus.OK);
+    }
+    
 }

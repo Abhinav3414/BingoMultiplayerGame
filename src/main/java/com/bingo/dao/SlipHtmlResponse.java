@@ -8,8 +8,12 @@ package com.bingo.dao;
 public class SlipHtmlResponse {
 
     public String slipId;
-   
+
     public int[][] transformedMatrix = new int[3][9];
+
+    public SlipHtmlResponse() {
+
+    }
 
     public SlipHtmlResponse(String slipId, int[][] matrix) {
         this.slipId = slipId;
@@ -24,5 +28,21 @@ public class SlipHtmlResponse {
         }
         return this.transformedMatrix;
     }
-    
+
+    public String getSlipId() {
+        return slipId;
+    }
+
+    public void setSlipId(String slipId) {
+        this.slipId = slipId;
+    }
+
+    public int[][] getTransformedMatrix() {
+        return transformedMatrix;
+    }
+
+    public void setTransformedMatrix(int[][] transformedMatrix) {
+        this.transformedMatrix = transformedMatrix;
+    }
+
 }

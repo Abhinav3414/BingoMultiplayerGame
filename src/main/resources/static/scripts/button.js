@@ -26,7 +26,7 @@ $('#blogLink').click(function (e) {
            // data: {'topic': topic},  
             success: function(dataString) {  
             	console.log(dataString);
-            	window.location.href = dataString + "/gamesetup";
+            	window.location.href = dataString.gameId + "/gamesetup";
             }  
         });  
     }, 1200); // will call the function after 2 secs.
