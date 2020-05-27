@@ -32,6 +32,9 @@ export class ManagePlayerComponent implements OnInit {
     if (this.playerSetupComplete) {
       this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
         this.players = r;
+        if (this.players.length > 0) {
+          this.proceedGame();
+        }
       });
     }
   }
@@ -39,7 +42,6 @@ export class ManagePlayerComponent implements OnInit {
   // convenience getters for easy access to form fields
   get f() { return this.dynamicForm.controls; }
   get t() { return this.f.players as FormArray; }
-
 
   proceedGame() {
     this.isPlayerSetupReady.emit(this.playerSetupComplete);
@@ -79,30 +81,6 @@ export class ManagePlayerComponent implements OnInit {
     this.t.reset();
   }
 
-  onSubmit() {
-    this.submitted = true;
-
-    // stop here if form is invalid
-    if (this.dynamicForm.invalid) {
-      return;
-    }
-
-    this.t.value.forEach(element => {
-      this.PlayerResponses.push(new PlayerResponse(element.name, element.email));
-    });
-
-    // display form values on success
-    // alert('SUCCESS!! :-)\n\n' + JSON.stringify(this.dynamicForm.value, null, 4));
-
-    this.bingoService.addPlayers(this.gameId, this.PlayerResponses).subscribe(
-      res => {
-        this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
-          this.players = r;
-          this.playerSetupComplete = true;
-        });
-      });
-  }
-
   getSampleExcelLink() {
     this.bingoService.getSampleExcel().subscribe(
       blob => {
@@ -129,6 +107,32 @@ export class ManagePlayerComponent implements OnInit {
         this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
           this.players = r;
           this.playerSetupComplete = true;
+          this.proceedGame();
+        });
+      });
+  }
+
+  onSubmit() {
+    this.submitted = true;
+
+    // stop here if form is invalid
+    if (this.dynamicForm.invalid) {
+      return;
+    }
+
+    this.t.value.forEach(element => {
+      this.PlayerResponses.push(new PlayerResponse(element.name, element.email));
+    });
+
+    // display form values on success
+    // alert('SUCCESS!! :-)\n\n' + JSON.stringify(this.dynamicForm.value, null, 4));
+
+    this.bingoService.addPlayers(this.gameId, this.PlayerResponses).subscribe(
+      res => {
+        this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
+          this.players = r;
+          this.playerSetupComplete = true;
+          this.proceedGame();
         });
       });
   }
