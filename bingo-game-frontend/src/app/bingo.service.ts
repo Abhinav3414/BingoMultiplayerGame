@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { PlayerResponse } from './models';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,14 @@ export class BingoService {
 
   initiateGame(): any {
     return this.http.post<string>(this.appUrl + '/initiategame', null);
+  }
+
+  assignLeader(gameId: string, leader: PlayerResponse) {
+    return this.http.post(this.appUrl + '/' + gameId + '/assignLeader', leader);
+  }
+
+  getGameSetupStatus(gameId: string) {
+    return this.http.get(this.appUrl + '/' + gameId + '/gameSetupStatus');
   }
 
   getSampleExcel(): Observable<Blob> {

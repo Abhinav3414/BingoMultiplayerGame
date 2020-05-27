@@ -1,17 +1,7 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { BingoService } from '../bingo.service';
-
-class PlayerWrapper {
-  name: string;
-  email: string;
-  id = 'id';
-
-  constructor(theName: string, theEmail: string) {
-    this.name = theName;
-    this.email = theEmail;
-  }
-}
+import { PlayerResponse } from '../models';
 
 @Component({
   selector: 'app-manage-player',
@@ -22,6 +12,7 @@ export class ManagePlayerComponent implements OnInit {
 
   @Input() gameId: string;
   @Input() gameStarted: boolean;
+  @Input() playerSetupComplete: boolean;
   @ViewChild('fileInput') fileInput: ElementRef;
   @Output() isPlayerSetupReady = new EventEmitter<boolean>();
 
@@ -29,17 +20,20 @@ export class ManagePlayerComponent implements OnInit {
   dynamicForm: FormGroup;
   submitted = false;
   numberOfPLayers = 0;
-  playerWrappers: PlayerWrapper[] = [];
-  isExcelImported = false;
-  playersAddedManually = false;
+  PlayerResponses: PlayerResponse[] = [];
 
-  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
-  }
+  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
     this.dynamicForm = this.formBuilder.group({
       players: new FormArray([])
     });
+
+    if (this.playerSetupComplete) {
+      this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
+        this.players = r;
+      });
+    }
   }
 
   // convenience getters for easy access to form fields
@@ -48,7 +42,7 @@ export class ManagePlayerComponent implements OnInit {
 
 
   proceedGame() {
-    this.isPlayerSetupReady.emit(true);
+    this.isPlayerSetupReady.emit(this.playerSetupComplete);
   }
 
   addPlayer() {
@@ -94,18 +88,17 @@ export class ManagePlayerComponent implements OnInit {
     }
 
     this.t.value.forEach(element => {
-      this.playerWrappers.push(new PlayerWrapper(element.name, element.email));
+      this.PlayerResponses.push(new PlayerResponse(element.name, element.email));
     });
 
-    console.log(this.playerWrappers);
     // display form values on success
     // alert('SUCCESS!! :-)\n\n' + JSON.stringify(this.dynamicForm.value, null, 4));
 
-    this.bingoService.addPlayers(this.gameId, this.playerWrappers).subscribe(
+    this.bingoService.addPlayers(this.gameId, this.PlayerResponses).subscribe(
       res => {
         this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
           this.players = r;
-          this.playersAddedManually = true;
+          this.playerSetupComplete = true;
         });
       });
   }
@@ -114,7 +107,7 @@ export class ManagePlayerComponent implements OnInit {
     this.bingoService.getSampleExcel().subscribe(
       blob => {
         const blobUrl = window.URL.createObjectURL(blob);
-        window.open(blobUrl, '', 'left=20,top=20,width=600,height=600,toolbar=1,resizable=0');
+        window.open(blobUrl, '', 'left=20,top=20,width=700,height=600,toolbar=1,resizable=0');
       }
     );
   }
@@ -135,7 +128,7 @@ export class ManagePlayerComponent implements OnInit {
       res => {
         this.bingoService.getBingoPlayers(this.gameId).subscribe((r) => {
           this.players = r;
-          this.isExcelImported = true;
+          this.playerSetupComplete = true;
         });
       });
   }

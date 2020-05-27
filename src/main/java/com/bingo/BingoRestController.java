@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,12 +28,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.bingo.appservice.BingoAppService;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
+import com.bingo.dao.BingoUserType;
 import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.repository.BingoGameRepository;
@@ -50,10 +49,6 @@ import com.bingo.utility.FileIOService;
 
 @Controller
 public class BingoRestController {
-
-    private static final String GAME_IS_ON = "Game is On !!!";
-    private static final String BINGO_MULTIPLAYER = "Bingo Multiplayer";
-    private static final String WELCOME_TO_BINGO_GAME = "Welcome to Bingo !!!";
 
     private final String UPLOAD_DIR = "./";
 
@@ -71,7 +66,7 @@ public class BingoRestController {
 
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, path = "/initiategame")
-    public ResponseEntity<Map<String, String>> initiategame(Model model) {
+    public ResponseEntity<Map<String, String>> initiategame() {
 
         // Delete email excel from local memory
         File fileToDelete = new File("emails-bingo-users.xlsx");
@@ -84,9 +79,28 @@ public class BingoRestController {
         return new ResponseEntity<>(Collections.singletonMap("gameId", game.getGameId()), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "{gameId}/assignLeader", method = RequestMethod.POST)
+    public ResponseEntity<String> assignLeader(@PathVariable("gameId") String gameId, @RequestBody PlayerResponse leader) {
+
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+        bGame.setLeaderAssigned(bingoAppService.setLeader(bGame.getGameId(), leader));
+        bingoGameRepository.save(bGame);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(value = "{gameId}/gameSetupStatus", method = RequestMethod.GET)
+    public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+        bGame.setCalls(new ArrayList<Integer>());
+        return new ResponseEntity<>(bGame, HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/download/{gameId}/{userEmail}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId, @PathVariable("userEmail") String userEmail) throws IOException {
+    public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
+            @PathVariable("userEmail") String userEmail) throws IOException {
         String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
         FileSystemResource file = new FileSystemResource(new File(slipName));
 
@@ -99,9 +113,9 @@ public class BingoRestController {
                 .body(file);
     }
 
-    //TODO work on email
+    // TODO work on email
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/emailandstartbingo")
-    public void emailandstartbingo(Model model, @PathVariable("gameId") String gameId) {
+    public void emailandstartbingo(@PathVariable("gameId") String gameId) {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
@@ -131,8 +145,6 @@ public class BingoRestController {
         }
         bingoGameRepository.save(bGame);
 
-        System.out.println(bGame.getCalls().get(bGame.getCurrentCall()));
-
         return new ResponseEntity<>(bGame.getCalls().get(bGame.getCurrentCall()), HttpStatus.OK);
     }
 
@@ -146,7 +158,7 @@ public class BingoRestController {
 
     @ResponseBody
     @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
-    public ResponseEntity addPlayers(@PathVariable("gameId") String gameId, @RequestBody List<PlayerResponse> players) {
+    public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId, @RequestBody List<PlayerResponse> players) {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         fileIOService.createBingoGameFolder(bGame.getGameId());
@@ -156,18 +168,22 @@ public class BingoRestController {
 
         generatePdfs(bGame);
 
+        bGame.setPdfsGenerated(true);
+        bGame.setPlayerSetupComplete(true);
+
+        bingoGameRepository.save(bGame);
+
         return ResponseEntity.ok().build();
     }
 
     @ResponseBody
     @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
-    public ResponseEntity uploadExcelFile(@RequestParam(required = false) MultipartFile file, @PathVariable("gameId") String gameId) {
+    public ResponseEntity<String> uploadExcelFile(@RequestParam(required = false) MultipartFile file, @PathVariable("gameId") String gameId) {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         fileIOService.createBingoGameFolder(bGame.getGameId());
 
         if (file == null || file.isEmpty()) {
-            // redirectAttributes.addFlashAttribute("message", "Please select a file to upload");
             return ResponseEntity.notFound().build();
         }
         // normalize the file path
@@ -200,6 +216,11 @@ public class BingoRestController {
 
         generatePdfs(bGame);
 
+        bGame.setPdfsGenerated(true);
+        bGame.setPlayerSetupComplete(true);
+
+        bingoGameRepository.save(bGame);
+
         return ResponseEntity.ok().build();
     }
 
@@ -218,14 +239,15 @@ public class BingoRestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
-    public ResponseEntity<List<PlayerResponse>> getBingoPlayers(Model model, @PathVariable("gameId") String gameId) {
+    public ResponseEntity<List<PlayerResponse>> getBingoPlayers(@PathVariable("gameId") String gameId) {
         List<PlayerResponse> boardUsers = bingoAppService.getBoardUsers(bingoGameRepository.findById(gameId).get()).stream()
+                .filter(p -> !p.getUserType().equals(BingoUserType.ORGANIZER))
                 .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail())).collect(Collectors.toList());
         return new ResponseEntity<>(boardUsers, HttpStatus.OK);
     }
 
     @RequestMapping(value = "{gameId}/playerslips/{userEmail}", method = RequestMethod.GET)
-    public ResponseEntity<BingoSlipsTemplateData> getUserSlips(Model model, @PathVariable("userEmail") String userEmail,
+    public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("userEmail") String userEmail,
             @PathVariable("gameId") String gameId) {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();

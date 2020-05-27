@@ -20,7 +20,15 @@ public class BingoBoard {
 
     private List<String> userIds = new ArrayList<>();
 
+    private String leaderId;
+
+    private String gameId;
+
     public BingoBoard() {
+    }
+    
+    public BingoBoard(String gameId) {
+        this.gameId = gameId;
     }
 
     public List<String> getUserIds() {
@@ -31,12 +39,28 @@ public class BingoBoard {
         this.userIds = userIds;
     }
 
-       public String getBoardId() {
+    public String getBoardId() {
         return boardId;
     }
 
     public void setBoardId(String boardId) {
         this.boardId = boardId;
+    }
+
+    public String getLeaderId() {
+        return leaderId;
+    }
+
+    public void setLeaderId(String leaderId) {
+        this.leaderId = leaderId;
+    }
+
+    public String getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(String gameId) {
+        this.gameId = gameId;
     }
 
 }

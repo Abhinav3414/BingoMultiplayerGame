@@ -30,6 +30,10 @@ public class BingoGame {
     private boolean isExcelUploaded;
 
     private boolean pdfsGenerated;
+    
+    private boolean isPlayerSetupComplete;
+    
+    private boolean isLeaderAssigned;
 
     public BingoGame() {
         generateCallSequence();
@@ -81,6 +85,25 @@ public class BingoGame {
 
     public void setPdfsGenerated(boolean pdfsGenerated) {
         this.pdfsGenerated = pdfsGenerated;
+    }
+
+    public boolean isPlayerSetupComplete() {
+        return isPlayerSetupComplete;
+    }
+
+    
+    public void setPlayerSetupComplete(boolean isPlayerSetupComplete) {
+        this.isPlayerSetupComplete = isPlayerSetupComplete;
+    }
+
+    
+    public boolean isLeaderAssigned() {
+        return isLeaderAssigned;
+    }
+
+    
+    public void setLeaderAssigned(boolean isLeaderAssigned) {
+        this.isLeaderAssigned = isLeaderAssigned;
     }
 
     public void generateCallSequence() {

@@ -1,17 +1,19 @@
-<p>Manage Players for Game: {{gameId}}</p>
+<h5>Manage Players for Game</h5>
 
-You can upload excel if there are many players
-Note: Excel can only have emails, Your player will be recongnised using their emails
+<div *ngIf="!playerSetupComplete">
+  You can upload excel if there are many players. <br>
+  Note: Excel can only have emails, Your player will be recongnised using their emails.
+  <br>
+  <a (click)="getSampleExcelLink()" style="color: blue">View  Sample Excel</a>
+</div>
+<br>
 
-<a (click)="getSampleExcelLink()">View  Sample Excel</a>
-<br><br>
-
-<div *ngIf="!players">
+<div *ngIf="!playerSetupComplete">
   <input type="file" #fileInput placeholder="Upload file..." />
   <button type="button" class="btn btn-success" (click)="uploadExcel()">Upload</button>
 </div>
 
-<form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" style="width: 50%;" *ngIf="!isExcelImported && !playersAddedManually">
+<form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="col-sm-6" *ngIf="!playerSetupComplete">
   <div class="card m-3">
       <h5 class="card-header">Add Players Manually</h5>
       <div *ngFor="let player of t.controls; let i = index" class="list-group list-group-flush">
@@ -48,11 +50,11 @@ Note: Excel can only have emails, Your player will be recongnised using their em
 
 <div *ngIf="players">
   <h3>Players in Game</h3>
-  <li  *ngFor="let player of players; index as i;">
-    <span>{{i + 1}}</span>
+  <div *ngFor="let player of players; index as i;" style="padding: 0 0 .2em .5em">
+    <span style="padding-right: 1em">{{i + 1}}.</span>
     <span>{{player.email}}</span>
-    <a (click)="getUserSlips(player.email)"> view slips</a>
-  </li>
+    <button type="button" class="btn btn-info" (click)="getUserSlips(player.email)" style="margin-left:.5em">View slips</button>
+  </div>
 </div>
 
-<button class="btn btn-primary mr-1" *ngIf="(isExcelImported || playersAddedManually) && !gameStarted" (click)="proceedGame()">Proceed to Game</button>
+<button class="btn btn-primary mr-1" *ngIf="(playerSetupComplete) && !gameStarted" (click)="proceedGame()">Proceed to Game</button>

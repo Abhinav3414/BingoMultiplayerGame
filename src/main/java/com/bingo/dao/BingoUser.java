@@ -23,7 +23,7 @@ public class BingoUser {
 
     private String boardId;
 
-    private BingoUserType userType = BingoUserType.ORGANIZER;
+    private BingoUserType userType = BingoUserType.PARTICIPANT;
 
     public BingoUser() {
     }

@@ -7,4 +7,5 @@ import com.bingo.dao.BingoBoard;
 
 public interface BingoBoardRepository extends MongoRepository<BingoBoard, String> {
 
+    public BingoBoard findByGameId(String gameId);
 }

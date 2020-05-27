@@ -12,6 +12,7 @@ import com.bingo.dao.BingoBoard;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoUser;
+import com.bingo.dao.BingoUserType;
 import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.repository.BingoBoardRepository;
@@ -55,7 +56,13 @@ public class BingoAppService {
         BingoBoard bb = bingoBoardRepository.save(new BingoBoard());
         BingoGame bGame = new BingoGame();
         bGame.setBingoBoardId(bb.getBoardId());
-        return bingoGameRepository.save(bGame);
+
+        BingoGame startedGame = bingoGameRepository.save(bGame);
+
+        bb.setGameId(startedGame.getGameId());
+        bingoBoardRepository.save(bb);
+
+        return startedGame;
     }
 
     public void generateSlipsForUser(String gameId, List<PlayerResponse> players) {
@@ -139,5 +146,15 @@ public class BingoAppService {
 
     public List<BingoUser> getBoardUsers(BingoGame bGame) {
         return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().collect(Collectors.toList());
+    }
+
+    public boolean setLeader(String gameId, PlayerResponse organizer) {
+        System.out.println(organizer);
+        BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
+        BingoUser gameOrganizer = bingoUserRepository.save(new BingoUser(organizer.getName(), organizer.getEmail(),
+                BingoUserType.ORGANIZER, bBoard.getBoardId()));
+        bBoard.setLeaderId(gameOrganizer.getUserId());
+        bingoBoardRepository.save(bBoard);
+        return true;
     }
 }

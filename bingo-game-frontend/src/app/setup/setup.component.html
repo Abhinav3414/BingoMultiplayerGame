@@ -1,9 +1,34 @@
-
 <div class="setup">
+  <br>
   <button type="button" [routerLink]="['']" class="btn btn-danger">Reset And Start New Game!!</button>
-  Setup your Game
+  <br> <br>
+  <h4>Setup your Game</h4>
+
   New Game is created :
   Game id# {{gameId}}
-  <app-manage-player [gameId]="gameId" [gameStarted]="shouldStartGame" (isPlayerSetupReady)="getPlayerSetupStatus($event)"></app-manage-player>
+
+  <br> <br>
+
+  <div *ngIf="!leaderAssigned">
+    <h4>Welcome, Being leader of game, please provide your name and email to proceed</h4>
+    <div class="col-sm-3">
+      <form [formGroup]="leaderForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <input [class.is-invalid]="leaderForm.get('name').invalid && leaderForm.get('name').touched"
+            class="form-control" formControlName="name" placeholder="Name" />
+        </div>
+        <div class="form-group">
+          <input [class.is-invalid]="leaderForm.get('email').invalid && leaderForm.get('email').touched" type="email"
+            class="form-control" formControlName="email" placeholder="Email" />
+        </div>
+        <button type="submit" class="btn btn-success" [disabled]="leaderForm.status !== 'VALID'">Add me as
+          leader</button>
+      </form>
+    </div>
+  </div>
+
+  <app-manage-player [gameId]="gameId" [gameStarted]="shouldStartGame" [playerSetupComplete]="playerSetupComplete"
+    (isPlayerSetupReady)="getPlayerSetupStatus($event)" *ngIf="leaderAssigned"></app-manage-player>
+
   <app-call-number *ngIf="shouldStartGame" [gameId]="gameId"></app-call-number>
 </div>
