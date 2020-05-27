@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { BingoService } from '../bingo.service';
 
@@ -20,8 +20,10 @@ class PlayerWrapper {
 })
 export class ManagePlayerComponent implements OnInit {
 
-  @Input() gameId: string = null;
+  @Input() gameId: string;
+  @Input() gameStarted: boolean;
   @ViewChild('fileInput') fileInput: ElementRef;
+  @Output() isPlayerSetupReady = new EventEmitter<boolean>();
 
   players: any;
   dynamicForm: FormGroup;
@@ -44,6 +46,10 @@ export class ManagePlayerComponent implements OnInit {
   get f() { return this.dynamicForm.controls; }
   get t() { return this.f.players as FormArray; }
 
+
+  proceedGame() {
+    this.isPlayerSetupReady.emit(true);
+  }
 
   addPlayer() {
     this.submitted = false;

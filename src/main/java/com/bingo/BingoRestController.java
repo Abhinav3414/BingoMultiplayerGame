@@ -69,14 +69,6 @@ public class BingoRestController {
     @Autowired
     private BingoAppService bingoAppService;
 
-    @RequestMapping(method = RequestMethod.GET, path = "/")
-    public ModelAndView homePage(Model model) {
-
-        ModelAndView mav = createModelView("index");
-
-        return mav;
-    }
-
     @ResponseBody
     @RequestMapping(method = RequestMethod.POST, path = "/initiategame")
     public ResponseEntity<Map<String, String>> initiategame(Model model) {
@@ -107,19 +99,14 @@ public class BingoRestController {
                 .body(file);
     }
 
+    //TODO work on email
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/emailandstartbingo")
-    public ModelAndView emailandstartbingo(Model model, @PathVariable("gameId") String gameId) {
+    public void emailandstartbingo(Model model, @PathVariable("gameId") String gameId) {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
         List<String> emails = bingoAppService.getBoardUserEmails(bGame);
         System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
-        ModelAndView mav = createModelView("setup-game");
-        mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", bGame.getGameId());
-        mav.addObject("bingo_calls", bGame.getCalls());
-        mav.addObject("bingo_user_emails", emails);
-        mav.addObject("show_call_next_button", true);
 
         List<String> emailNotSent = emailService.sendMailToParticipants(emails, bGame.getGameId());
 
@@ -129,70 +116,28 @@ public class BingoRestController {
         } else {
             System.out.println("All Emails have been sent successfully. Enjoy !!!!\n--- Game is Started ---");
         }
-        return mav;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/startbingo")
-    public ModelAndView startbingo(Model model, @PathVariable("gameId") String gameId) {
+    @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId) {
+
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
-        System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
-        ModelAndView mav = createModelView("setup-game");
-        mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", bGame.getGameId());
-        mav.addObject("bingo_calls", bGame.getCalls());
-        mav.addObject("bingo_user_emails", emails);
-        mav.addObject("show_call_next_button", true);
-
-        return mav;
-    }
-
-    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/callNextRandomNumber")
-    public ModelAndView callRandomNumber(Model model, @PathVariable("gameId") String gameId) throws Exception {
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-
-        if (bGame.getCurrentCall() == -1) {
-            bGame.setCurrentCall(0);
-        }
 
         if (bGame.getCurrentCall() == 89) {
             bGame.setCurrentCall(0);
+        } else {
+            int currentCall = bGame.getCurrentCall();
+            bGame.setCurrentCall(++currentCall);
         }
-        ModelAndView mav = createModelView("setup-game");
-        mav.addObject("setup_game", GAME_IS_ON);
-        mav.addObject("bingo_game_id", bGame.getGameId());
-
-        mav.addObject("bingo_call_number", String.format("Call %d:", bGame.getCurrentCall() + 1));
-        mav.addObject("bingo_call_value", bGame.getCalls().get(bGame.getCurrentCall()));
-        mav.addObject("show_call_next_button", true);
-
-        List<Integer> doneCalls = new ArrayList<>();
-        int b = 0;
-        while (b <= bGame.getCurrentCall()) {
-            doneCalls.add(bGame.getCalls().get(b));
-            b++;
-        }
-        mav.addObject("bingo_done_calls", doneCalls);
-
-        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
-        mav.addObject("bingo_user_emails", emails);
-
-        int currentCall = bGame.getCurrentCall();
-        bGame.setCurrentCall(++currentCall);
         bingoGameRepository.save(bGame);
 
-        return mav;
-    }
+        System.out.println(bGame.getCalls().get(bGame.getCurrentCall()));
 
-    private ModelAndView createModelView(String name) {
-        ModelAndView mav = new ModelAndView(name);
-        mav.addObject("bingo_welcome_heading", WELCOME_TO_BINGO_GAME);
-        mav.addObject("bingo_welcome_title", BINGO_MULTIPLAYER);
-        return mav;
+        return new ResponseEntity<>(bGame.getCalls().get(bGame.getCurrentCall()), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity<byte[]> getSampleExcel(Model model) throws IOException {
+    public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
 
         ClassPathResource imageFile = new ClassPathResource("static/excel-instructions-image.png");
         byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());

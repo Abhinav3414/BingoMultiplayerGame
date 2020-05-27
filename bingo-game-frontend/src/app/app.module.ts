@@ -12,6 +12,7 @@ import { ManagePlayerComponent } from './manage-player/manage-player.component';
 
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { CallNumberComponent } from './call-number/call-number.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { HttpClientModule } from '@angular/common/http';
     SetupComponent,
     FooterComponent,
     HomeComponent,
-    ManagePlayerComponent
+    ManagePlayerComponent,
+    CallNumberComponent
   ],
   imports: [
     HttpClientModule,

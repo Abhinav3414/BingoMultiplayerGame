@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 export class SetupComponent implements OnInit {
 
   gameId;
+  shouldStartGame = false;
 
   constructor(private route: ActivatedRoute) { }
 
@@ -16,6 +17,10 @@ export class SetupComponent implements OnInit {
     this.route.paramMap.subscribe(params => {
       this.gameId = params.get('gameId');
     });
+  }
+
+  getPlayerSetupStatus(startCall: boolean) {
+    this.shouldStartGame = startCall;
   }
 
 }

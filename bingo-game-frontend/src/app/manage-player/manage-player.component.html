@@ -54,3 +54,5 @@ Note: Excel can only have emails, Your player will be recongnised using their em
     <a (click)="getUserSlips(player.email)"> view slips</a>
   </li>
 </div>
+
+<button class="btn btn-primary mr-1" *ngIf="(isExcelImported || playersAddedManually) && !gameStarted" (click)="proceedGame()">Proceed to Game</button>

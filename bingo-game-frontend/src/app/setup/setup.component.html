@@ -4,5 +4,6 @@
   Setup your Game
   New Game is created :
   Game id# {{gameId}}
-  <app-manage-player [gameId]="gameId"></app-manage-player>
+  <app-manage-player [gameId]="gameId" [gameStarted]="shouldStartGame" (isPlayerSetupReady)="getPlayerSetupStatus($event)"></app-manage-player>
+  <app-call-number *ngIf="shouldStartGame" [gameId]="gameId"></app-call-number>
 </div>

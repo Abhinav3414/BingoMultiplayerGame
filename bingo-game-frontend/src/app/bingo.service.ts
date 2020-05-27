@@ -20,23 +20,27 @@ export class BingoService {
     return this.http.get(this.appUrl + '/sampleexcel', { responseType: 'blob' });
   }
 
-  getBingoPlayers(gameId): Observable<any> {
+  getBingoPlayers(gameId: string): Observable<any> {
     return this.http.get(this.appUrl + '/' + gameId + '/getBingoPlayers');
   }
 
-  getUserSlips(gameId, email): Observable<any> {
+  getUserSlips(gameId: string, email: string): Observable<any> {
     return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + email);
   }
 
-  addPlayers(gameId, players): any {
+  addPlayers(gameId: string, players): any {
     return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/addPlayers', players);
   }
 
-  uploadExcel(gameId, file: File): any {
+  uploadExcel(gameId: string, file: File): any {
     this.headers.set('Content-Type', 'multipart/form-data');
     const formData: FormData = new FormData();
     formData.append('file', file);
     return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/uploadExcelFile', formData, { headers: this.headers });
+  }
+
+  callNext(gameId: string) {
+    return this.http.post(this.appUrl + '/' + gameId + '/callNext', null);
   }
 
 }

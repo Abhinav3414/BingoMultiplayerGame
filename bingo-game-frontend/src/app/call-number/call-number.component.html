@@ -1,0 +1,7 @@
+<button class="btn btn-secondary" type="button" (click)="callNext()">Call Next</button>
+
+<div *ngFor="let call of calls; index as i;">
+
+  <span>{{i+1}}: </span>
+  <span>{{call}}</span>
+</div>
