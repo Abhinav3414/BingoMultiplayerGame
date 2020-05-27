@@ -3,13 +3,15 @@ package com.bingo.dao;
 public class PlayerResponse {
 
     String id;
+    String name;
     String email;
 
     public PlayerResponse() {
     }
 
-    public PlayerResponse(String id, String email) {
+    public PlayerResponse(String id, String name, String email) {
         this.id = id;
+        this.name = name;
         this.email = email;
     }
 
@@ -19,6 +21,14 @@ public class PlayerResponse {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {

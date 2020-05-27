@@ -8,8 +8,43 @@ Note: Excel can only have emails, Your player will be recongnised using their em
 
 <div *ngIf="!players">
   <input type="file" #fileInput placeholder="Upload file..." />
-  <button type="button" (click)="upload()">Upload</button>
+  <button type="button" class="btn btn-success" (click)="uploadExcel()">Upload</button>
 </div>
+
+<form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" style="width: 50%;" *ngIf="!isExcelImported && !playersAddedManually">
+  <div class="card m-3">
+      <h5 class="card-header">Add Players Manually</h5>
+      <div *ngFor="let player of t.controls; let i = index" class="list-group list-group-flush">
+          <div class="list-group-item">
+              <h5 class="card-title">Player {{i + 1}}</h5>
+              <div [formGroup]="player" class="form-row">
+                  <div class="form-group col-6">
+                      <label>Name</label>
+                      <input type="text" formControlName="name" class="form-control" [ngClass]="{ 'is-invalid': submitted && player.controls.name.errors }" />
+                      <div *ngIf="submitted && player.controls.name.errors" class="invalid-feedback">
+                          <div *ngIf="player.controls.name.errors.required">Name is required</div>
+                      </div>
+                  </div>
+                  <div class="form-group col-6">
+                      <label>Email</label>
+                      <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && player.controls.email.errors }" />
+                      <div *ngIf="submitted && player.controls.email.errors" class="invalid-feedback">
+                          <div *ngIf="player.controls.email.errors.required">Email is required</div>
+                          <div *ngIf="player.controls.email.errors.email">Email must be a valid email address</div>
+                      </div>
+                  </div>
+              </div>
+              <button class="btn btn-primary mr-1"(click)="removePlayer(i)">Remove</button>
+          </div>
+      </div>
+      <div class="card-footer text-center">
+          <button class="btn btn-primary mr-1" (click)="addPlayer()">Add Player</button>
+          <button class="btn btn-primary mr-1"  [disabled]="numberOfPLayers < 1 || !isValid()">Submit Players</button>
+          <button class="btn btn-secondary mr-1" type="reset" (click)="onReset()">Reset</button>
+          <button class="btn btn-secondary" type="button" (click)="onClear()">Clear</button>
+      </div>
+  </div>
+</form>
 
 <div *ngIf="players">
   <h3>Players in Game</h3>
@@ -19,5 +54,3 @@ Note: Excel can only have emails, Your player will be recongnised using their em
     <a (click)="getUserSlips(player.email)"> view slips</a>
   </li>
 </div>
-
-

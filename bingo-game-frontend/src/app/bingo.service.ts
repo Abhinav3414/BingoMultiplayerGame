@@ -28,6 +28,10 @@ export class BingoService {
     return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + email);
   }
 
+  addPlayers(gameId, players): any {
+    return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/addPlayers', players);
+  }
+
   uploadExcel(gameId, file: File): any {
     this.headers.set('Content-Type', 'multipart/form-data');
     const formData: FormData = new FormData();

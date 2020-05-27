@@ -1,6 +1,5 @@
 package com.bingo.appservice;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +12,7 @@ import com.bingo.dao.BingoBoard;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoUser;
+import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.repository.BingoBoardRepository;
 import com.bingo.repository.BingoGameRepository;
@@ -58,19 +58,18 @@ public class BingoAppService {
         return bingoGameRepository.save(bGame);
     }
 
-    public List<String> generateSlipsForUser(String gameId) {
+    public void generateSlipsForUser(String gameId, List<PlayerResponse> players) {
 
-        List<String> emails = fileIOService.readEmailsFromExcel(fileIOService.getBingoFolder(gameId) + File.separator + EMAILS_BINGO_USERS_XLSX);
         List<String> userIds = new ArrayList<>();
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
-        emails.forEach(e -> {
-            BingoUser bUser = bingoUserRepository.findByEmailAndBoardIdLike(e, bGame.getBingoBoardId());
+        players.forEach(p -> {
+            BingoUser bUser = bingoUserRepository.findByEmailAndBoardIdLike(p.getEmail(), bGame.getBingoBoardId());
             if (bUser != null) {
                 bingoUserRepository.delete(bUser);
             }
-            BingoUser bu = bingoUserRepository.save(new BingoUser(e, bGame.getBingoBoardId()));
+            BingoUser bu = bingoUserRepository.save(new BingoUser(p.getName(), p.getEmail(), bGame.getBingoBoardId()));
             userIds.add(bu.getUserId());
         });
 
@@ -82,9 +81,7 @@ public class BingoAppService {
             generateSlipsForUser(u, bGame);
         });
 
-        // bingoSlipRepository.save(new BingoSlip());
         bingoBoardRepository.save(bingoBoard.get());
-        return emails;
     }
 
     private List<BingoSlip> generateSlipsForUser(BingoUser bu, BingoGame bGame) {
