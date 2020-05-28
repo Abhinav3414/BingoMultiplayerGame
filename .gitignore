@@ -33,3 +33,4 @@ Bingo_*
 application.properties
 Bingo_commands.txt
 src/main/resources/application.properties
+src/main/resources/static/

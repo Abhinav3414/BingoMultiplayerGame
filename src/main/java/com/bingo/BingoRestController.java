@@ -18,15 +18,17 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.bingo.appservice.BingoAppService;
@@ -47,216 +49,215 @@ import com.bingo.utility.FileIOService;
  * @since 12-May-2020
  */
 
-@Controller
+@RestController
 public class BingoRestController {
 
-    private final String UPLOAD_DIR = "./";
+  private final String UPLOAD_DIR = "./";
 
-    @Autowired
-    private BingoGameRepository bingoGameRepository;
+  @Autowired
+  private BingoGameRepository bingoGameRepository;
 
-    @Autowired
-    private FileIOService fileIOService;
+  @Autowired
+  private FileIOService fileIOService;
 
-    @Autowired
-    private EmailService emailService;
+  @Autowired
+  private EmailService emailService;
 
-    @Autowired
-    private BingoAppService bingoAppService;
+  @Autowired
+  private BingoAppService bingoAppService;
 
-    @ResponseBody
-    @RequestMapping(method = RequestMethod.POST, path = "/initiategame")
-    public ResponseEntity<Map<String, String>> initiategame() {
+  @PostMapping("/initiategame")
+  public ResponseEntity<Map<String, String>> initiategame() {
 
-        // Delete email excel from local memory
-        File fileToDelete = new File("emails-bingo-users.xlsx");
-        fileToDelete.delete();
+    // Delete email excel from local memory
+    File fileToDelete = new File("emails-bingo-users.xlsx");
+    fileToDelete.delete();
 
-        BingoGame game = bingoAppService.startGame();
-        System.out.println("Game id: " + game.getGameId());
-        System.out.println(game.getCalls());
+    BingoGame game = bingoAppService.startGame();
+    System.out.println("Game id: " + game.getGameId());
+    System.out.println(game.getCalls());
 
-        return new ResponseEntity<>(Collections.singletonMap("gameId", game.getGameId()), HttpStatus.OK);
+    return new ResponseEntity<>(Collections.singletonMap("gameId", game.getGameId()), HttpStatus.OK);
+  }
+
+  @PostMapping("{gameId}/assignLeader")
+  public ResponseEntity<String> assignLeader(@PathVariable("gameId") String gameId, @RequestBody PlayerResponse leader) {
+
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+    bGame.setLeaderAssigned(bingoAppService.setLeader(bGame.getGameId(), leader));
+    bingoGameRepository.save(bGame);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @GetMapping("{gameId}/gameSetupStatus")
+  public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    bGame.setCalls(new ArrayList<Integer>());
+    return new ResponseEntity<>(bGame, HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/download/{gameId}/{userEmail}", method = RequestMethod.GET)
+  @ResponseBody
+  public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
+      @PathVariable("userEmail") String userEmail) throws IOException {
+    String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
+    FileSystemResource file = new FileSystemResource(new File(slipName));
+
+    return ResponseEntity
+        .ok()
+        .contentLength(file.contentLength())
+        .contentType(
+            MediaType.parseMediaType("application/pdf"))
+        .header("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf")
+        .body(file);
+  }
+
+  // TODO work on email
+  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/emailandstartbingo")
+  public void emailandstartbingo(@PathVariable("gameId") String gameId) {
+
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+    List<String> emails = bingoAppService.getBoardUserEmails(bGame);
+    System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
+
+    List<String> emailNotSent = emailService.sendMailToParticipants(emails, bGame.getGameId());
+
+    if (!emailNotSent.isEmpty()) {
+      System.out.println("Emails could not be sent to: ");
+      System.out.println(emailNotSent);
+    } else {
+      System.out.println("All Emails have been sent successfully. Enjoy !!!!\n--- Game is Started ---");
     }
+  }
 
-    @RequestMapping(value = "{gameId}/assignLeader", method = RequestMethod.POST)
-    public ResponseEntity<String> assignLeader(@PathVariable("gameId") String gameId, @RequestBody PlayerResponse leader) {
+  @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
+  public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId) {
 
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
-        bGame.setLeaderAssigned(bingoAppService.setLeader(bGame.getGameId(), leader));
+    if (bGame.getCurrentCall() == 89) {
+      bGame.setCurrentCall(0);
+    } else {
+      int currentCall = bGame.getCurrentCall();
+      bGame.setCurrentCall(++currentCall);
+    }
+    bingoGameRepository.save(bGame);
+
+    return new ResponseEntity<>(bGame.getCalls().get(bGame.getCurrentCall()), HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
+  public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
+
+    ClassPathResource imageFile = new ClassPathResource("static/excel-instructions-image.png");
+    byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
+    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+  }
+
+  @ResponseBody
+  @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
+  public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId, @RequestBody List<PlayerResponse> players) {
+
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    fileIOService.createBingoGameFolder(bGame.getGameId());
+
+    bingoAppService.generateSlipsForUser(gameId, players);
+    bingoAppService.createBingoFolderStructure(bGame);
+
+    generatePdfs(bGame);
+
+    bGame.setPdfsGenerated(true);
+    bGame.setPlayerSetupComplete(true);
+
+    bingoGameRepository.save(bGame);
+
+    return ResponseEntity.ok().build();
+  }
+
+  @ResponseBody
+  @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
+  public ResponseEntity<String> uploadExcelFile(@RequestParam(required = false) MultipartFile file, @PathVariable("gameId") String gameId) {
+
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    fileIOService.createBingoGameFolder(bGame.getGameId());
+
+    if (file == null || file.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    // normalize the file path
+    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+    if (fileName.endsWith(".xlsx")) {
+
+      // save the file on the local file system
+      try {
+        Path path = Paths.get(UPLOAD_DIR + '/' + fileIOService.getBingoFolder(gameId) + '/' + BingoAppService.EMAILS_BINGO_USERS_XLSX);
+        Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+        bGame.setExcelUploaded(true);
         bingoGameRepository.save(bGame);
-
-        return ResponseEntity.ok().build();
+        System.out.println("Excel is read successfully and saved in memory");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      System.out.println("FileType is not correct");
     }
 
-    @RequestMapping(value = "{gameId}/gameSetupStatus", method = RequestMethod.GET)
-    public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        bGame.setCalls(new ArrayList<Integer>());
-        return new ResponseEntity<>(bGame, HttpStatus.OK);
+    List<String> emails = fileIOService.readEmailsFromExcel(fileIOService.getBingoFolder(gameId) + File.separator + BingoAppService.EMAILS_BINGO_USERS_XLSX);
+
+    // read excel, import participants and generateSlipsForUser
+
+    List<PlayerResponse> players = emails.stream().map(e -> new PlayerResponse(null, null, e)).collect(Collectors.toList());
+    bingoAppService.generateSlipsForUser(gameId, players);
+
+    bingoAppService.createBingoFolderStructure(bGame);
+
+    generatePdfs(bGame);
+
+    bGame.setPdfsGenerated(true);
+    bGame.setPlayerSetupComplete(true);
+
+    bingoGameRepository.save(bGame);
+
+    return ResponseEntity.ok().build();
+  }
+
+  private void generatePdfs(BingoGame bGame) {
+    List<String> userEmails = bingoAppService.getBoardUserEmails(bGame);
+    List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails, bGame);
+
+    if (pdfNotGenerated.isEmpty()) {
+      System.out.println("Pdf generated for all successfully !!!, Game id : " + bGame.getGameId());
+      bGame.setPdfsGenerated(true);
+      bingoGameRepository.save(bGame);
+    } else {
+      System.out.println("Pdf could not be geneatated for: ");
+      System.out.println(pdfNotGenerated);
     }
+  }
 
-    @RequestMapping(value = "/download/{gameId}/{userEmail}", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
-            @PathVariable("userEmail") String userEmail) throws IOException {
-        String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
-        FileSystemResource file = new FileSystemResource(new File(slipName));
+  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
+  public ResponseEntity<List<PlayerResponse>> getBingoPlayers(@PathVariable("gameId") String gameId) {
+    List<PlayerResponse> boardUsers = bingoAppService.getBoardUsers(bingoGameRepository.findById(gameId).get()).stream()
+        .filter(p -> !p.getUserType().equals(BingoUserType.ORGANIZER))
+        .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail())).collect(Collectors.toList());
+    return new ResponseEntity<>(boardUsers, HttpStatus.OK);
+  }
 
-        return ResponseEntity
-                .ok()
-                .contentLength(file.contentLength())
-                .contentType(
-                        MediaType.parseMediaType("application/pdf"))
-                .header("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf")
-                .body(file);
-    }
+  @RequestMapping(value = "{gameId}/playerslips/{userEmail}", method = RequestMethod.GET)
+  public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("userEmail") String userEmail,
+      @PathVariable("gameId") String gameId) {
 
-    // TODO work on email
-    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/emailandstartbingo")
-    public void emailandstartbingo(@PathVariable("gameId") String gameId) {
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    List<BingoSlip> userSlips = bingoAppService.getUserSlips(userEmail, bGame);
 
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+    List<SlipHtmlResponse> slipResponses = userSlips.stream()
+        .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
 
-        List<String> emails = bingoAppService.getBoardUserEmails(bGame);
-        System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
-
-        List<String> emailNotSent = emailService.sendMailToParticipants(emails, bGame.getGameId());
-
-        if (!emailNotSent.isEmpty()) {
-            System.out.println("Emails could not be sent to: ");
-            System.out.println(emailNotSent);
-        } else {
-            System.out.println("All Emails have been sent successfully. Enjoy !!!!\n--- Game is Started ---");
-        }
-    }
-
-    @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId) {
-
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-
-        if (bGame.getCurrentCall() == 89) {
-            bGame.setCurrentCall(0);
-        } else {
-            int currentCall = bGame.getCurrentCall();
-            bGame.setCurrentCall(++currentCall);
-        }
-        bingoGameRepository.save(bGame);
-
-        return new ResponseEntity<>(bGame.getCalls().get(bGame.getCurrentCall()), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
-    public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
-
-        ClassPathResource imageFile = new ClassPathResource("static/excel-instructions-image.png");
-        byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
-    public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId, @RequestBody List<PlayerResponse> players) {
-
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        fileIOService.createBingoGameFolder(bGame.getGameId());
-
-        bingoAppService.generateSlipsForUser(gameId, players);
-        bingoAppService.createBingoFolderStructure(bGame);
-
-        generatePdfs(bGame);
-
-        bGame.setPdfsGenerated(true);
-        bGame.setPlayerSetupComplete(true);
-
-        bingoGameRepository.save(bGame);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @ResponseBody
-    @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
-    public ResponseEntity<String> uploadExcelFile(@RequestParam(required = false) MultipartFile file, @PathVariable("gameId") String gameId) {
-
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        fileIOService.createBingoGameFolder(bGame.getGameId());
-
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        // normalize the file path
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-
-        if (fileName.endsWith(".xlsx")) {
-
-            // save the file on the local file system
-            try {
-                Path path = Paths.get(UPLOAD_DIR + '/' + fileIOService.getBingoFolder(gameId) + '/' + BingoAppService.EMAILS_BINGO_USERS_XLSX);
-                Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                bGame.setExcelUploaded(true);
-                bingoGameRepository.save(bGame);
-                System.out.println("Excel is read successfully and saved in memory");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("FileType is not correct");
-        }
-
-        List<String> emails = fileIOService.readEmailsFromExcel(fileIOService.getBingoFolder(gameId) + File.separator + BingoAppService.EMAILS_BINGO_USERS_XLSX);
-
-        // read excel, import participants and generateSlipsForUser
-
-        List<PlayerResponse> players = emails.stream().map(e -> new PlayerResponse(null, null, e)).collect(Collectors.toList());
-        bingoAppService.generateSlipsForUser(gameId, players);
-
-        bingoAppService.createBingoFolderStructure(bGame);
-
-        generatePdfs(bGame);
-
-        bGame.setPdfsGenerated(true);
-        bGame.setPlayerSetupComplete(true);
-
-        bingoGameRepository.save(bGame);
-
-        return ResponseEntity.ok().build();
-    }
-
-    private void generatePdfs(BingoGame bGame) {
-        List<String> userEmails = bingoAppService.getBoardUserEmails(bGame);
-        List<String> pdfNotGenerated = bingoAppService.generateSlipPDFForUsers(userEmails, bGame);
-
-        if (pdfNotGenerated.isEmpty()) {
-            System.out.println("Pdf generated for all successfully !!!, Game id : " + bGame.getGameId());
-            bGame.setPdfsGenerated(true);
-            bingoGameRepository.save(bGame);
-        } else {
-            System.out.println("Pdf could not be geneatated for: ");
-            System.out.println(pdfNotGenerated);
-        }
-    }
-
-    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
-    public ResponseEntity<List<PlayerResponse>> getBingoPlayers(@PathVariable("gameId") String gameId) {
-        List<PlayerResponse> boardUsers = bingoAppService.getBoardUsers(bingoGameRepository.findById(gameId).get()).stream()
-                .filter(p -> !p.getUserType().equals(BingoUserType.ORGANIZER))
-                .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail())).collect(Collectors.toList());
-        return new ResponseEntity<>(boardUsers, HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "{gameId}/playerslips/{userEmail}", method = RequestMethod.GET)
-    public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("userEmail") String userEmail,
-            @PathVariable("gameId") String gameId) {
-
-        BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        List<BingoSlip> userSlips = bingoAppService.getUserSlips(userEmail, bGame);
-
-        List<SlipHtmlResponse> slipResponses = userSlips.stream()
-                .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
-
-        return new ResponseEntity<>(new BingoSlipsTemplateData(userEmail, gameId, slipResponses), HttpStatus.OK);
-    }
+    return new ResponseEntity<>(new BingoSlipsTemplateData(userEmail, gameId, slipResponses), HttpStatus.OK);
+  }
 
 }
