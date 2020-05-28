@@ -53,7 +53,7 @@
   <div *ngFor="let player of players; index as i;" style="padding: 0 0 .2em .5em">
     <span style="padding-right: 1em">{{i + 1}}.</span>
     <span>{{player.email}}</span>
-    <button type="button" class="btn btn-info" (click)="getUserSlips(player.email)" style="margin-left:.5em">View slips</button>
+    <app-modal [playerId]="player.id" [gameId]="gameId" style="margin-left:.5em"></app-modal>
   </div>
 </div>
 

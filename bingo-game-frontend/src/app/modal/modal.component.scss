@@ -1,0 +1,27 @@
+#slips {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	width: 35em;
+}
+
+#slips td, #slips th {
+	border: 1px solid #d6ff90;;
+	text-align: center;
+	min-width: .7em;
+}
+
+#slips tr:nth-child(even) {
+	background-color: #eeffd1;;
+}
+
+#slips tr:hover {
+	background-color: #ddd;
+}
+
+#slips th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;
+	background-color: #4CAF50;
+	color: white;
+}

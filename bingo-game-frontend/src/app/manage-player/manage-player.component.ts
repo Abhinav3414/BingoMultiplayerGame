@@ -90,12 +90,6 @@ export class ManagePlayerComponent implements OnInit {
     );
   }
 
-  getUserSlips(email) {
-    this.bingoService.getUserSlips(this.gameId, email).subscribe((r) => {
-      console.log(r);
-    });
-  }
-
   uploadExcel() {
     const file = this.fileInput.nativeElement.files[0];
 

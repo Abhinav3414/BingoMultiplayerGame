@@ -33,8 +33,8 @@ export class BingoService {
     return this.http.get(this.appUrl + '/' + gameId + '/getBingoPlayers');
   }
 
-  getUserSlips(gameId: string, email: string): Observable<any> {
-    return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + email);
+  getUserSlips(gameId: string, playerId: string): Observable<any> {
+    return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + playerId);
   }
 
   addPlayers(gameId: string, players): any {

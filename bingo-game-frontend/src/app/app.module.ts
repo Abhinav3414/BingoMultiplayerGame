@@ -13,6 +13,8 @@ import { ManagePlayerComponent } from './manage-player/manage-player.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CallNumberComponent } from './call-number/call-number.component';
+import { ModalComponent } from './modal/modal.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -21,13 +23,15 @@ import { CallNumberComponent } from './call-number/call-number.component';
     FooterComponent,
     HomeComponent,
     ManagePlayerComponent,
-    CallNumberComponent
+    CallNumberComponent,
+    ModalComponent
   ],
   imports: [
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
+    NgbModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [],

@@ -247,17 +247,16 @@ public class BingoRestController {
     return new ResponseEntity<>(boardUsers, HttpStatus.OK);
   }
 
-  @RequestMapping(value = "{gameId}/playerslips/{userEmail}", method = RequestMethod.GET)
-  public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("userEmail") String userEmail,
+  @RequestMapping(value = "{gameId}/playerslips/{playerId}", method = RequestMethod.GET)
+  public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("playerId") String playerId,
       @PathVariable("gameId") String gameId) {
 
-    BingoGame bGame = bingoGameRepository.findById(gameId).get();
-    List<BingoSlip> userSlips = bingoAppService.getUserSlips(userEmail, bGame);
+    List<BingoSlip> userSlips = bingoAppService.getUserSlips(playerId);
 
     List<SlipHtmlResponse> slipResponses = userSlips.stream()
         .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
 
-    return new ResponseEntity<>(new BingoSlipsTemplateData(userEmail, gameId, slipResponses), HttpStatus.OK);
+    return new ResponseEntity<>(new BingoSlipsTemplateData(null, gameId, slipResponses), HttpStatus.OK);
   }
 
 }

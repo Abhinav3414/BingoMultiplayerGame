@@ -135,10 +135,14 @@ public class BingoAppService {
         return fileIOService.getUserSlipPdfName(gameId, email);
     }
 
-    public List<BingoSlip> getUserSlips(String userEmail, BingoGame bGame) {
+    public List<BingoSlip> getUserSlipsByEmail(String userEmail, BingoGame bGame) {
         return bingoSlipRepository
                 .findByUserId(bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
     }
+    
+    public List<BingoSlip> getUserSlips(String playerId) {
+      return bingoSlipRepository.findByUserId(playerId);
+  }
 
     public List<String> getBoardUserEmails(BingoGame bGame) {
         return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
