@@ -1,60 +1,86 @@
-<h5>Manage Players for Game</h5>
+<h5 *ngIf="!playerSetupComplete" style="padding-left: 1.25rem;" class="mb-3">Manage Players for Game</h5>
 
-<div *ngIf="!playerSetupComplete">
-  You can upload excel if there are many players. <br>
-  Note: Excel can only have emails, Your player will be recongnised using their emails.
-  <br>
-  <a (click)="getSampleExcelLink()" style="color: blue">View  Sample Excel</a>
-</div>
-<br>
-
-<div *ngIf="!playerSetupComplete">
-  <input type="file" #fileInput placeholder="Upload file..." />
-  <button type="button" class="btn btn-success" (click)="uploadExcel()">Upload</button>
+<div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons" *ngIf="!playerSetupComplete">
+  <label class="btn btn-secondary active">
+    <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="addPlayerManually()"> Add
+    Players Manually
+  </label>
+  <label class="btn btn-secondary">
+    <input type="radio" name="options" id="option3" autocomplete="off" (click)="addPlayerFromExcel()"> Add players from
+    excel
+  </label>
 </div>
 
-<form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" class="col-sm-6" *ngIf="!playerSetupComplete">
-  <div class="card m-3">
-      <h5 class="card-header">Add Players Manually</h5>
-      <div *ngFor="let player of t.controls; let i = index" class="list-group list-group-flush">
-          <div class="list-group-item">
-              <h5 class="card-title">Player {{i + 1}}</h5>
+<div class="col-lg-10" *ngIf="!playerSetupComplete  && isAddPlayerFromExcel ">
+  <div class="card">
+    <div class="card-body" style="display: flex; flex-direction: column;">
+      <h6 class="card-title">Add players from excel (.xlsx)</h6>
+      <div *ngIf="!playerSetupComplete" style="padding: .5rem 0 0 1.25rem;">
+        You can upload excel if there are many players. <br>
+        <b>Note: </b> <I>Excel can only have emails, Your player will be recognised using their emails.</I>
+        <br>
+        <a (click)="getSampleExcelLink()" style="color: blue; cursor: pointer;">View Sample Excel</a>
+      </div>
+      <br>
+      <div style="display: flex; flex-wrap: wrap;" class="col-sm-12">
+        <input type="file" style="flex-grow: 1" #fileInput placeholder="Upload file..." />
+        <button type="button" class="btn btn-success" (click)="uploadExcel()">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-lg-10" *ngIf="!playerSetupComplete && isAddPlayerFromManually"
+  style="max-height: 65vh; overflow-y: auto;">
+  <div class="card">
+    <div class="card-body" style="display: flex; flex-direction: column;">
+      <h6 class="card-title">Add Players Manually</h6>
+
+      <form [formGroup]="dynamicForm" (ngSubmit)="onSubmit()" *ngIf="!playerSetupComplete" class="col-sm-12">
+        <div class="card">
+          <div *ngFor="let player of t.controls; let i = index" class="list-group list-group-flush">
+            <div class="list-group-item">
+              <h6 class="card-title">Player {{i + 1}}</h6>
               <div [formGroup]="player" class="form-row">
-                  <div class="form-group col-6">
-                      <label>Name</label>
-                      <input type="text" formControlName="name" class="form-control" [ngClass]="{ 'is-invalid': submitted && player.controls.name.errors }" />
-                      <div *ngIf="submitted && player.controls.name.errors" class="invalid-feedback">
-                          <div *ngIf="player.controls.name.errors.required">Name is required</div>
-                      </div>
+                <div class="form-group col-5">
+                  <input type="text" formControlName="name" class="form-control" placeholder="Name"
+                    [ngClass]="{ 'is-invalid': submitted && player.controls.name.errors }" />
+                  <div *ngIf="submitted && player.controls.name.errors" class="invalid-feedback">
+                    <div *ngIf="player.controls.name.errors.required">Name is required</div>
                   </div>
-                  <div class="form-group col-6">
-                      <label>Email</label>
-                      <input type="text" formControlName="email" class="form-control" [ngClass]="{ 'is-invalid': submitted && player.controls.email.errors }" />
-                      <div *ngIf="submitted && player.controls.email.errors" class="invalid-feedback">
-                          <div *ngIf="player.controls.email.errors.required">Email is required</div>
-                          <div *ngIf="player.controls.email.errors.email">Email must be a valid email address</div>
-                      </div>
+                </div>
+                <div class="form-group col-6">
+                  <input type="text" formControlName="email" class="form-control" placeholder="Email"
+                    [ngClass]="{ 'is-invalid': submitted && player.controls.email.errors }" />
+                  <div *ngIf="submitted && player.controls.email.errors" class="invalid-feedback">
+                    <div *ngIf="player.controls.email.errors.required">Email is required</div>
+                    <div *ngIf="player.controls.email.errors.email">Email must be a valid email address</div>
                   </div>
+                </div>
+                <div class="form-group col-1">
+                  <button class="btn btn-primary" (click)="removePlayer(i)"><i class="fa fa-close"></i></button>
+                </div>
               </div>
-              <button class="btn btn-primary mr-1"(click)="removePlayer(i)">Remove</button>
+            </div>
           </div>
-      </div>
-      <div class="card-footer text-center">
-          <button class="btn btn-primary mr-1" (click)="addPlayer()">Add Player</button>
-          <button class="btn btn-primary mr-1"  [disabled]="numberOfPLayers < 1 || !isValid()">Submit Players</button>
-          <button class="btn btn-secondary mr-1" type="reset" (click)="onReset()">Reset</button>
-          <button class="btn btn-secondary" type="button" (click)="onClear()">Clear</button>
-      </div>
-  </div>
-</form>
+          <div class="card-footer text-center">
+            <button class="btn btn-primary mr-2" (click)="addPlayer()">Add Player</button>
+            <button class="btn btn-success mr-2" [disabled]="numberOfPLayers < 1 || !isValid()">Submit Players</button>
+            <button class="btn btn-danger mr-2" type="reset" (click)="onReset()">Reset</button>
+            <button class="btn btn-secondary" type="button" (click)="onClear()">Clear</button>
+          </div>
+        </div>
+      </form>
 
-<div *ngIf="players">
-  <h3>Players in Game</h3>
-  <div *ngFor="let player of players; index as i;" style="padding: 0 0 .2em .5em">
-    <span style="padding-right: 1em">{{i + 1}}.</span>
-    <span>{{player.email}}</span>
-    <app-modal [playerId]="player.id" [gameId]="gameId" style="margin-left:.5em"></app-modal>
+    </div>
   </div>
 </div>
 
-<!-- <button class="btn btn-primary mr-1" *ngIf="(playerSetupComplete) && !gameStarted" (click)="proceedGame()">Proceed to Game</button> -->
+<div *ngIf="players" style="padding-left: 1.25rem;" class="col-lg-6">
+  <h5 class="mb-4">Players in Game</h5>
+  <div *ngFor="let player of players; index as i;" style="display:flex; padding: 0 0 .2em .5em">
+    <span style="padding-right: 1em">{{i + 1}}.</span>
+    <span style="display: flex;flex-grow: 1;">{{player.email}}</span>
+    <app-modal [playerId]="player.id" [playerEmail]="player.email" [gameId]="gameId" style="margin-left:.5em"></app-modal>
+  </div>
+</div>

@@ -1,7 +1,17 @@
-<button class="bubbly-button" type="button" (click)="callNext()">Call Next</button>
+<div class="col-sm-12 ml-4 mt-4" style="display: flex; flex-direction: column;">
 
-<div *ngFor="let call of calls; index as i;">
+  <div style=" display: flex; align-items: center; ">
+    <button class="bubbly-button" type="button" (click)="callNext()">Call Next</button>
+    <span *ngIf="currentCall" style=" color: #1c7588; font-size: 2.5em; ">Call# {{currentCall}}</span>
+  </div>
 
-  <span>{{i+1}}: </span>
-  <span>{{call}}</span>
+
+  <div class="ml-4 mt-4" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
+    <div *ngFor="let call of calls; index as i;">
+      <span>{{i+1}}: </span>
+      <span>{{call}}</span>
+    </div>
+  </div>
+
+
 </div>

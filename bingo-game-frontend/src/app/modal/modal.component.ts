@@ -10,6 +10,7 @@ import { BingoService } from '../bingo.service';
 export class ModalComponent implements OnInit {
   @Input() playerId: null;
   @Input() gameId: null;
+  @Input() playerEmail: null;
   slipResponse: any;
   closeResult: string;
 
@@ -20,15 +21,15 @@ export class ModalComponent implements OnInit {
 
   open(content) {
     this.bingoService.getUserSlips(this.gameId, this.playerId).subscribe((r) => {
-      console.log(r);
       this.slipResponse = r;
     });
 
-    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title', centered: true, size: 'lg' }).result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
+    this.modalService.open(content,
+      { ariaLabelledBy: 'modal-basic-title', centered: true, size: 'lg', scrollable: true }).result.then((result) => {
+        this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
   }
 
   private getDismissReason(reason: any): string {

@@ -9,6 +9,7 @@ import { BingoService } from '../bingo.service';
 export class CallNumberComponent implements OnInit {
   @Input() gameId: string;
   calls: any = [];
+  currentCall: any;
 
   constructor(private bingoService: BingoService) { }
 
@@ -21,8 +22,8 @@ export class CallNumberComponent implements OnInit {
     }
     this.bingoService.callNext(this.gameId).subscribe(
       res => {
-        console.log(res);
         this.calls.push(res);
+        this.currentCall = res;
       });
   }
 

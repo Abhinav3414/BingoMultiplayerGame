@@ -161,4 +161,8 @@ public class BingoAppService {
         bingoBoardRepository.save(bBoard);
         return true;
     }
+
+    public String getPlayerEmail(String playerId) {
+      return bingoUserRepository.findById(playerId).get().getEmail();
+    }
 }

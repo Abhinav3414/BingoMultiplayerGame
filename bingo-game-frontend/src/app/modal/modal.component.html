@@ -2,14 +2,15 @@
 
 <ng-template #mymodal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Welcome to Bingo !!!</h4>
+    <h5 class="modal-title" id="modal-basic-title">Welcome {{playerEmail}} !!!</h5>
     <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
       <span aria-hidden="true">×</span>
     </button>
   </div>
   <div class="modal-body">
-    <button class="btn btn-success" type="button">Download Slips</button>
-
+    <div style=" display: flex; flex-direction: row-reverse; margin-right: 2em">
+      <button class="btn btn-success" type="button">Download Slips</button>
+    </div>
     <div *ngIf="slipResponse">
       <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as i;">
         <span>Slip No: {{i+1}}</span>
@@ -18,12 +19,9 @@
             <td *ngFor="let j of item"><span *ngIf="j!=0">{{j}}</span></td>
           <tr>
         </table>
-        <span style="font-size: 0.8em; padding-left: 20em;">id# {{res.slipId}} </span>
+        <span style="font-size: 0.8em;display: flex;flex-direction: row-reverse;max-width: 40em;">id# {{res.slipId}} </span>
       </div>
     </div>
-
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Ok</button>
   </div>
 </ng-template>
+

@@ -21,6 +21,8 @@ export class ManagePlayerComponent implements OnInit {
   submitted = false;
   numberOfPLayers = 0;
   PlayerResponses: PlayerResponse[] = [];
+  isAddPlayerFromExcel = false;
+  isAddPlayerFromManually = true;
 
   constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) { }
 
@@ -45,6 +47,16 @@ export class ManagePlayerComponent implements OnInit {
 
   proceedGame() {
     this.isPlayerSetupReady.emit(this.playerSetupComplete);
+  }
+
+  addPlayerFromExcel() {
+    this.isAddPlayerFromExcel = true;
+    this.isAddPlayerFromManually = false;
+  }
+
+  addPlayerManually() {
+    this.isAddPlayerFromExcel = false;
+    this.isAddPlayerFromManually = true;
   }
 
   addPlayer() {

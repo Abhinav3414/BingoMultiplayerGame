@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit {
   initiateGame() {
     this.bingoService.initiateGame().subscribe(
       res => {
-        this.router.navigate(['/setup', res.gameId]);
+        this.router.navigate(['/game', res.gameId]);
       }
     );
   }

@@ -256,7 +256,7 @@ public class BingoRestController {
     List<SlipHtmlResponse> slipResponses = userSlips.stream()
         .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
 
-    return new ResponseEntity<>(new BingoSlipsTemplateData(null, gameId, slipResponses), HttpStatus.OK);
+    return new ResponseEntity<>(new BingoSlipsTemplateData(bingoAppService.getPlayerEmail(playerId), gameId, slipResponses), HttpStatus.OK);
   }
 
 }
