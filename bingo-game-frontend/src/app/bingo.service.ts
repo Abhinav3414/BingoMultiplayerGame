@@ -8,10 +8,14 @@ import { PlayerResponse } from './models';
 })
 export class BingoService {
 
+  baseUrl: string;
   headers = new HttpHeaders();
-  private appUrl = 'http://localhost:8080/bingo-game';
+  appUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.baseUrl = (location.origin === 'http://localhost:4200') ? 'http://localhost:8080' : location.origin;
+    this.appUrl = this.baseUrl + '/bingo-game';
+  }
 
   initiateGame(): any {
     return this.http.post<string>(this.appUrl + '/initiategame', null);
@@ -46,6 +50,11 @@ export class BingoService {
     const formData: FormData = new FormData();
     formData.append('file', file);
     return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/uploadExcelFile', formData, { headers: this.headers });
+  }
+
+  downloadSlipPdf(gameId: string, email: any): any {
+    return this.http.get<any[]>(this.appUrl + '/download/' + gameId + '/' + email,
+      { observe: 'response', responseType: 'blob' as 'json' });
   }
 
   callNext(gameId: string) {

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -105,12 +106,16 @@ public class BingoRestController {
     String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
     FileSystemResource file = new FileSystemResource(new File(slipName));
 
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf");
+    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+    
     return ResponseEntity
         .ok()
         .contentLength(file.contentLength())
         .contentType(
             MediaType.parseMediaType("application/pdf"))
-        .header("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf")
+        .headers(headers)
         .body(file);
   }
 

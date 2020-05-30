@@ -15,6 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { CallNumberComponent } from './call-number/call-number.component';
 import { ModalComponent } from './modal/modal.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgbModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
-  providers: [],
+  providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

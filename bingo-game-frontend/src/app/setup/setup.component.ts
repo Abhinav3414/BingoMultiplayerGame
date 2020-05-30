@@ -17,6 +17,7 @@ export class SetupComponent implements OnInit {
   isExcelUploaded = false;
   playerSetupComplete = false;
   leader: PlayerResponse;
+  callsStarted = false;
 
   leaderForm = new FormGroup({
     email: new FormControl('', [
@@ -42,6 +43,10 @@ export class SetupComponent implements OnInit {
 
   getPlayerSetupStatus(startCall: boolean) {
     this.shouldStartGame = startCall;
+  }
+
+  proceedWithCalls() {
+    this.callsStarted = true;
   }
 
   onSubmit() {

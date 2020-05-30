@@ -9,7 +9,7 @@
   </div>
   <div class="modal-body">
     <div style=" display: flex; flex-direction: row-reverse; margin-right: 2em">
-      <button class="btn btn-success" type="button">Download Slips</button>
+      <button class="btn btn-success" type="button" (click)="downloadSlipPdf()">Download Slips</button>
     </div>
     <div *ngIf="slipResponse">
       <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as i;">
@@ -24,4 +24,3 @@
     </div>
   </div>
 </ng-template>
-

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { BingoService } from '../bingo.service';
+import { HttpResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-modal',
@@ -40,6 +41,28 @@ export class ModalComponent implements OnInit {
     } else {
       return `with: ${reason}`;
     }
+  }
+
+  downloadSlipPdf() {
+
+    this.bingoService.downloadSlipPdf(this.gameId, this.playerEmail).subscribe((res: HttpResponse<Blob>) => {
+
+      let fileName = 'bingo_slips.pdf';
+
+      if (res.headers && res.headers.get('content-disposition')) {
+        const str = res.headers.get('content-disposition');
+        fileName = str.substring(str.indexOf('=') + 1, str.length);
+      }
+      const file = new Blob([res.body], { type: 'application/pdf' });
+
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(file);
+      link.download = fileName;
+      link.target = '_blank';
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+
+    });
   }
 
 }
