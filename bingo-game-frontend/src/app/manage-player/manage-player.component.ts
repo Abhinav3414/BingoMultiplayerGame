@@ -23,8 +23,11 @@ export class ManagePlayerComponent implements OnInit {
   PlayerResponses: PlayerResponse[] = [];
   isAddPlayerFromExcel = false;
   isAddPlayerFromManually = true;
+  originUrl;
 
-  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) { }
+  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
+    this.originUrl = window.location.origin;
+  }
 
   ngOnInit(): void {
     this.dynamicForm = this.formBuilder.group({

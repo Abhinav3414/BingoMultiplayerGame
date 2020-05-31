@@ -5,14 +5,16 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+
 import { SetupComponent } from './setup/setup.component';
 import { FooterComponent } from './footer/footer.component';
+import { GameRoomComponent } from './game-room/game-room.component';
 import { HomeComponent } from './home/home.component';
 import { ManagePlayerComponent } from './manage-player/manage-player.component';
+import { CallNumberComponent } from './call-number/call-number.component';
 
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { CallNumberComponent } from './call-number/call-number.component';
 import { ModalComponent } from './modal/modal.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
@@ -25,7 +27,8 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     HomeComponent,
     ManagePlayerComponent,
     CallNumberComponent,
-    ModalComponent
+    ModalComponent,
+    GameRoomComponent
   ],
   imports: [
     HttpClientModule,

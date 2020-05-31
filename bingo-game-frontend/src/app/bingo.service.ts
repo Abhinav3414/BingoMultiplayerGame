@@ -87,8 +87,7 @@ export class BingoService {
   }
 
   getAllCalls(gameId: string): Observable<any> {
-    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
-    return this.http.get(this.appUrl + '/' + gameId + '/getallcalls', { headers: this.headers });
+    return this.http.get(this.appUrl + '/' + gameId + '/getallcalls');
   }
 
 }

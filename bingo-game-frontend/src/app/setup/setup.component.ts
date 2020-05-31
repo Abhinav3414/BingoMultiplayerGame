@@ -31,9 +31,7 @@ export class SetupComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, public bingoService: BingoService) {
 
-
     this.route.data.subscribe((res) => {
-
       const r = res.gameSetupStatus;
       this.gameId = r.gameId;
       this.leaderAssigned = r.leaderAssigned;
@@ -41,15 +39,10 @@ export class SetupComponent implements OnInit {
       this.playerSetupComplete = r.playerSetupComplete;
       this.callsStarted = r.haveCallsStarted;
 
-      if (this.leaderAssigned) {
-        console.log(this.bingoService.getLeader());
-      }
-
       this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
         this.callsDone = callsDone;
       });
     });
-
   }
 
   ngOnInit(): void {
@@ -60,7 +53,10 @@ export class SetupComponent implements OnInit {
   }
 
   proceedWithCalls() {
-    this.callsStarted = true;
+    this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
+      this.callsDone = callsDone;
+      this.callsStarted = true;
+    });
   }
 
   onSubmit() {

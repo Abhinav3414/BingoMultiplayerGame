@@ -288,9 +288,8 @@ public class BingoRestController {
   }
 
   @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
-  public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId, @RequestHeader("X-Requested-With") String leaderId) {
+  public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
 
-    bingoAppService.validateGameAccess(gameId, leaderId);
     BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
     List<Integer> calls = bGame.getCalls();

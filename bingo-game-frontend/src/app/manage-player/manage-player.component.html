@@ -78,6 +78,11 @@
 
 <div *ngIf="players" style="padding-left: 1.25rem;" class="col-lg-6">
   <h5 class="mb-4">Players in Game</h5>
+
+  Link For Game Room for Players
+  <a href="{{originUrl}}/#/gameroom/{{gameId}}" target="_blank">{{originUrl}}/#/gameroom/{{gameId}}</a>
+  <br> <br>
+
   <div *ngFor="let player of players; index as i;" style="display:flex; padding: 0 0 .2em .5em">
     <span style="padding-right: 1em">{{i + 1}}.</span>
     <span style="display: flex;flex-grow: 1;">{{player.email}}</span>

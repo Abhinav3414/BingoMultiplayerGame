@@ -1,0 +1,13 @@
+<div class="gameroom">
+
+  <h4 class="p-4" > Welcom in Bingo Game !!!</h4>
+
+  <h5 class="pl-4">Calls done </h5>
+  <div class="m-4" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
+    <div *ngFor="let call of calls; index as i;">
+      <span>{{i+1}}: </span>
+      <span>{{call}}</span>
+    </div>
+  </div>
+
+</div>

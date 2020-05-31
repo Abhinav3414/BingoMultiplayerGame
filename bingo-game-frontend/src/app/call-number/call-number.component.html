@@ -5,8 +5,7 @@
     <span *ngIf="currentCall" style=" color: #1c7588; font-size: 2.5em; ">Call# {{currentCall}}</span>
   </div>
 
-
-  <div class="ml-4 mt-4" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
+  <div class="ml-4 mt-3" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
     <div *ngFor="let call of calls; index as i;">
       <span>{{i+1}}: </span>
       <span>{{call}}</span>
