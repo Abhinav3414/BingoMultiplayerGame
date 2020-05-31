@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bingo.dao.BingoBoard;
+import com.bingo.dao.BingoBoardType;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoUser;
@@ -53,7 +54,7 @@ public class BingoAppService {
     private SlipToPdfGeneratorService slipToPdfGeneratorService;
 
     public BingoGame startGame() {
-        BingoBoard bb = bingoBoardRepository.save(new BingoBoard());
+        BingoBoard bb = bingoBoardRepository.save(new BingoBoard(BingoBoardType.GAMEBOARD_90));
         BingoGame bGame = new BingoGame();
         bGame.setBingoBoardId(bb.getBoardId());
 
@@ -94,7 +95,7 @@ public class BingoAppService {
     private List<BingoSlip> generateSlipsForUser(BingoUser bu, BingoGame bGame) {
 
         for (int i = 0; i < 6; i++) {
-            BingoSlip bingoSlip = new BingoSlip(bu.getUserId(), bGame.getBingoBoardId());
+            BingoSlip bingoSlip = new BingoSlip(bu.getUserId(), bGame.getBingoBoardId(), true);
             bingoSlipRepository.save(bingoSlip);
         }
 
@@ -107,7 +108,8 @@ public class BingoAppService {
         emails.forEach(email -> {
             String slipName = fileIOService.getUserSlipPdfName(game.getGameId(), email);
             List<BingoSlip> userSlips = bingoSlipRepository
-                    .findByUserId(bingoUserRepository.findByEmailAndBoardIdLike(email, game.getBingoBoardId()).getUserId());
+                    .findByUserId(
+                            bingoUserRepository.findByEmailAndBoardIdLike(email, game.getBingoBoardId()).getUserId());
 
             List<SlipHtmlResponse> slipResponses = userSlips.stream()
                     .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
@@ -137,15 +139,17 @@ public class BingoAppService {
 
     public List<BingoSlip> getUserSlipsByEmail(String userEmail, BingoGame bGame) {
         return bingoSlipRepository
-                .findByUserId(bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
+                .findByUserId(
+                        bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
     }
-    
+
     public List<BingoSlip> getUserSlips(String playerId) {
-      return bingoSlipRepository.findByUserId(playerId);
-  }
+        return bingoSlipRepository.findByUserId(playerId);
+    }
 
     public List<String> getBoardUserEmails(BingoGame bGame) {
-        return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail()).collect(Collectors.toList());
+        return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().map(u -> u.getEmail())
+                .collect(Collectors.toList());
     }
 
     public List<BingoUser> getBoardUsers(BingoGame bGame) {
@@ -162,13 +166,13 @@ public class BingoAppService {
     }
 
     public String getPlayerEmail(String playerId) {
-      return bingoUserRepository.findById(playerId).get().getEmail();
+        return bingoUserRepository.findById(playerId).get().getEmail();
     }
-    
+
     public void validateGameAccess(String gameId, String leaderId) {
-      BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
-      if(!bBoard.getLeaderId().equals(leaderId)) {
-        throw new IllegalAccessError("Not Authorized");
-      }
+        BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
+        if (!bBoard.getLeaderId().equals(leaderId)) {
+            throw new IllegalAccessError("Not Authorized");
+        }
     }
 }

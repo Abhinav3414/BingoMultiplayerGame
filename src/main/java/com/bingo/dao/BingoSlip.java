@@ -34,12 +34,21 @@ public class BingoSlip {
 
     private int columns[] = new int[MAX_IN_EACH_COLUMN];
 
-    private Set<Integer> slipRandomNumber = null;
+    private Set<Integer> slipRandomNumbers = null;
 
-    public BingoSlip(String userId, String boardId) {
+    private boolean is90Game = false;
+
+    public BingoSlip(String userId, String boardId, boolean is90Game) {
         this.boardId = boardId;
         this.userId = userId;
-        generateBingoSlip();
+        this.is90Game = is90Game;
+
+        if (is90Game) {
+            generateBingoSlipFor90Game();
+        } else {
+            generateBingoSlipFor75Game();
+        }
+
     }
 
     public String getSlipId() {
@@ -67,11 +76,11 @@ public class BingoSlip {
     }
 
     public Set<Integer> getSlipRandomNumber() {
-        return slipRandomNumber;
+        return slipRandomNumbers;
     }
 
     public void setSlipRandomNumber(Set<Integer> slipRandomNumber) {
-        this.slipRandomNumber = slipRandomNumber;
+        this.slipRandomNumbers = slipRandomNumber;
     }
 
     public String getUserId() {
@@ -90,12 +99,20 @@ public class BingoSlip {
         this.boardId = boardId;
     }
 
-    public int getSlipColumnNumber(int number) {
+    public boolean isIs90Game() {
+        return is90Game;
+    }
+
+    public void setIs90Game(boolean is90Game) {
+        this.is90Game = is90Game;
+    }
+
+    private int getSlipColumnNumber(int number) {
         // 1-9, 10-19, 20-29 , 30-39 , 40-49, 50-59, 60-69, 70-79, 80-89
         if (number < 1 || number > 90) {
             return -1;
         }
-        if(number == 90) {
+        if (number == 90) {
             return 8;
         }
 
@@ -107,7 +124,7 @@ public class BingoSlip {
         return val;
     }
 
-    public boolean updateNumberInBingoSlip(int number) {
+    private boolean updateNumberInBingoSlip(int number) {
 
         int val = getSlipColumnNumber(number);
         int[] x = bingoMatrix[val];
@@ -160,7 +177,7 @@ public class BingoSlip {
         return false;
     }
 
-    public int[][] generateBingoSlip() {
+    private int[][] generateBingoSlipFor90Game() {
         int updated = 0;
         Random ran = new Random();
         Set<Integer> randomNumbersUsed = new TreeSet<>();
@@ -172,10 +189,15 @@ public class BingoSlip {
                 updated++;
             }
         }
-        slipRandomNumber = randomNumbersUsed;
+        slipRandomNumbers = randomNumbersUsed;
         sortSlipColumns();
         validateBingoMatrix();
         return bingoMatrix;
+    }
+
+    private void generateBingoSlipFor75Game() {
+        // TODO Auto-generated method stub
+        System.out.println("generateBingoSlipFor75Game");
     }
 
     private void validateBingoMatrix() {

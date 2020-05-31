@@ -24,9 +24,15 @@ public class BingoBoard {
 
     private String gameId;
 
+    private BingoBoardType bingoBoardType = BingoBoardType.GAMEBOARD_90;
+
     public BingoBoard() {
     }
-    
+
+    public BingoBoard(BingoBoardType bingoBoardType) {
+        this.bingoBoardType = bingoBoardType;
+    }
+
     public BingoBoard(String gameId) {
         this.gameId = gameId;
     }
@@ -61,6 +67,14 @@ public class BingoBoard {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public BingoBoardType getBingoBoardType() {
+        return bingoBoardType;
+    }
+
+    public void setBingoBoardType(BingoBoardType bingoBoardType) {
+        this.bingoBoardType = bingoBoardType;
     }
 
 }
