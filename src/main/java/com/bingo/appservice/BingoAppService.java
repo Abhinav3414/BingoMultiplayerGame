@@ -152,14 +152,14 @@ public class BingoAppService {
         return bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).stream().collect(Collectors.toList());
     }
 
-    public boolean setLeader(String gameId, PlayerResponse organizer) {
+    public BingoUser setLeader(String gameId, PlayerResponse organizer) {
         System.out.println(organizer);
         BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
         BingoUser gameOrganizer = bingoUserRepository.save(new BingoUser(organizer.getName(), organizer.getEmail(),
                 BingoUserType.ORGANIZER, bBoard.getBoardId()));
         bBoard.setLeaderId(gameOrganizer.getUserId());
         bingoBoardRepository.save(bBoard);
-        return true;
+        return gameOrganizer;
     }
 
     public String getPlayerEmail(String playerId) {

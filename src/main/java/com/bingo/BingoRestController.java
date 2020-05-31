@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import com.bingo.appservice.BingoAppService;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
+import com.bingo.dao.BingoUser;
 import com.bingo.dao.BingoUserType;
 import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
@@ -82,14 +84,18 @@ public class BingoRestController {
   }
 
   @PostMapping("{gameId}/assignLeader")
-  public ResponseEntity<String> assignLeader(@PathVariable("gameId") String gameId, @RequestBody PlayerResponse leader) {
+  public ResponseEntity<PlayerResponse> assignLeader(@PathVariable("gameId") String gameId, @RequestBody PlayerResponse leader) {
 
     BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
-    bGame.setLeaderAssigned(bingoAppService.setLeader(bGame.getGameId(), leader));
-    bingoGameRepository.save(bGame);
+    BingoUser bLeader = bingoAppService.setLeader(bGame.getGameId(), leader);
 
-    return ResponseEntity.ok().build();
+    if (bLeader != null) {
+      bGame.setLeaderAssigned(true);
+      bingoGameRepository.save(bGame);
+      return new ResponseEntity<>(new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail()), HttpStatus.OK);
+    }
+    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
   }
 
   @GetMapping("{gameId}/gameSetupStatus")
@@ -109,7 +115,7 @@ public class BingoRestController {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf");
     headers.add("Access-Control-Expose-Headers", "Content-Disposition");
-    
+
     return ResponseEntity
         .ok()
         .contentLength(file.contentLength())
@@ -147,6 +153,10 @@ public class BingoRestController {
       bGame.setCurrentCall(0);
     } else {
       int currentCall = bGame.getCurrentCall();
+
+      if (bGame.getCurrentCall() == -1) {
+        bGame.setHaveCallsStarted(true);
+      }
       bGame.setCurrentCall(++currentCall);
     }
     bingoGameRepository.save(bGame);
@@ -262,6 +272,31 @@ public class BingoRestController {
         .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix())).collect(Collectors.toList());
 
     return new ResponseEntity<>(new BingoSlipsTemplateData(bingoAppService.getPlayerEmail(playerId), gameId, slipResponses), HttpStatus.OK);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
+  public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
+    BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+    List<Integer> calls = bGame.getCalls();
+
+    Map<Integer, Integer> calledCallsMap = new HashMap<>();
+    int currentCall = bGame.getCurrentCall();
+
+    if (currentCall > -1) {
+      for (int i = 0; i <= currentCall; i++) {
+        calledCallsMap.put(i + 1, calls.get(i));
+      }
+    }
+    return new ResponseEntity<>(calledCallsMap, HttpStatus.OK);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers2")
+  public ResponseEntity<List<PlayerResponse>> getBingoPlayers2(@PathVariable("gameId") String gameId) {
+    List<PlayerResponse> boardUsers = bingoAppService.getBoardUsers(bingoGameRepository.findById(gameId).get()).stream()
+        .filter(p -> !p.getUserType().equals(BingoUserType.ORGANIZER))
+        .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail())).collect(Collectors.toList());
+    return new ResponseEntity<>(boardUsers, HttpStatus.OK);
   }
 
 }

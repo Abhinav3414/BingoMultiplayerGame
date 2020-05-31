@@ -4,6 +4,8 @@
     <div class="col-sm-6">
 
       <button type="button" [routerLink]="['']" class="btn btn-danger ml-4 mb-4">Reset And Start New Game!!</button>
+
+      <h4 *ngIf="leaderAssigned" class="ml-4">Hi {{bingoService.getLeader().name}} !!!</h4>
       <h4 *ngIf="!shouldStartGame" class="ml-4">Setup your Game</h4>
 
       <div class="m-4">
@@ -15,7 +17,7 @@
         </span>
       </div>
 
-      <div class="m-4 messages" *ngIf="!callsStrarted && shouldStartGame">
+      <div class="m-4 messages" *ngIf="!callsStarted && shouldStartGame">
         <div class="mb-1">
           <svg class="bi bi-check" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
             xmlns="http://www.w3.org/2000/svg">
@@ -52,7 +54,7 @@
 
       </div>
 
-      <app-call-number *ngIf="callsStrarted" [gameId]="gameId"></app-call-number>
+      <app-call-number *ngIf="callsStarted && callsDone" [gameId]="gameId" [callsDone]="callsDone"></app-call-number>
 
       <div *ngIf="!leaderAssigned" class="col-md-12 col-lg-6 ml-4">
         <h5>Welcome!</h5>

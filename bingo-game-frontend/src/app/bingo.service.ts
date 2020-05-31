@@ -17,7 +17,17 @@ export class BingoService {
     this.appUrl = this.baseUrl + '/bingo-game';
   }
 
+  setLeader(leader) {
+    localStorage.setItem('leader', JSON.stringify(leader));
+  }
+
+  getLeader(): any {
+    const user = JSON.parse(localStorage.getItem('leader'));
+    return user;
+  }
+
   initiateGame(): any {
+    localStorage.removeItem('leader');
     return this.http.post<string>(this.appUrl + '/initiategame', null);
   }
 
@@ -59,6 +69,10 @@ export class BingoService {
 
   callNext(gameId: string) {
     return this.http.post(this.appUrl + '/' + gameId + '/callNext', null);
+  }
+
+  getAllCalls(gameId: string): Observable<any> {
+    return this.http.get(this.appUrl + '/' + gameId + '/getallcalls');
   }
 
 }

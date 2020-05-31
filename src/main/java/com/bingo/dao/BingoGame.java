@@ -26,6 +26,8 @@ public class BingoGame {
     private List<Integer> calls = new ArrayList<>();
 
     private int currentCall = -1;
+    
+    private boolean isLeaderAssigned;
 
     private boolean isExcelUploaded;
 
@@ -33,7 +35,7 @@ public class BingoGame {
     
     private boolean isPlayerSetupComplete;
     
-    private boolean isLeaderAssigned;
+    private boolean haveCallsStarted;
 
     public BingoGame() {
         generateCallSequence();
@@ -104,6 +106,14 @@ public class BingoGame {
     
     public void setLeaderAssigned(boolean isLeaderAssigned) {
         this.isLeaderAssigned = isLeaderAssigned;
+    }
+    
+    public boolean isHaveCallsStarted() {
+      return haveCallsStarted;
+    }
+    
+    public void setHaveCallsStarted(boolean haveCallsStarted) {
+      this.haveCallsStarted = haveCallsStarted;
     }
 
     public void generateCallSequence() {

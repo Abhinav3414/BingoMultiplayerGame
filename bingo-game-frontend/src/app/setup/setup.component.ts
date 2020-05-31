@@ -18,6 +18,7 @@ export class SetupComponent implements OnInit {
   playerSetupComplete = false;
   leader: PlayerResponse;
   callsStarted = false;
+  callsDone;
 
   leaderForm = new FormGroup({
     email: new FormControl('', [
@@ -28,17 +29,30 @@ export class SetupComponent implements OnInit {
     ])
   });
 
-  constructor(private route: ActivatedRoute, private bingoService: BingoService) { }
+  constructor(private route: ActivatedRoute, public bingoService: BingoService) {
 
-  ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      this.gameId = params.get('gameId');
-      this.bingoService.getGameSetupStatus(this.gameId).subscribe((r: any) => {
-        this.leaderAssigned = r.leaderAssigned;
-        this.isExcelUploaded = r.excelUploaded;
-        this.playerSetupComplete = r.playerSetupComplete;
+
+    this.route.data.subscribe((res) => {
+
+      const r = res.gameSetupStatus;
+      this.gameId = r.gameId;
+      this.leaderAssigned = r.leaderAssigned;
+      this.isExcelUploaded = r.excelUploaded;
+      this.playerSetupComplete = r.playerSetupComplete;
+      this.callsStarted = r.haveCallsStarted;
+
+      if (this.leaderAssigned) {
+        console.log(this.bingoService.getLeader());
+      }
+
+      this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
+        this.callsDone = callsDone;
       });
     });
+
+  }
+
+  ngOnInit(): void {
   }
 
   getPlayerSetupStatus(startCall: boolean) {
@@ -53,6 +67,7 @@ export class SetupComponent implements OnInit {
     this.leader = new PlayerResponse(this.leaderForm.value.name, this.leaderForm.value.email);
     this.bingoService.assignLeader(this.gameId, this.leader).subscribe((r) => {
       this.leaderAssigned = true;
+      this.bingoService.setLeader(r);
     });
   }
 
