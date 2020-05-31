@@ -44,8 +44,17 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/assignLeader', leader);
   }
 
+  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number) {
+    return this.http.post(this.appUrl + '/' + gameId + '/boardType/' + boardType + '/slipcount/' + slips, null);
+  }
+
   getGameSetupStatus(gameId: string) {
     return this.http.get(this.appUrl + '/' + gameId + '/gameSetupStatus');
+  }
+
+  sendEmail(gameId: string) {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/sendEmail', null, { headers: this.headers });
   }
 
   getSampleExcel(): Observable<Blob> {

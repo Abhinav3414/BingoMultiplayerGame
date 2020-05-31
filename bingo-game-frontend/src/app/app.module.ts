@@ -13,7 +13,7 @@ import { HomeComponent } from './home/home.component';
 import { ManagePlayerComponent } from './manage-player/manage-player.component';
 import { CallNumberComponent } from './call-number/call-number.component';
 
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ModalComponent } from './modal/modal.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -36,6 +36,7 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     AppRoutingModule,
     ReactiveFormsModule,
     NgbModule,
+    FormsModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],

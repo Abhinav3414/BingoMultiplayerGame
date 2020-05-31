@@ -50,6 +50,8 @@
         </div> -->
         <div style="margin:1.5rem">
           <button type="submit" class="btn btn-success" (click)="proceedWithCalls()">Proceed to Game</button>
+          <!-- <br> <br>
+          <button type="submit" class="btn btn-success" (click)="sendEmail()">Send Email</button> -->
         </div>
 
       </div>
@@ -77,7 +79,30 @@
     <div class="col-sm-6">
       <br> <br> <br>
       <app-manage-player [gameId]="gameId" [gameStarted]="shouldStartGame" [playerSetupComplete]="playerSetupComplete"
-        (isPlayerSetupReady)="getPlayerSetupStatus($event)" *ngIf="leaderAssigned"></app-manage-player>
+        (isPlayerSetupReady)="getPlayerSetupStatus($event)" *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
+
+        <div *ngIf="leaderAssigned && !bingoBoardReady" class="col-sm-8">
+          <div class="form-group">
+            <label for="slipsNeeded">How many slips per user is needed ?</label>
+            <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded" (ngModelChange)="onSlipSelectedChange($event)">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option selected>6</option>
+            </select>
+          </div>
+           <div class="form-group">
+            <label for="boardType">Choose Bingo Game Type</label>
+            <select class="form-control" id="boardType" [(ngModel)]="boardType" (ngModelChange)="onBoardTypeSelectedChange($event)">
+              <option value="GAMEBOARD_75">Bingo 75 Board Game</option>
+              <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
+        </div>
+
     </div>
   </div>
 </div>

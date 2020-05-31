@@ -1,11 +1,5 @@
 package com.bingo.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,22 +17,19 @@ public class BingoGame {
 
     private String bingoBoardId;
 
-    private List<Integer> calls = new ArrayList<>();
-
-    private int currentCall = -1;
-    
     private boolean isLeaderAssigned;
 
     private boolean isExcelUploaded;
 
     private boolean pdfsGenerated;
-    
+
     private boolean isPlayerSetupComplete;
-    
+
     private boolean haveCallsStarted;
 
+    private boolean isBingoBoardReady;
+
     public BingoGame() {
-        generateCallSequence();
     }
 
     public String getGameId() {
@@ -55,22 +46,6 @@ public class BingoGame {
 
     public void setBingoBoardId(String bingoBoardId) {
         this.bingoBoardId = bingoBoardId;
-    }
-
-    public List<Integer> getCalls() {
-        return calls;
-    }
-
-    public void setCalls(List<Integer> calls) {
-        this.calls = calls;
-    }
-
-    public int getCurrentCall() {
-        return currentCall;
-    }
-
-    public void setCurrentCall(int currentCall) {
-        this.currentCall = currentCall;
     }
 
     public boolean isExcelUploaded() {
@@ -93,50 +68,32 @@ public class BingoGame {
         return isPlayerSetupComplete;
     }
 
-    
     public void setPlayerSetupComplete(boolean isPlayerSetupComplete) {
         this.isPlayerSetupComplete = isPlayerSetupComplete;
     }
 
-    
     public boolean isLeaderAssigned() {
         return isLeaderAssigned;
     }
 
-    
     public void setLeaderAssigned(boolean isLeaderAssigned) {
         this.isLeaderAssigned = isLeaderAssigned;
     }
-    
+
     public boolean isHaveCallsStarted() {
-      return haveCallsStarted;
+        return haveCallsStarted;
     }
-    
+
     public void setHaveCallsStarted(boolean haveCallsStarted) {
-      this.haveCallsStarted = haveCallsStarted;
+        this.haveCallsStarted = haveCallsStarted;
     }
 
-    public void generateCallSequence() {
-
-        if (calls.size() != 90) {
-            int updated = 0;
-            Random ran = new Random();
-            Set<Integer> callSet = new TreeSet<>();
-            while (updated != 90) {
-                int rNo = ran.nextInt(90) + 1;
-                if (!callSet.contains(rNo)) {
-                    callSet.add(rNo);
-                    calls.add(rNo);
-                    updated++;
-                }
-            }
-        }
+    public boolean isBingoBoardReady() {
+        return isBingoBoardReady;
     }
 
-    public void printSlipsForUser(List<BingoSlip> slips) {
-        slips.forEach(s -> {
-            s.printSlip();
-        });
+    public void setBingoBoardReady(boolean isBingoBoardReady) {
+        this.isBingoBoardReady = isBingoBoardReady;
     }
 
 }

@@ -55,7 +55,7 @@ public class EmailService {
             helper.addAttachment(BINGO_SLIP_ATTACHMENT_NAME_PREFIX + email + ".pdf", new ByteArrayResource(content));
             helper.setText(textMessage, true);// true indicates body is html
 
-            ClassPathResource classPathResource = new ClassPathResource("static/excel-instructions-image.png");
+            ClassPathResource classPathResource = new ClassPathResource("static/bingo_game_image.jpg");
             helper.addInline(contentId, classPathResource);
 
             javaMailSender.send(message);

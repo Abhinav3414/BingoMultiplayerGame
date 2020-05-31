@@ -74,7 +74,7 @@ public class FileIOService {
     }
 
     public String createBingoGameFolder(String gameId) {
-        String bingoFolderName = BINGO_FOLDER_PREFIX + gameId;
+        String bingoFolderName = getBingoFolder(gameId);
 
         Path path = Paths.get(bingoFolderName);
 
@@ -136,7 +136,7 @@ public class FileIOService {
     }
 
     public String getUserSlipPdfName(String gameId, String userEmail) {
-        return bingoFolderName + File.separator + userEmail + "_" + gameId + File.separator + userEmail + "_" + gameId + "_slips.pdf";
+        return getBingoFolder(gameId) + File.separator + userEmail + "_" + gameId + File.separator + userEmail + "_" + gameId + "_slips.pdf";
     }
     
     public String getBingoFolder(String gameId) {

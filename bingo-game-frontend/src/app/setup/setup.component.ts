@@ -16,9 +16,12 @@ export class SetupComponent implements OnInit {
   leaderAssigned = false;
   isExcelUploaded = false;
   playerSetupComplete = false;
+  bingoBoardReady = false;
   leader: PlayerResponse;
   callsStarted = false;
   callsDone;
+  slipsNeeded = 6;
+  boardType = 'GAMEBOARD_90';
 
   leaderForm = new FormGroup({
     email: new FormControl('', [
@@ -38,6 +41,7 @@ export class SetupComponent implements OnInit {
       this.isExcelUploaded = r.excelUploaded;
       this.playerSetupComplete = r.playerSetupComplete;
       this.callsStarted = r.haveCallsStarted;
+      this.bingoBoardReady = r.bingoBoardReady;
 
       this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
         this.callsDone = callsDone;
@@ -59,11 +63,31 @@ export class SetupComponent implements OnInit {
     });
   }
 
+  onSlipSelectedChange(value: number) {
+    this.slipsNeeded = value;
+  }
+
+  onBoardTypeSelectedChange(value: string) {
+    this.boardType = value;
+  }
+
+  sendEmail() {
+    this.bingoService.sendEmail(this.gameId).subscribe((r) => {
+      console.log(r);
+    });
+  }
+
   onSubmit() {
     this.leader = new PlayerResponse(this.leaderForm.value.name, this.leaderForm.value.email);
     this.bingoService.assignLeader(this.gameId, this.leader).subscribe((r) => {
       this.leaderAssigned = true;
       this.bingoService.setLeader(r);
+    });
+  }
+
+  setUpBoardTypeAndSlipCount() {
+    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded).subscribe((r) => {
+      this.bingoBoardReady = true;
     });
   }
 

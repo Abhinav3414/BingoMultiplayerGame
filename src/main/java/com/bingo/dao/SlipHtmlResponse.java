@@ -9,20 +9,30 @@ public class SlipHtmlResponse {
 
     public String slipId;
 
-    public int[][] transformedMatrix = new int[3][9];
+    public int[][] transformedMatrix;
+
+    public boolean isTransposeNeeded = false;
 
     public SlipHtmlResponse() {
 
     }
 
-    public SlipHtmlResponse(String slipId, int[][] matrix) {
+    public SlipHtmlResponse(String slipId, int[][] matrix, boolean isTransposeNeeded) {
         this.slipId = slipId;
+
+        if (isTransposeNeeded) {
+            this.transformedMatrix = new int[3][9];
+        } else {
+            this.transformedMatrix = new int[5][5];
+        }
+        
         this.transformedMatrix = exchangeRowToColumn(matrix);
     }
 
     private int[][] exchangeRowToColumn(int[][] matrix) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 9; j++) {
+        
+        for (int i = 0; i < matrix[0].length; i++) {
+            for (int j = 0; j < matrix.length; j++) {
                 transformedMatrix[i][j] = matrix[j][i];
             }
         }

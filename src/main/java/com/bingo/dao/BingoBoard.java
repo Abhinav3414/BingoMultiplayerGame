@@ -2,6 +2,9 @@ package com.bingo.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,7 +27,13 @@ public class BingoBoard {
 
     private String gameId;
 
-    private BingoBoardType bingoBoardType = BingoBoardType.GAMEBOARD_90;
+    private BingoBoardType bingoBoardType;
+
+    private int slipsPerUser;
+
+    private List<Integer> calls = new ArrayList<>();
+
+    private int currentCall = -1;
 
     public BingoBoard() {
     }
@@ -75,6 +84,49 @@ public class BingoBoard {
 
     public void setBingoBoardType(BingoBoardType bingoBoardType) {
         this.bingoBoardType = bingoBoardType;
+    }
+
+    public int getSlipsPerUser() {
+        return slipsPerUser;
+    }
+
+    public void setSlipsPerUser(int slipsPerUser) {
+        this.slipsPerUser = slipsPerUser;
+    }
+
+    public List<Integer> getCalls() {
+        return calls;
+    }
+
+    public void setCalls(List<Integer> calls) {
+        this.calls = calls;
+    }
+
+    public int getCurrentCall() {
+        return currentCall;
+    }
+
+    public void setCurrentCall(int currentCall) {
+        this.currentCall = currentCall;
+    }
+
+    public void generateCallSequence() {
+        
+        int callsLimit = (bingoBoardType.equals(BingoBoardType.GAMEBOARD_90)) ? 90 : 75;
+            
+        if (calls.size() != callsLimit) {
+            int updated = 0;
+            Random ran = new Random();
+            Set<Integer> callSet = new TreeSet<>();
+            while (updated != callsLimit) {
+                int rNo = ran.nextInt(callsLimit) + 1;
+                if (!callSet.contains(rNo)) {
+                    callSet.add(rNo);
+                    calls.add(rNo);
+                    updated++;
+                }
+            }
+        }
     }
 
 }
