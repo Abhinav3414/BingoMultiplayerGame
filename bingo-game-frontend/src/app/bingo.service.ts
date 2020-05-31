@@ -17,13 +17,22 @@ export class BingoService {
     this.appUrl = this.baseUrl + '/bingo-game';
   }
 
+  getHeaderWithXRequest(uId) {
+    if (localStorage.getItem('leader')) {
+      this.headers = this.headers.set('X-Requested-With', uId);
+    }
+    return this.headers;
+  }
+
   setLeader(leader) {
     localStorage.setItem('leader', JSON.stringify(leader));
   }
 
   getLeader(): any {
-    const user = JSON.parse(localStorage.getItem('leader'));
-    return user;
+    if (localStorage.getItem('leader')) {
+      return JSON.parse(localStorage.getItem('leader'));
+    }
+    return undefined;
   }
 
   initiateGame(): any {
@@ -44,18 +53,22 @@ export class BingoService {
   }
 
   getBingoPlayers(gameId: string): Observable<any> {
-    return this.http.get(this.appUrl + '/' + gameId + '/getBingoPlayers');
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.get(this.appUrl + '/' + gameId + '/getBingoPlayers', { headers: this.headers });
   }
 
   getUserSlips(gameId: string, playerId: string): Observable<any> {
-    return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + playerId);
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.get(this.appUrl + '/' + gameId + '/playerslips/' + playerId, { headers: this.headers });
   }
 
   addPlayers(gameId: string, players): any {
-    return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/addPlayers', players);
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/addPlayers', players, { headers: this.headers });
   }
 
   uploadExcel(gameId: string, file: File): any {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
     this.headers.set('Content-Type', 'multipart/form-data');
     const formData: FormData = new FormData();
     formData.append('file', file);
@@ -63,16 +76,19 @@ export class BingoService {
   }
 
   downloadSlipPdf(gameId: string, email: any): any {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
     return this.http.get<any[]>(this.appUrl + '/download/' + gameId + '/' + email,
-      { observe: 'response', responseType: 'blob' as 'json' });
+      { observe: 'response', responseType: 'blob' as 'json', headers: reqHeader });
   }
 
   callNext(gameId: string) {
-    return this.http.post(this.appUrl + '/' + gameId + '/callNext', null);
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/callNext', null, { headers: this.headers });
   }
 
   getAllCalls(gameId: string): Observable<any> {
-    return this.http.get(this.appUrl + '/' + gameId + '/getallcalls');
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.get(this.appUrl + '/' + gameId + '/getallcalls', { headers: this.headers });
   }
 
 }

@@ -153,7 +153,6 @@ public class BingoAppService {
     }
 
     public BingoUser setLeader(String gameId, PlayerResponse organizer) {
-        System.out.println(organizer);
         BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
         BingoUser gameOrganizer = bingoUserRepository.save(new BingoUser(organizer.getName(), organizer.getEmail(),
                 BingoUserType.ORGANIZER, bBoard.getBoardId()));
@@ -164,5 +163,12 @@ public class BingoAppService {
 
     public String getPlayerEmail(String playerId) {
       return bingoUserRepository.findById(playerId).get().getEmail();
+    }
+    
+    public void validateGameAccess(String gameId, String leaderId) {
+      BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
+      if(!bBoard.getLeaderId().equals(leaderId)) {
+        throw new IllegalAccessError("Not Authorized");
+      }
     }
 }
