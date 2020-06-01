@@ -76,11 +76,11 @@
   </div>
 </div>
 
-<div *ngIf="players" style="padding-left: 1.25rem;" class="col-lg-6">
+<div *ngIf="players" style="padding-left: 1.25rem;" class="col-lg-8">
   <h5 class="mb-4">Players in Game</h5>
 
   Link of Game Room for Players
-  <a href="{{originUrl}}/#/gameroom/{{gameId}}" target="_blank">{{originUrl}}/#/gameroom/{{gameId}}</a>
+  <a href="{{originUrl}}/#/gameroom/{{gameId}}" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
   <br> <br>
 
   <div *ngFor="let player of players; index as i;" style="display:flex; padding: 0 0 .2em .5em">

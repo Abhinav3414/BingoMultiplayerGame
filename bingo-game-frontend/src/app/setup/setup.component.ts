@@ -73,7 +73,7 @@ export class SetupComponent implements OnInit {
 
   sendEmail() {
     this.bingoService.sendEmail(this.gameId).subscribe((r) => {
-      console.log(r);
+      this.callsStarted = true;
     });
   }
 

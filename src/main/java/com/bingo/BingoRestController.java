@@ -117,7 +117,16 @@ public class BingoRestController {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
 
-        return new ResponseEntity<>(bingoAppService.sendEmail(gameId), HttpStatus.OK);
+        List<String> emails = bingoAppService.sendEmail(gameId);
+
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+        if (bGame.isHaveCallsStarted() == false) {
+            bGame.setHaveCallsStarted(true);
+            bingoGameRepository.save(bGame);
+        }
+
+        return new ResponseEntity<>(emails, HttpStatus.OK);
     }
 
     @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
@@ -132,7 +141,7 @@ public class BingoRestController {
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
     public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
 
-        ClassPathResource imageFile = new ClassPathResource("static/excel-instructions-image.png");
+        ClassPathResource imageFile = new ClassPathResource("excel-instructions-image.png");
         byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
         return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
     }
@@ -188,7 +197,9 @@ public class BingoRestController {
     @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
     public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
 
-        return new ResponseEntity<>(bingoAppService.getAllCalls(gameId), HttpStatus.OK);
+        Map<Integer, Integer> allCallsMap = bingoAppService.getAllCalls(gameId);
+
+        return new ResponseEntity<>(allCallsMap, HttpStatus.OK);
     }
 
 }

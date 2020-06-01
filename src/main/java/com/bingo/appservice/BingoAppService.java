@@ -127,7 +127,7 @@ public class BingoAppService {
         generateSlipsForUser(gameId, players);
         createBingoPlayerFolders(bGame);
         writeCallsToCSV(bGame);
-        
+
         generatePdfs(bGame);
 
         bGame.setPdfsGenerated(true);
@@ -272,12 +272,12 @@ public class BingoAppService {
         String bingoFolderName = fileIOService.getBingoFolder(game.getGameId());
 
         bingoUserRepository.findByBoardId(game.getBingoBoardId())
-        .stream()
-        .filter(us -> !us.getUserType().equals(BingoUserType.ORGANIZER))
-        .map(bu -> bu.getEmail())
-        .forEach(e -> {
-            fileIOService.createUserFolder(game.getGameId(), bingoFolderName, e);
-        });
+                .stream()
+                .filter(us -> !us.getUserType().equals(BingoUserType.ORGANIZER))
+                .map(bu -> bu.getEmail())
+                .forEach(e -> {
+                    fileIOService.createUserFolder(game.getGameId(), bingoFolderName, e);
+                });
     }
 
     private void writeCallsToCSV(BingoGame game) {
@@ -389,8 +389,33 @@ public class BingoAppService {
             System.out.println("Emails could not be sent to: ");
             System.out.println(emailNotSent);
         } else {
-            System.out.println("All Emails have been sent successfully. Enjoy !!!!\n--- Game is Started ---");
+            System.out.println("All Emails have been sent successfully. Enjoy !!!!");
         }
+
+        String line1 = "";
+        String line2 = "";
+        String line3 = "";
+
+        StringBuilder sb = new StringBuilder();
+        if (!emailNotSent.isEmpty()) {
+            line1 = "Slips Email could not be sent to :";
+            for (String email : emailNotSent) {
+                sb.append(email).append(", ");
+            }
+            line2 = sb.toString();
+            line3 = "please make sure these user get slips.";
+        } else {
+            line1 = "All Emails have been sent successfully.";
+        }
+
+        emailService.sendMailToLeader(getBingoLeaderEmail(bGame.getGameId()), "Bingo Game Status For Game Leader",
+                bGame.getGameId(), line1, line2, line3);
+
         return emailNotSent;
+    }
+
+    public String getBingoLeaderEmail(String gameId) {
+        String leaderId = bingoBoardRepository.findByGameId(gameId).getLeaderId();
+        return bingoUserRepository.findById(leaderId).get().getEmail();
     }
 }

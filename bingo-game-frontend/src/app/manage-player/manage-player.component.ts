@@ -23,10 +23,11 @@ export class ManagePlayerComponent implements OnInit {
   PlayerResponses: PlayerResponse[] = [];
   isAddPlayerFromExcel = false;
   isAddPlayerFromManually = true;
-  originUrl;
+  hrefUrl;
 
   constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
-    this.originUrl = window.location.origin;
+    this.hrefUrl = window.location.href.substr(0, window.location.href.indexOf('#') + 2);
+    console.log(this.hrefUrl);
   }
 
   ngOnInit(): void {
