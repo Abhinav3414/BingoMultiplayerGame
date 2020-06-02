@@ -34,3 +34,4 @@ application.properties
 Bingo_commands.txt
 src/main/resources/application.properties
 src/main/resources/static/
+bingo-game-frontend/node_installation/

@@ -11,15 +11,17 @@
 	</parent>
 	<groupId>com.bingo</groupId>
 	<artifactId>BingoMultiplayerGame</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>v1.0</version>
 	<name>BingoMultiplayerGame</name>
 	<description>Bingo Project For Multiplayers</description>
 
 	<properties>
 		<java.version>1.8</java.version>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
+		<angular.project.location>bingo-game-frontend</angular.project.location>
+    <angular.project.nodeinstallation>bingo-game-frontend/node_installation</angular.project.nodeinstallation>
 	</properties>
-
+    
 	<dependencies>
 		<!-- hot swapping, disable cache for template, enable live reload -->
 		<dependency>
@@ -88,12 +90,101 @@
 
 	<build>
 		<plugins>
+		
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+       <!--  plugin to delete resource/static folder all content -->
+        <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <configuration>
+                <filesets>
+                    <fileset>
+                        <directory>${basedir}/src/main/resources/static</directory>
+                          <includes>
+                            <include>**/*</include>
+                          </includes>
+                    </fileset>
+                </filesets>
+            </configuration>
+        </plugin>
+        
+			 <!-- It will install nodejs and npm , will create dist folder with custom script "build-prod"-->
+			 <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>1.0</version>
+            <configuration>
+                <workingDirectory>${angular.project.location}</workingDirectory>
+                <installDirectory>${angular.project.nodeinstallation}</installDirectory>
+            </configuration>
+            <executions>
+                <!-- It will install nodejs and npm -->
+                <execution>
+                    <id>install node and npm</id>
+                    <goals>
+                        <goal>install-node-and-npm</goal>
+                    </goals>
+                    <configuration>
+                        <nodeVersion>v12.16.2</nodeVersion>
+                        <npmVersion>6.13.4</npmVersion>
+                    </configuration>
+                </execution>
+
+                <!-- It will execute command "npm install" inside "/bingo-game-frontend" directory -->
+                <execution>
+                    <id>npm install</id>
+                    <goals>
+                        <goal>npm</goal>
+                    </goals>
+                    <configuration>
+                        <arguments>install</arguments>
+                    </configuration>
+                </execution>
+                <!-- It will execute command "npm build" inside "/bingo-game-frontend" directory 
+                    to clean and create "/dist" directory -->
+                <execution>
+                    <id>npm build</id>
+                    <goals>
+                        <goal>npm</goal>
+                    </goals>
+                    <configuration>
+                        <arguments>run build-prod</arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+        
+       <!--  plugin to copy dist folder contents of angular to resource/static folder -->
+        <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <id>copy-resources</id>
+                    <phase>validate</phase>
+                    <goals>
+                        <goal>copy-resources</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${basedir}/src/main/resources/static</outputDirectory>
+                        <resources>
+                            <resource>
+                                <directory>/bingo-game-frontend/dist/bingo-game-frontend</directory>
+                                <includes>
+                                    <include>**/*</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </configuration>
+                </execution>
+           </executions>
+        </plugin>
+
 		</plugins>
-		<finalName>bingo_game</finalName>
+		<!-- <finalName>bingo_game</finalName> -->
 	</build>
 
 </project>
