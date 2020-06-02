@@ -82,6 +82,18 @@ public class BingoRestController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("{gameId}/entergameroom/{leaderEmail}")
+    public ResponseEntity<PlayerResponse> enterGameRoom(@PathVariable("gameId") String gameId,
+            @PathVariable("leaderEmail") String leaderEmail) {
+        PlayerResponse res = null;
+        try {
+            res = bingoAppService.enterGameRoom(gameId, leaderEmail);
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
+        }
+    }
+
     @GetMapping("{gameId}/gameSetupStatus")
     public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();

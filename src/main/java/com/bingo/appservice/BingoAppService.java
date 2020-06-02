@@ -418,4 +418,16 @@ public class BingoAppService {
         String leaderId = bingoBoardRepository.findByGameId(gameId).getLeaderId();
         return bingoUserRepository.findById(leaderId).get().getEmail();
     }
+
+    public PlayerResponse enterGameRoom(String gameId, String leaderEmail) {
+        BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
+        BingoUser bUser = bingoUserRepository.findByEmailAndBoardIdLike(leaderEmail, bBoard.getBoardId());
+
+        if (bUser != null && bUser.getUserType().equals(BingoUserType.ORGANIZER)) {
+            return new PlayerResponse(bUser.getUserId(), bUser.getName(), bUser.getEmail());
+        } else {
+            throw new IllegalAccessError("NOT AUTHORIZED");
+        }
+
+    }
 }

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PlayerResponse } from '../models';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { BingoService } from '../bingo.service';
+import { ThrowStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-setup',
@@ -22,6 +23,9 @@ export class SetupComponent implements OnInit {
   callsDone;
   slipsNeeded = 6;
   boardType = 'GAMEBOARD_90';
+  newGame = true;
+  existingGameId;
+  notAuthorized = false;
 
   leaderForm = new FormGroup({
     email: new FormControl('', [
@@ -32,7 +36,7 @@ export class SetupComponent implements OnInit {
     ])
   });
 
-  constructor(private route: ActivatedRoute, public bingoService: BingoService) {
+  constructor(private route: ActivatedRoute, public bingoService: BingoService, private router: Router) {
 
     this.route.data.subscribe((res) => {
       const r = res.gameSetupStatus;
@@ -43,13 +47,24 @@ export class SetupComponent implements OnInit {
       this.callsStarted = r.haveCallsStarted;
       this.bingoBoardReady = r.bingoBoardReady;
 
-      this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
-        this.callsDone = callsDone;
-      });
+      if (r.haveCallsStarted) {
+        this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
+          this.callsDone = callsDone;
+        });
+      }
     });
   }
 
   ngOnInit(): void {
+  }
+
+
+  initiateNewGame() {
+    this.newGame = true;
+  }
+
+  existingGame() {
+    this.newGame = false;
   }
 
   getPlayerSetupStatus(startCall: boolean) {
@@ -88,6 +103,20 @@ export class SetupComponent implements OnInit {
   setUpBoardTypeAndSlipCount() {
     this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded).subscribe((r) => {
       this.bingoBoardReady = true;
+    });
+  }
+
+  enterExistingGame() {
+    this.bingoService.enterGameRoom(this.existingGameId).subscribe((r) => {
+      this.bingoService.setLeader(r);
+      this.gameId = this.existingGameId;
+      this.bingoBoardReady = true;
+      this.router.navigate(['game', this.existingGameId]).then(() => {
+        window.location.reload();
+      });
+    }, (err) => {
+      console.log('not authorized');
+      this.notAuthorized = true;
     });
   }
 

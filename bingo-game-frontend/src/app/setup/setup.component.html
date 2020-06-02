@@ -83,26 +83,60 @@
       <app-manage-player [gameId]="gameId" [gameStarted]="shouldStartGame" [playerSetupComplete]="playerSetupComplete"
         (isPlayerSetupReady)="getPlayerSetupStatus($event)" *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
 
+
+
+
         <div *ngIf="leaderAssigned && !bingoBoardReady" class="col-sm-8">
-          <div class="form-group">
-            <label for="slipsNeeded">How many slips per user is needed ?</label>
-            <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded" (ngModelChange)="onSlipSelectedChange($event)">
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-              <option selected>6</option>
-            </select>
+
+          <div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons" >
+            <label class="btn btn-secondary active">
+              <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="initiateNewGame()"> Initiate New Game
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="option3" autocomplete="off" (click)="existingGame()"> Enter in Existing Game
+            </label>
           </div>
-           <div class="form-group">
-            <label for="boardType">Choose Bingo Game Type</label>
-            <select class="form-control" id="boardType" [(ngModel)]="boardType" (ngModelChange)="onBoardTypeSelectedChange($event)">
-              <option value="GAMEBOARD_75">Bingo 75 Board Game</option>
-              <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
-            </select>
+
+          <div *ngIf="!newGame">
+            <div class="form-group">
+              <label for="enterExistingGame">Enter Already Existing Game</label>
+              <input class="form-control"  placeholder="Game room id" id="enterExistingGame" [(ngModel)]="existingGameId"/>
+            </div>
+            <div *ngIf="notAuthorized" style="color: red; font-size: .9em;">Not authorized Game room !</div>
+            <button type="submit" class="btn btn-success mt-2" (click)="enterExistingGame()">Enter!!!</button>
           </div>
-          <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
+
+          <div *ngIf="newGame">
+            <div class="form-group">
+              <label for="slipsNeeded">How many slips per user is needed ?</label>
+              <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded" (ngModelChange)="onSlipSelectedChange($event)">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option selected>6</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="boardType">Choose Bingo Game Type</label>
+              <select class="form-control" id="boardType" [(ngModel)]="boardType" (ngModelChange)="onBoardTypeSelectedChange($event)">
+                <option value="GAMEBOARD_75">Bingo 75 Board Game</option>
+                <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
+              </select>
+            </div>
+            <!-- <div class="m-1 mb-3" style=" color: gray; font-style: italic; font-size: .9em; ">
+            (If you check below option, you will have to provide emails for each player mandatorily.)
+            </div>
+            <div class="form-check" class="m-1 ml-4 mb-4" >
+              <input class="form-check-input" type="checkbox" id="sendSlips">
+              <label class="form-check-label" for="sendSlips">
+                Send Slips to Participants
+              </label>
+            </div> -->
+            <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
+          </div>
+
         </div>
 
     </div>

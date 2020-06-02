@@ -48,6 +48,11 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/boardType/' + boardType + '/slipcount/' + slips, null);
   }
 
+  enterGameRoom(gameId: string) {
+    const leaderEmail = this.getLeader() ? this.getLeader().email : undefined;
+    return this.http.post(this.appUrl + '/' + gameId + '/entergameroom/' + leaderEmail, null);
+  }
+
   getGameSetupStatus(gameId: string) {
     return this.http.get(this.appUrl + '/' + gameId + '/gameSetupStatus');
   }
