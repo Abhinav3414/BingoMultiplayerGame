@@ -11,7 +11,6 @@ import { PlayerResponse } from '../models';
 export class ManagePlayerComponent implements OnInit {
 
   @Input() gameId: string;
-  @Input() gameStarted: boolean;
   @Input() playerSetupComplete: boolean;
   @ViewChild('fileInput') fileInput: ElementRef;
   @Output() isPlayerSetupReady = new EventEmitter<boolean>();

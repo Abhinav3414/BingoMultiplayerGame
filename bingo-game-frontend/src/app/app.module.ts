@@ -19,6 +19,30 @@ import { ModalComponent } from './modal/modal.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 
+import { ShareIconsModule } from 'ngx-sharebuttons/icons';
+import { ShareButtonsConfig } from 'ngx-sharebuttons';
+import { ShareButtonsModule } from 'ngx-sharebuttons/buttons';
+
+const customConfig: ShareButtonsConfig = {
+  include: ['twitter', 'whatsapp', 'telegram', 'copy'],
+  // exclude: ['tumblr', 'stumble', 'vk', 'print' ,'sms', 'facebook', 'linkedin'],
+  theme: 'modern-light',
+  gaTracking: true,
+  windowWidth: 500,
+  windowHeight: 500
+  // twitterAccount: 'twitterUsername'
+  // prop: {
+  //   facebook: {
+  //     icon: ['fab', 'fa-facebook-official'],
+  //     text: 'Share'
+  //   },
+  //   twitter: {
+  //     icon: ['fab', 'fa-twitter-square'],
+  //     text: 'Tweet'
+  //   }
+  // }
+};
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,6 +61,8 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
     ReactiveFormsModule,
     NgbModule,
     FormsModule,
+    ShareIconsModule,
+    ShareButtonsModule.withConfig(customConfig),
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [{ provide: LocationStrategy, useClass: HashLocationStrategy }],

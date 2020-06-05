@@ -15,8 +15,11 @@ export class CallNumberComponent implements OnInit {
   constructor(private bingoService: BingoService) { }
 
   ngOnInit(): void {
-    for (const val of Object.values(this.callsDone)) {
-      this.calls.push(val);
+    if (this.callsDone) {
+      for (const val of Object.values(this.callsDone)) {
+        this.calls.push(val);
+        this.currentCall = val;
+      }
     }
   }
 

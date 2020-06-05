@@ -13,7 +13,6 @@ import { ThrowStmt } from '@angular/compiler';
 export class SetupComponent implements OnInit {
 
   gameId;
-  shouldStartGame = false;
   leaderAssigned = false;
   isExcelUploaded = false;
   playerSetupComplete = false;
@@ -68,7 +67,7 @@ export class SetupComponent implements OnInit {
   }
 
   getPlayerSetupStatus(startCall: boolean) {
-    this.shouldStartGame = startCall;
+    this.playerSetupComplete = startCall;
   }
 
   proceedWithCalls() {
@@ -89,6 +88,7 @@ export class SetupComponent implements OnInit {
   sendEmail() {
     this.bingoService.sendEmail(this.gameId).subscribe((r) => {
       this.callsStarted = true;
+      this.callsDone = {};
     });
   }
 
