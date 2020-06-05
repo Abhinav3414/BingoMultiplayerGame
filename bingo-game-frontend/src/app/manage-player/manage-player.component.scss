@@ -1,0 +1,53 @@
+.card {
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
+.all-players-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    flex-grow: 1;
+    height: 100%;
+    padding-left: 1.25rem;
+
+    .all-players {
+      display:flex;
+      padding: 0 0 .2em .5em;
+      flex-wrap: wrap;
+
+      .player-name-style {
+        display: flex;
+        flex-grow: 1;
+        max-width: 13em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
+      .email-status-style {
+        font-size: 1.2em;
+        margin-left: 0.3em;
+        padding-top: 0.4em;
+
+        .check-style,
+        .exclamation-style {
+          font-size: .7em;
+          position: relative;
+          left: 1em;
+        }
+        .check-style {
+          font-size: 0.8em;
+        }
+      }
+      .success {
+        color: #28a745;
+      }
+      .fail {
+        color: red;
+      }
+    }
+
+
+}

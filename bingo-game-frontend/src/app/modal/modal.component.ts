@@ -9,9 +9,8 @@ import { HttpResponse } from '@angular/common/http';
   styleUrls: ['./modal.component.scss']
 })
 export class ModalComponent implements OnInit {
-  @Input() playerId: null;
+  @Input() player: any;
   @Input() gameId: null;
-  @Input() playerEmail: null;
   slipResponse: any;
   closeResult: string;
 
@@ -21,7 +20,7 @@ export class ModalComponent implements OnInit {
   }
 
   open(content) {
-    this.bingoService.getUserSlips(this.gameId, this.playerId).subscribe((r) => {
+    this.bingoService.getUserSlips(this.gameId, this.player.id).subscribe((r) => {
       this.slipResponse = r;
     });
 
@@ -45,7 +44,7 @@ export class ModalComponent implements OnInit {
 
   downloadSlipPdf() {
 
-    this.bingoService.downloadSlipPdf(this.gameId, this.playerEmail).subscribe((res: HttpResponse<Blob>) => {
+    this.bingoService.downloadSlipPdf(this.gameId, this.player.id).subscribe((res: HttpResponse<Blob>) => {
 
       let fileName = 'bingo_slips.pdf';
 

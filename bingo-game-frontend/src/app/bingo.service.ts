@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PlayerResponse } from './models';
 
@@ -44,8 +44,13 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/assignLeader', leader);
   }
 
-  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number) {
-    return this.http.post(this.appUrl + '/' + gameId + '/boardType/' + boardType + '/slipcount/' + slips, null);
+  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number, emailSlips: any) {
+
+    const params = new HttpParams();
+    params.set('emailSlips', emailSlips);
+
+    return this.http.post(this.appUrl + '/' + gameId +
+      '/boardType/' + boardType + '/slipcount/' + slips + '?emailSlips=' + emailSlips, null, { params });
   }
 
   enterGameRoom(gameId: string) {
@@ -57,9 +62,14 @@ export class BingoService {
     return this.http.get(this.appUrl + '/' + gameId + '/gameSetupStatus');
   }
 
-  sendEmail(gameId: string) {
+  sendEmailToAll(gameId: string) {
     const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
-    return this.http.post(this.appUrl + '/' + gameId + '/sendEmail', null, { headers: this.headers });
+    return this.http.post(this.appUrl + '/' + gameId + '/sendEmailToAll', null, { headers: this.headers });
+  }
+
+  sendEmail(gameId: string, playerId: string) {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/sendEmail/' + playerId, null, { headers: this.headers });
   }
 
   getSampleExcel(): Observable<Blob> {
@@ -89,9 +99,9 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/gamesetup/uploadExcelFile', formData, { headers: this.headers });
   }
 
-  downloadSlipPdf(gameId: string, email: any): any {
+  downloadSlipPdf(gameId: string, playerId: any): any {
     const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
-    return this.http.get<any[]>(this.appUrl + '/download/' + gameId + '/' + email,
+    return this.http.get<any[]>(this.appUrl + '/download/' + gameId + '/' + playerId,
       { observe: 'response', responseType: 'blob' as 'json', headers: reqHeader });
   }
 
@@ -102,6 +112,11 @@ export class BingoService {
 
   getAllCalls(gameId: string): Observable<any> {
     return this.http.get(this.appUrl + '/' + gameId + '/getallcalls');
+  }
+
+  startCalls(gameId: string) {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/startCalls', null, { headers: this.headers });
   }
 
 }

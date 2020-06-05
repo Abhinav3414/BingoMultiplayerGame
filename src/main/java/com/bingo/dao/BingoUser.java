@@ -25,24 +25,23 @@ public class BingoUser {
 
     private BingoUserType userType = BingoUserType.PARTICIPANT;
 
+    private BingoSlipEmailStatus bingoSlipEmailStatus = BingoSlipEmailStatus.DISABLED;
+
     public BingoUser() {
     }
 
-    public BingoUser(String email, String boardId) {
-        this.email = email;
-        this.boardId = boardId;
-    }
-
-    public BingoUser(String name, String email, String boardId) {
+    public BingoUser(String name, String email, String gameId, String boardId) {
         this.email = email;
         this.name = name;
+        this.gameId = gameId;
         this.boardId = boardId;
     }
 
-    public BingoUser(String name, String email, BingoUserType userType, String boardId) {
+    public BingoUser(String name, String email, BingoUserType userType, String gameId, String boardId) {
         this.email = email;
         this.name = name;
         this.userType = userType;
+        this.gameId = gameId;
         this.boardId = boardId;
     }
 
@@ -92,6 +91,14 @@ public class BingoUser {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public BingoSlipEmailStatus getBingoSlipEmailStatus() {
+        return bingoSlipEmailStatus;
+    }
+
+    public void setBingoSlipEmailStatus(BingoSlipEmailStatus bingoSlipEmailStatus) {
+        this.bingoSlipEmailStatus = bingoSlipEmailStatus;
     }
 
 }

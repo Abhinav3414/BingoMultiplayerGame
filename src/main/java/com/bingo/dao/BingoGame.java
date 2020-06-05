@@ -28,6 +28,8 @@ public class BingoGame {
     private boolean haveCallsStarted;
 
     private boolean isBingoBoardReady;
+    
+    private BingoSlipEmailStatus bingoSlipEmailStatus = BingoSlipEmailStatus.DISABLED;
 
     public BingoGame() {
     }
@@ -94,6 +96,16 @@ public class BingoGame {
 
     public void setBingoBoardReady(boolean isBingoBoardReady) {
         this.isBingoBoardReady = isBingoBoardReady;
+    }
+
+    
+    public BingoSlipEmailStatus getBingoSlipEmailStatus() {
+        return bingoSlipEmailStatus;
+    }
+
+    
+    public void setBingoSlipEmailStatus(BingoSlipEmailStatus bingoSlipEmailStatus) {
+        this.bingoSlipEmailStatus = bingoSlipEmailStatus;
     }
 
 }

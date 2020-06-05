@@ -12,6 +12,8 @@ public interface BingoUserRepository extends MongoRepository<BingoUser, String> 
     public BingoUser findByName(String name);
 
     public BingoUser findByEmailAndBoardIdLike(String email, String boardId);
+    
+    public BingoUser findByNameAndBoardIdLike(String name, String boardId);
 
     public List<BingoUser> findByBoardId(String boardId);
 }

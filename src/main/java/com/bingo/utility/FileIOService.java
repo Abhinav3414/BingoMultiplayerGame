@@ -135,8 +135,9 @@ public class FileIOService {
         return emails;
     }
 
-    public String getUserSlipPdfName(String gameId, String userEmail) {
-        return getBingoFolder(gameId) + File.separator + userEmail + "_" + gameId + File.separator + userEmail + "_" + gameId + "_slips.pdf";
+    public String getUserSlipPdfName(String gameId, String userEmail, String name) {
+        String emailOrName = userEmail == null ? name : userEmail;
+        return getBingoFolder(gameId) + File.separator + emailOrName + "_" + gameId + File.separator + emailOrName + "_" + gameId + "_slips.pdf";
     }
     
     public String getBingoFolder(String gameId) {

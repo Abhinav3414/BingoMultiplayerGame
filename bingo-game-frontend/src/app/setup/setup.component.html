@@ -3,9 +3,10 @@
   <div class="row" style="width: 100%">
     <div class="col-sm-6">
 
-      <button type="button" [routerLink]="['']" class="btn btn-danger ml-4 mb-4">Reset And Start New Game!!</button>
+      <button type="button" [routerLink]="['']" class="btn btn-danger ml-4 mb-4">
+        <i class="fa fa-ban" aria-hidden="true"></i> Restart New Game!!</button>
 
-      <h4 *ngIf="leaderAssigned" class="ml-4" >Hi {{bingoService.getLeader().name}} !!!</h4>
+      <h4 *ngIf="leaderAssigned" class="ml-4">Hi {{bingoService.getLeader().name}} !!!</h4>
       <h4 *ngIf="!playerSetupComplete" class="ml-4 mb-4" style="padding-left : .5em">Setup your Game</h4>
 
       <div *ngIf="!leaderAssigned" class="col-md-12 col-lg-7 ml-4">
@@ -52,17 +53,34 @@
           </svg>
           You can view slips by clicking on "View Slips" button next to participant's email id.
         </div>
-        <div class="mb-1 mt-3">
-          <svg class="bi bi-question" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M5.25 6.033h1.32c0-.781.458-1.384 1.36-1.384.685 0 1.313.343 1.313 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.007.463h1.307v-.355c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.326 0-2.786.647-2.754 2.533zm1.562 5.516c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
-          </svg>
-          Would you like to mail slips to each participant ?
-          <br>
-          <h6 class="ml-4 mt-2">Choose one of the options to continue game !!!</h6>
+
+
+        <div *ngIf="bingoSlipEmailStatus != 'DISABLED'">
+          <div class="mb-1 ">
+            <svg class="bi bi-envelope-fill" width=".7em" height=".7em" viewBox="0 0 16 16" fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg" style="margin-right: .25em;margin-left: .15em;">
+              <path fill-rule="evenodd"
+                d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z" />
+            </svg>
+            You can email slips to all players now.
+            <br>
+          </div>
         </div>
+        <div *ngIf="bingoSlipEmailStatus === 'DISABLED'">
+          <div class="mb-1 mt-3">
+            <svg class="bi bi-award" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M9.669.864L8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193l-1.51-.229L8 1.126l-1.355.702-1.51.229-.684 1.365-1.086 1.072L3.614 6l-.25 1.506 1.087 1.072.684 1.365 1.51.229L8 10.874l1.356-.702 1.509-.229.684-1.365 1.086-1.072L12.387 6l.248-1.506-1.086-1.072-.684-1.365z" />
+              <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z" />
+            </svg>
+            Setup is ready Now.
+            <br>
+          </div>
+        </div>
+        <h6 class="ml-4 mt-4">Click to continue game !!!</h6>
         <div style="margin:1.5rem; display:flex">
-          <button type="submit" class="btn btn-success" (click)="proceedWithCalls()">Do not email slips</button>
-          <button style="margin-left: 2em" type="submit" class="btn btn-success" (click)="sendEmail()">Email Slips</button>
+          <button type="submit" class="btn btn-success" (click)="proceedWithCalls()">Proceed</button>
         </div>
 
       </div>
@@ -72,61 +90,68 @@
     </div>
     <div class="col-sm-6">
       <br> <br> <br>
+
       <app-manage-player [gameId]="gameId" [playerSetupComplete]="playerSetupComplete"
-        (isPlayerSetupReady)="getPlayerSetupStatus($event)" *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
+        [bingoSlipEmailStatus]="bingoSlipEmailStatus" (isPlayerSetupReady)="getPlayerSetupStatus($event)"
+        *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
 
-        <div *ngIf="leaderAssigned && !bingoBoardReady" class="col-sm-8">
+      <div *ngIf="leaderAssigned && !bingoBoardReady" class="col-sm-8">
 
-          <div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons" >
-            <label class="btn btn-secondary active">
-              <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="initiateNewGame()"> Initiate New Game
-            </label>
-            <label class="btn btn-secondary">
-              <input type="radio" name="options" id="option3" autocomplete="off" (click)="existingGame()"> Enter in Existing Game
-            </label>
-          </div>
-
-          <div *ngIf="!newGame">
-            <div class="form-group">
-              <label for="enterExistingGame">Enter Already Existing Game</label>
-              <input class="form-control"  placeholder="Game room id" id="enterExistingGame" [(ngModel)]="existingGameId"/>
-            </div>
-            <div *ngIf="notAuthorized" style="color: red; font-size: .9em;">Not authorized Game room !</div>
-            <button type="submit" class="btn btn-success mt-2" (click)="enterExistingGame()">Enter!!!</button>
-          </div>
-
-          <div *ngIf="newGame">
-            <div class="form-group">
-              <label for="slipsNeeded">How many slips per user is needed ?</label>
-              <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded" (ngModelChange)="onSlipSelectedChange($event)">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-                <option selected>6</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="boardType">Choose Bingo Game Type</label>
-              <select class="form-control" id="boardType" [(ngModel)]="boardType" (ngModelChange)="onBoardTypeSelectedChange($event)">
-                <option value="GAMEBOARD_75">Bingo 75 Board Game</option>
-                <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
-              </select>
-            </div>
-            <!-- <div class="m-1 mb-3" style=" color: gray; font-style: italic; font-size: .9em; ">
-            (If you check below option, you will have to provide emails for each player mandatorily.)
-            </div>
-            <div class="form-check" class="m-1 ml-4 mb-4" >
-              <input class="form-check-input" type="checkbox" id="sendSlips">
-              <label class="form-check-label" for="sendSlips">
-                Send Slips to Participants
-              </label>
-            </div> -->
-            <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
-          </div>
-
+        <div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons">
+          <label class="btn btn-secondary active">
+            <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="initiateNewGame()">
+            Initiate New Game
+          </label>
+          <label class="btn btn-secondary">
+            <input type="radio" name="options" id="option3" autocomplete="off" (click)="existingGame()"> Enter in
+            Existing Game
+          </label>
         </div>
+
+        <div *ngIf="!newGame">
+          <div class="form-group">
+            <label for="enterExistingGame">Enter Already Existing Game</label>
+            <input class="form-control" placeholder="Game room id" id="enterExistingGame"
+              [(ngModel)]="existingGameId" />
+          </div>
+          <div *ngIf="notAuthorized" style="color: red; font-size: .9em;">Not authorized Game room !</div>
+          <button type="submit" class="btn btn-success mt-2" (click)="enterExistingGame()">Enter!!!</button>
+        </div>
+
+        <div *ngIf="newGame">
+          <div class="form-group">
+            <label for="slipsNeeded">How many slips per user is needed ?</label>
+            <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded"
+              (ngModelChange)="onSlipSelectedChange($event)">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option selected>6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="boardType">Choose Bingo Game Type</label>
+            <select class="form-control" id="boardType" [(ngModel)]="boardType"
+              (ngModelChange)="onBoardTypeSelectedChange($event)">
+              <option value="GAMEBOARD_75">Bingo 75 Board Game</option>
+              <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
+            </select>
+          </div>
+          <div class="m-1 mb-3" style=" color: gray; font-style: italic; font-size: .9em; ">
+            (If you check below option, you will have to provide emails for each player mandatorily.)
+          </div>
+          <div class="form-check" class="m-1 ml-4 mb-4">
+            <input class="form-check-input" type="checkbox" id="sendSlips" [(ngModel)]="emailSlips">
+            <label class="form-check-label" for="sendSlips">
+              Send Slips to Participants
+            </label>
+          </div>
+          <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
+        </div>
+
+      </div>
 
     </div>
   </div>

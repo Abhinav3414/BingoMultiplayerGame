@@ -12,6 +12,7 @@ export class ManagePlayerComponent implements OnInit {
 
   @Input() gameId: string;
   @Input() playerSetupComplete: boolean;
+  @Input() bingoSlipEmailStatus: string;
   @ViewChild('fileInput') fileInput: ElementRef;
   @Output() isPlayerSetupReady = new EventEmitter<boolean>();
 
@@ -26,7 +27,6 @@ export class ManagePlayerComponent implements OnInit {
 
   constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
     this.hrefUrl = window.location.href.substr(0, window.location.href.indexOf('#') + 2);
-    console.log(this.hrefUrl);
   }
 
   ngOnInit(): void {
@@ -64,10 +64,21 @@ export class ManagePlayerComponent implements OnInit {
 
   addPlayer() {
     this.submitted = false;
-    this.t.push(this.formBuilder.group({
-      name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]]
-    }));
+
+    let formBuilderGroup;
+    if (this.bingoSlipEmailStatus === 'DISABLED') {
+      formBuilderGroup = this.formBuilder.group({
+        name: ['', Validators.required]
+      });
+
+    } else {
+      formBuilderGroup = this.formBuilder.group({
+        name: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]]
+      });
+    }
+
+    this.t.push(formBuilderGroup);
     this.numberOfPLayers++;
   }
 
@@ -144,6 +155,18 @@ export class ManagePlayerComponent implements OnInit {
           this.proceedGame();
         });
       });
+  }
+
+  sendEmailToAll() {
+    this.bingoService.sendEmailToAll(this.gameId).subscribe((r) => {
+      this.bingoSlipEmailStatus = 'SENT';
+    });
+  }
+
+  sendEmail(playerId: string) {
+    this.bingoService.sendEmail(this.gameId, playerId).subscribe((r) => {
+      this.bingoSlipEmailStatus = 'SENT';
+    });
   }
 
 }

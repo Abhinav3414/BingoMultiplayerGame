@@ -25,6 +25,8 @@ export class SetupComponent implements OnInit {
   newGame = true;
   existingGameId;
   notAuthorized = false;
+  emailSlips = false;
+  bingoSlipEmailStatus = 'DISABLED';
 
   leaderForm = new FormGroup({
     email: new FormControl('', [
@@ -45,7 +47,7 @@ export class SetupComponent implements OnInit {
       this.playerSetupComplete = r.playerSetupComplete;
       this.callsStarted = r.haveCallsStarted;
       this.bingoBoardReady = r.bingoBoardReady;
-
+      this.bingoSlipEmailStatus = r.bingoSlipEmailStatus;
       if (r.haveCallsStarted) {
         this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
           this.callsDone = callsDone;
@@ -71,8 +73,8 @@ export class SetupComponent implements OnInit {
   }
 
   proceedWithCalls() {
-    this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
-      this.callsDone = callsDone;
+    this.bingoService.startCalls(this.gameId).subscribe(() => {
+      this.callsDone = {};
       this.callsStarted = true;
     });
   }
@@ -85,13 +87,6 @@ export class SetupComponent implements OnInit {
     this.boardType = value;
   }
 
-  sendEmail() {
-    this.bingoService.sendEmail(this.gameId).subscribe((r) => {
-      this.callsStarted = true;
-      this.callsDone = {};
-    });
-  }
-
   onSubmit() {
     this.leader = new PlayerResponse(this.leaderForm.value.name, this.leaderForm.value.email);
     this.bingoService.assignLeader(this.gameId, this.leader).subscribe((r) => {
@@ -101,7 +96,10 @@ export class SetupComponent implements OnInit {
   }
 
   setUpBoardTypeAndSlipCount() {
-    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded).subscribe((r) => {
+    if (this.emailSlips) {
+      this.bingoSlipEmailStatus = 'NOT_SENT';
+    }
+    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded, this.emailSlips).subscribe((r) => {
       this.bingoBoardReady = true;
     });
   }

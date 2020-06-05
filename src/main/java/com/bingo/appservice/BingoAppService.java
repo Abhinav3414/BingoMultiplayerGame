@@ -24,6 +24,7 @@ import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlip75Type;
 import com.bingo.dao.BingoSlip90Type;
+import com.bingo.dao.BingoSlipEmailStatus;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.BingoUser;
 import com.bingo.dao.BingoUserType;
@@ -85,7 +86,8 @@ public class BingoAppService {
         return startedGame;
     }
 
-    public void setUpBoardTypeAndSlipCount(String gameId, BingoBoardType boardType, int slips) {
+    public void setUpBoardTypeAndSlipCount(String gameId, BingoBoardType boardType, int slips,
+            boolean shouldEmailSlips) {
         BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
         bBoard.setBingoBoardType(boardType);
         bBoard.setSlipsPerUser(slips);
@@ -95,6 +97,10 @@ public class BingoAppService {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         System.out.println(bBoard.getCalls());
         bGame.setBingoBoardReady(true);
+
+        if (shouldEmailSlips) {
+            bGame.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
+        }
         bingoGameRepository.save(bGame);
     }
 
@@ -124,7 +130,7 @@ public class BingoAppService {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         fileIOService.createBingoGameFolder(bGame.getGameId());
 
-        generateSlipsForUser(gameId, players);
+        createUsersAndGenerateSlips(gameId, players);
         createBingoPlayerFolders(bGame);
         writeCallsToCSV(bGame);
 
@@ -166,9 +172,9 @@ public class BingoAppService {
         // read excel, import participants and generateSlipsForUser
 
         List<PlayerResponse> players =
-                emails.stream().map(e -> new PlayerResponse(null, null, e)).collect(Collectors.toList());
+                emails.stream().map(e -> new PlayerResponse(e)).collect(Collectors.toList());
 
-        generateSlipsForUser(gameId, players);
+        createUsersAndGenerateSlips(gameId, players);
         createBingoPlayerFolders(bGame);
         writeCallsToCSV(bGame);
         generatePdfs(bGame);
@@ -180,8 +186,8 @@ public class BingoAppService {
     }
 
     public void generatePdfs(BingoGame bGame) {
-        List<String> userEmails = getBoardUserEmails(bGame);
-        List<String> pdfNotGenerated = generateSlipPDFForUsers(userEmails, bGame);
+        List<String> userIds = getBoardUserIds(bGame);
+        List<String> pdfNotGenerated = generateSlipPDFForUsers(userIds, bGame);
 
         if (pdfNotGenerated.isEmpty()) {
             System.out.println("Pdf generated for all successfully !!!, Game id : " + bGame.getGameId());
@@ -193,18 +199,17 @@ public class BingoAppService {
         }
     }
 
-    public void generateSlipsForUser(String gameId, List<PlayerResponse> players) {
+    public void createUsersAndGenerateSlips(String gameId, List<PlayerResponse> players) {
 
         List<String> userIds = new ArrayList<>();
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
         players.forEach(p -> {
-            BingoUser bUser = bingoUserRepository.findByEmailAndBoardIdLike(p.getEmail(), bGame.getBingoBoardId());
-            if (bUser != null) {
-                bingoUserRepository.delete(bUser);
-            }
-            BingoUser bu = bingoUserRepository.save(new BingoUser(p.getName(), p.getEmail(), bGame.getBingoBoardId()));
+            BingoUser newPlayer = new BingoUser(p.getName(), p.getEmail(), bGame.getGameId(), bGame.getBingoBoardId());
+            newPlayer.setBingoSlipEmailStatus(bGame.getBingoSlipEmailStatus());
+
+            BingoUser bu = bingoUserRepository.save(newPlayer);
             userIds.add(bu.getUserId());
         });
 
@@ -243,26 +248,27 @@ public class BingoAppService {
         return bingoSlipRepository.findByUserId(bu.getUserId());
     }
 
-    public List<String> generateSlipPDFForUsers(List<String> emails, BingoGame game) {
+    public List<String> generateSlipPDFForUsers(List<String> userIds, BingoGame game) {
         List<String> pdfNotGenerated = new ArrayList<>();
 
         boolean is90Game = bingoBoardRepository.findById(game.getBingoBoardId()).get().getBingoBoardType()
                 .equals(BingoBoardType.GAMEBOARD_90);
 
-        emails.forEach(email -> {
-            String slipName = fileIOService.getUserSlipPdfName(game.getGameId(), email);
-            List<BingoSlip> userSlips = bingoSlipRepository
-                    .findByUserId(
-                            bingoUserRepository.findByEmailAndBoardIdLike(email, game.getBingoBoardId()).getUserId());
+        userIds.forEach(userId -> {
+            BingoUser user = bingoUserRepository.findById(userId).get();
+            String slipName = fileIOService.getUserSlipPdfName(game.getGameId(), user.getEmail(), user.getName());
+            List<BingoSlip> userSlips = bingoSlipRepository.findByUserId(user.getUserId());
 
             List<SlipHtmlResponse> slipResponses = userSlips.stream()
                     .map(us -> new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix(), is90Game))
                     .collect(Collectors.toList());
+
+            String emailOrName = user.getEmail() != null ? user.getEmail() : user.getName();
             try {
-                slipToPdfGeneratorService.generateSlipPdf(slipName, email, game, slipResponses);
+                slipToPdfGeneratorService.generateSlipPdf(slipName, emailOrName, game, slipResponses);
             } catch (Exception e) {
-                System.out.println("Slip could not be generated for : " + email);
-                pdfNotGenerated.add(email);
+                System.out.println("Slip could not be generated for : " + emailOrName);
+                pdfNotGenerated.add(emailOrName);
             }
         });
         return pdfNotGenerated;
@@ -274,7 +280,7 @@ public class BingoAppService {
         bingoUserRepository.findByBoardId(game.getBingoBoardId())
                 .stream()
                 .filter(us -> !us.getUserType().equals(BingoUserType.ORGANIZER))
-                .map(bu -> bu.getEmail())
+                .map(bu -> (bu.getEmail()) != null ? bu.getEmail() : bu.getName())
                 .forEach(e -> {
                     fileIOService.createUserFolder(game.getGameId(), bingoFolderName, e);
                 });
@@ -286,18 +292,23 @@ public class BingoAppService {
         fileIOService.writeCallsToCsv(bingoFolderName, calls);
     }
 
-    public String getBingoUserSlipsForGame(String gameId, String email) {
-        return fileIOService.getUserSlipPdfName(gameId, email);
-    }
+    public String getBingoUserSlipsForGame(String gameId, String userId) {
 
-    public List<BingoSlip> getUserSlipsByEmail(String userEmail, BingoGame bGame) {
-        return bingoSlipRepository
-                .findByUserId(
-                        bingoUserRepository.findByEmailAndBoardIdLike(userEmail, bGame.getBingoBoardId()).getUserId());
+        BingoUser bUser = bingoUserRepository.findById(userId).get();
+
+        return fileIOService.getUserSlipPdfName(gameId, bUser.getEmail(), bUser.getName());
     }
 
     public List<BingoSlip> getUserSlips(String playerId) {
         return bingoSlipRepository.findByUserId(playerId);
+    }
+
+    public List<String> getBoardUserIds(BingoGame bGame) {
+        return bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
+                .stream()
+                .filter(us -> !us.getUserType().equals(BingoUserType.ORGANIZER))
+                .map(u -> u.getUserId())
+                .collect(Collectors.toList());
     }
 
     public List<String> getBoardUserEmails(BingoGame bGame) {
@@ -317,8 +328,14 @@ public class BingoAppService {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
         BingoBoard bBoard = bingoBoardRepository.findByGameId(bGame.getGameId());
-        BingoUser gameOrganizer = bingoUserRepository.save(new BingoUser(organizer.getName(), organizer.getEmail(),
-                BingoUserType.ORGANIZER, bBoard.getBoardId()));
+
+        BingoUser leader = new BingoUser(organizer.getName(), organizer.getEmail(),
+                BingoUserType.ORGANIZER, bGame.getGameId(), bBoard.getBoardId());
+
+        leader.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
+
+        BingoUser gameOrganizer = bingoUserRepository.save(leader);
+
         bBoard.setLeaderId(gameOrganizer.getUserId());
         bingoBoardRepository.save(bBoard);
 
@@ -343,7 +360,8 @@ public class BingoAppService {
         List<PlayerResponse> boardPlayers = getBoardUsers(bingoGameRepository.findById(gameId).get())
                 .stream()
                 .filter(p -> !p.getUserType().equals(BingoUserType.ORGANIZER))
-                .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail())).collect(Collectors.toList());
+                .map(p -> new PlayerResponse(p.getUserId(), p.getName(), p.getEmail(), p.getBingoSlipEmailStatus()))
+                .collect(Collectors.toList());
         return boardPlayers;
     }
 
@@ -377,13 +395,23 @@ public class BingoAppService {
         return calledCallsMap;
     }
 
-    public List<String> sendEmail(String gameId) {
+    public List<String> sendEmailToAll(String gameId) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
         List<String> emails = getBoardUserEmails(bGame);
-        System.out.println("pdfGenerated " + bGame.isPdfsGenerated());
 
         List<String> emailNotSent = emailService.sendMailToParticipants(emails, bGame.getGameId());
+
+        bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
+                .stream()
+                .forEach(u -> {
+                    if (emailNotSent.contains(u.getEmail())) {
+                        u.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
+                    } else {
+                        u.setBingoSlipEmailStatus(BingoSlipEmailStatus.SENT);
+                    }
+                    bingoUserRepository.save(u);
+                });
 
         if (!emailNotSent.isEmpty()) {
             System.out.println("Emails could not be sent to: ");
@@ -411,6 +439,33 @@ public class BingoAppService {
         emailService.sendMailToLeader(getBingoLeaderEmail(bGame.getGameId()), "Bingo Game Status For Game Leader",
                 bGame.getGameId(), line1, line2, line3);
 
+        bGame.setBingoSlipEmailStatus(BingoSlipEmailStatus.SENT);
+        bingoGameRepository.save(bGame);
+        return emailNotSent;
+    }
+
+    public List<String> sendEmail(String gameId, String playerId) {
+
+        BingoUser bingoUser = bingoUserRepository.findById(playerId).get();
+        List<String> emails = new ArrayList<>();
+        emails.add(bingoUser.getEmail());
+
+        List<String> emailNotSent = emailService.sendMailToParticipants(emails, gameId);
+
+        if (emailNotSent.contains(bingoUser.getEmail())) {
+            bingoUser.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
+        } else {
+            bingoUser.setBingoSlipEmailStatus(BingoSlipEmailStatus.SENT);
+        }
+        bingoUserRepository.save(bingoUser);
+
+        if (!emailNotSent.isEmpty()) {
+            System.out.println("Email could not be sent to: ");
+            System.out.println(emailNotSent);
+        } else {
+            System.out.println("Email has been sent successfully to : " + emails);
+        }
+
         return emailNotSent;
     }
 
@@ -424,7 +479,8 @@ public class BingoAppService {
         BingoUser bUser = bingoUserRepository.findByEmailAndBoardIdLike(leaderEmail, bBoard.getBoardId());
 
         if (bUser != null && bUser.getUserType().equals(BingoUserType.ORGANIZER)) {
-            return new PlayerResponse(bUser.getUserId(), bUser.getName(), bUser.getEmail());
+            return new PlayerResponse(bUser.getUserId(), bUser.getName(), bUser.getEmail(),
+                    bUser.getBingoSlipEmailStatus());
         } else {
             throw new IllegalAccessError("NOT AUTHORIZED");
         }

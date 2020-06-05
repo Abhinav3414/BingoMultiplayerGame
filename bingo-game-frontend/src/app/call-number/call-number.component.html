@@ -1,8 +1,12 @@
 <div class="col-sm-12 ml-4 mt-4" style="display: flex; flex-direction: column;">
 
   <div style=" display: flex; align-items: center; ">
-    <button *ngIf="calls.length >0" class="bubbly-button" type="button" (click)="callNext()">Call Next</button>
-    <button *ngIf="calls.length == 0" class="bubbly-button" type="button" (click)="callNext()">Start Calls</button>
+
+    <button *ngIf="calls.length >0" class="bubbly-button" type="button" (click)="callNext()">
+      <i class="fa fa-step-forward mr-1" aria-hidden="true"></i> Call Next</button>
+
+    <button *ngIf="calls.length == 0" class="bubbly-button" type="button" (click)="callNext()">
+      <i class="fa fa-rocket mr-1" aria-hidden="true" ></i>Start Calls</button>
 
     <span *ngIf="currentCall" style=" color: #1c7588; font-size: 2.5em; ">Call# {{currentCall}}</span>
   </div>

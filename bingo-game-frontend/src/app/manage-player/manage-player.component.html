@@ -42,14 +42,14 @@
             <div class="list-group-item">
               <h6 class="card-title">Player {{i + 1}}</h6>
               <div [formGroup]="player" class="form-row">
-                <div class="form-group col-5">
+                <div class="form-group col-5" [ngClass]="{'col-8': bingoSlipEmailStatus === 'DISABLED'}">
                   <input type="text" formControlName="name" class="form-control" placeholder="Name"
                     [ngClass]="{ 'is-invalid': submitted && player.controls.name.errors }" />
                   <div *ngIf="submitted && player.controls.name.errors" class="invalid-feedback">
                     <div *ngIf="player.controls.name.errors.required">Name is required</div>
                   </div>
                 </div>
-                <div class="form-group col-6">
+                <div class="form-group col-6" *ngIf="bingoSlipEmailStatus !== 'DISABLED'">
                   <input type="text" formControlName="email" class="form-control" placeholder="Email"
                     [ngClass]="{ 'is-invalid': submitted && player.controls.email.errors }" />
                   <div *ngIf="submitted && player.controls.email.errors" class="invalid-feedback">
@@ -76,16 +76,38 @@
   </div>
 </div>
 
-<div *ngIf="players" style="padding-left: 1.25rem;" class="col-lg-8">
+<div *ngIf="players" class="col-lg-9 all-players-wrapper">
   <h5 class="mb-4">Players in Game</h5>
 
   Link of Game Room for Players
   <a href="{{hrefUrl}}gameroom/{{gameId}}" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
-  <br> <br>
+  <br>
+  <div *ngFor="let player of players; index as i;" class="all-players">
+    <span style="padding-right: .5em">{{i + 1}}.</span>
+    <span class="player-name-style" *ngIf="player.email">{{player.email}}</span>
+    <span class="player-name-style" *ngIf="!player.email && player.name">{{player.name}}</span>
+    <app-modal [player]="player" [gameId]="gameId" style="margin-left:.5em"></app-modal>
 
-  <div *ngFor="let player of players; index as i;" style="display:flex; padding: 0 0 .2em .5em">
-    <span style="padding-right: 1em">{{i + 1}}.</span>
-    <span style="display: flex;flex-grow: 1;">{{player.email}}</span>
-    <app-modal [playerId]="player.id" [playerEmail]="player.email" [gameId]="gameId" style="margin-left:.5em"></app-modal>
+    <div class="email-status-style" *ngIf="bingoSlipEmailStatus === 'SENT'"
+      [ngClass]="{'success': player.bingoSlipEmailStatus === 'SENT', 'fail': player.bingoSlipEmailStatus === 'NOT_SENT'}">
+      <i class="fa fa-envelope-o" style=" position: absolute; " aria-hidden="true"></i>
+      <i class="fa fa-check check-style" *ngIf="player.bingoSlipEmailStatus == 'SENT'" aria-hidden="true"></i>
+      <i class="fa fa-exclamation-triangle exclamation-style" *ngIf="player.bingoSlipEmailStatus == 'NOT_SENT'"
+        aria-hidden="true"></i>
+    </div>
+
+    <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
+      <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
+        style=" margin-left: 1em; ">
+        <i class="fa fa-repeat" aria-hidden="true"></i></button>
+    </div>
+
+
+
   </div>
+  <div class="mt-4" *ngIf="bingoSlipEmailStatus === 'NOT_SENT'">
+    <button class="btn btn-success" type="button" (click)="sendEmailToAll()">
+      <i class="fa fa-envelope" aria-hidden="true" style="margin-right: .5em"></i>Email Slips to All players</button>
+  </div>
+
 </div>

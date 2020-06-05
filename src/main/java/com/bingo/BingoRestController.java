@@ -68,18 +68,50 @@ public class BingoRestController {
         BingoUser bLeader = bingoAppService.setLeader(gameId, leader);
 
         if (bLeader != null) {
-            return new ResponseEntity<>(new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail()),
-                    HttpStatus.OK);
+            PlayerResponse bLeaderResponse =
+                    new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail(), bLeader.getBingoSlipEmailStatus());
+            
+            return new ResponseEntity<>(bLeaderResponse,  HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("{gameId}/boardType/{boardType}/slipcount/{slips}")
     public ResponseEntity<PlayerResponse> setUpBoardTypeAndSlipCount(@PathVariable("gameId") String gameId,
-            @PathVariable("boardType") BingoBoardType boardType, @PathVariable("slips") int slips) {
+            @PathVariable("boardType") BingoBoardType boardType, @PathVariable("slips") int slips,
+            @RequestParam(required = false, value = "emailSlips") boolean emailSlips) {
 
-        bingoAppService.setUpBoardTypeAndSlipCount(gameId, boardType, slips);
+        bingoAppService.setUpBoardTypeAndSlipCount(gameId, boardType, slips, emailSlips);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("{gameId}/startCalls")
+    public ResponseEntity<PlayerResponse> startCalls(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+        bGame.setHaveCallsStarted(true);
+        bingoGameRepository.save(bGame);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
+    public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        return new ResponseEntity<>(bingoAppService.callNext(gameId), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
+    public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
+
+        Map<Integer, Integer> allCallsMap = bingoAppService.getAllCalls(gameId);
+
+        return new ResponseEntity<>(allCallsMap, HttpStatus.OK);
     }
 
     @PostMapping("{gameId}/entergameroom/{leaderEmail}")
@@ -100,14 +132,14 @@ public class BingoRestController {
         return new ResponseEntity<>(bGame, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/download/{gameId}/{userEmail}", method = RequestMethod.GET)
+    @RequestMapping(value = "/download/{gameId}/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<FileSystemResource> getBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
-            @PathVariable("userEmail") String userEmail, @RequestHeader("X-Requested-With") String leaderId)
+    public ResponseEntity<FileSystemResource> downloadBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
+            @PathVariable("userId") String userId, @RequestHeader("X-Requested-With") String leaderId)
             throws IOException {
         bingoAppService.validateGameAccess(gameId, leaderId);
 
-        String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userEmail);
+        String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userId);
         FileSystemResource file = new FileSystemResource(new File(slipName));
 
         HttpHeaders headers = new HttpHeaders();
@@ -123,13 +155,13 @@ public class BingoRestController {
                 .body(file);
     }
 
-    @PostMapping("{gameId}/sendEmail")
-    public ResponseEntity<List<String>> emailandstartbingo(@PathVariable("gameId") String gameId,
+    @PostMapping("{gameId}/sendEmailToAll")
+    public ResponseEntity<List<String>> sendEmailToAll(@PathVariable("gameId") String gameId,
             @RequestHeader("X-Requested-With") String leaderId) {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
 
-        List<String> emails = bingoAppService.sendEmail(gameId);
+        List<String> emails = bingoAppService.sendEmailToAll(gameId);
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
@@ -137,17 +169,17 @@ public class BingoRestController {
             bGame.setHaveCallsStarted(true);
             bingoGameRepository.save(bGame);
         }
-
         return new ResponseEntity<>(emails, HttpStatus.OK);
     }
-
-    @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
-    public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId,
+    
+    @PostMapping("{gameId}/sendEmail/{playerId}")
+    public ResponseEntity<List<String>> sendEmail(@PathVariable("gameId") String gameId, @PathVariable("playerId") String playerId,
             @RequestHeader("X-Requested-With") String leaderId) {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
+        List<String> emails = bingoAppService.sendEmail(gameId, playerId);
 
-        return new ResponseEntity<>(bingoAppService.callNext(gameId), HttpStatus.OK);
+        return new ResponseEntity<>(emails, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
@@ -194,7 +226,9 @@ public class BingoRestController {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
 
-        return new ResponseEntity<>(bingoAppService.getBingoBoardPlayers(gameId), HttpStatus.OK);
+        List<PlayerResponse> bingoBoardPlayers = bingoAppService.getBingoBoardPlayers(gameId);
+        
+        return new ResponseEntity<>(bingoBoardPlayers, HttpStatus.OK);
     }
 
     @RequestMapping(value = "{gameId}/playerslips/{playerId}", method = RequestMethod.GET)
@@ -204,14 +238,6 @@ public class BingoRestController {
         bingoAppService.validateGameAccess(gameId, leaderId);
 
         return new ResponseEntity<>(bingoAppService.getUserSlipsWrapper(gameId, playerId), HttpStatus.OK);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
-    public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
-
-        Map<Integer, Integer> allCallsMap = bingoAppService.getAllCalls(gameId);
-
-        return new ResponseEntity<>(allCallsMap, HttpStatus.OK);
     }
 
 }

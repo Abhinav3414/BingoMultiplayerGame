@@ -112,7 +112,7 @@ public class EmailService {
         String mailSubject = EMAIL_SUBJECT;
 
         emails.forEach(e -> {
-            String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, e);
+            String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, e, null);
             Path path = Paths.get(userSlipPdfName);
             byte[] content;
             try {
