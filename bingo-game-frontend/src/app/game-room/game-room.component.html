@@ -1,13 +1,43 @@
 <div class="gameroom">
 
-  <h4 class="p-4" > Welcom in Bingo Game !!!</h4>
 
-  <h5 class="pl-4">Calls done </h5>
-  <div class="m-4" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
-    <div *ngFor="let call of calls; index as i;">
-      <span>{{i+1}}: </span>
-      <span>{{call}}</span>
+  <h4 class="p-4"> Welcom in Bingo Game !!!</h4>
+  <div class="row" style="width: 100%">
+
+    <div class="col-sm-4">
+      <span *ngIf="!lastCall" class="ml-4" style=" color: #1c7588; font-size: 2.5em; ">Game is yet to start !!!</span>
+      <span *ngIf="lastCall" class="ml-4" style=" color: #1c7588; font-size: 2.5em; ">Last Call# {{lastCall}}</span>
+      <div class="m-4" style=" display: flex; flex-direction: column; max-height: 50vh; flex-wrap: wrap; ">
+        <div *ngFor="let call of calls; index as i;">
+          <span>{{i+1}}: </span>
+          <span>{{call}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-8">
+
+      <div class="form-group col-sm-8 col-lg-4">
+        <label for="enterExistingGame">Enter Your Unique Id to view your slips:</label>
+        <div style=" display: flex; ">
+          <input class="form-control" placeholder="player id" id="playeruniqueid"
+          [(ngModel)]="playeruniqueid" />
+          <button type="submit" class="btn btn-success ml-2" (click)="viewSlips()">Submit</button>
+        </div>
+
+      </div>
+
+      <div *ngIf="slipResponse" class="slip-wrapper" >
+        <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as i;">
+          <span>Slip No: {{i+1}}</span>
+          <table id="slips">
+            <tr *ngFor="let item of res.transformedMatrix">
+              <td *ngFor="let j of item"><span *ngIf="j!=0">{{j}}</span></td>
+            <tr>
+          </table>
+          <span style="font-size: 0.8em;display: flex;flex-direction: row-reverse;max-width: 40em;">id# {{res.slipId}} </span>
+        </div>
+      </div>
+
+
     </div>
   </div>
-
-</div>

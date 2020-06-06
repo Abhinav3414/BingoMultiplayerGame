@@ -69,9 +69,10 @@ public class BingoRestController {
 
         if (bLeader != null) {
             PlayerResponse bLeaderResponse =
-                    new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail(), bLeader.getBingoSlipEmailStatus());
-            
-            return new ResponseEntity<>(bLeaderResponse,  HttpStatus.OK);
+                    new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail(),
+                            bLeader.getBingoSlipEmailStatus());
+
+            return new ResponseEntity<>(bLeaderResponse, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
@@ -171,15 +172,17 @@ public class BingoRestController {
         }
         return new ResponseEntity<>(emails, HttpStatus.OK);
     }
-    
+
     @PostMapping("{gameId}/sendEmail/{playerId}")
-    public ResponseEntity<List<String>> sendEmail(@PathVariable("gameId") String gameId, @PathVariable("playerId") String playerId,
-            @RequestHeader("X-Requested-With") String leaderId) {
+    public ResponseEntity<Boolean> sendEmail(@PathVariable("gameId") String gameId,
+            @PathVariable("playerId") String playerId, @RequestHeader("X-Requested-With") String leaderId) {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
-        List<String> emails = bingoAppService.sendEmail(gameId, playerId);
+        List<String> emailsNotSend = bingoAppService.sendEmail(gameId, playerId);
 
-        return new ResponseEntity<>(emails, HttpStatus.OK);
+        boolean isSentSuccess = emailsNotSend.isEmpty() ? true : false;
+
+        return new ResponseEntity<>(isSentSuccess, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
@@ -227,7 +230,7 @@ public class BingoRestController {
         bingoAppService.validateGameAccess(gameId, leaderId);
 
         List<PlayerResponse> bingoBoardPlayers = bingoAppService.getBingoBoardPlayers(gameId);
-        
+
         return new ResponseEntity<>(bingoBoardPlayers, HttpStatus.OK);
     }
 

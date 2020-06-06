@@ -1,4 +1,4 @@
-<button class="btn btn-info" (click)="open(mymodal)">
+<button class="btn btn-info button-style" (click)="open(mymodal)">
   <i class="fa fa-eye" aria-hidden="true" style="margin-right: .5em"></i>Slips</button>
 
 <ng-template #mymodal let-modal>
@@ -9,10 +9,19 @@
     </button>
   </div>
   <div class="modal-body">
-    <div style=" display: flex; flex-direction: row-reverse; margin-right: 2em">
+    <div style=" display: flex; flex-direction: row; margin-right: 2em">
+
+      <div style="display: flex; flex-grow: 1;">
+         <button class="btn btn-success" type="button" (click)="showId()">
+          <i class="fa fa-eye" aria-hidden="true" style="margin-right: .5em"></i>Click to view player Unique Id
+        </button>
+      </div>
       <button class="btn btn-success" type="button" (click)="downloadSlipPdf()">
         <i class="fa fa-download" aria-hidden="true" style="margin-right: .5em"></i>Download Slips</button>
     </div>
+    <div class="barcode" *ngIf="!showPlayerId"><h2>Libre Barcode</h2></div>
+    <div *ngIf="showPlayerId" class="mb-4 p-1"><a>{{player.id}}</a></div>
+
     <div *ngIf="slipResponse">
       <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as i;">
         <span>Slip No: {{i+1}}</span>

@@ -25,6 +25,9 @@ export class ManagePlayerComponent implements OnInit {
   isAddPlayerFromManually = true;
   hrefUrl;
 
+  emailSendPlayerIdentifier;
+  fetching = false;
+
   constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
     this.hrefUrl = window.location.href.substr(0, window.location.href.indexOf('#') + 2);
   }
@@ -158,14 +161,33 @@ export class ManagePlayerComponent implements OnInit {
   }
 
   sendEmailToAll() {
+    this.fetching = true;
     this.bingoService.sendEmailToAll(this.gameId).subscribe((r) => {
       this.bingoSlipEmailStatus = 'SENT';
-    });
+
+      this.bingoService.getBingoPlayers(this.gameId).subscribe((res) => {
+        this.players = res;
+        this.fetching = false;
+      }, (er) => {
+        this.fetching = false;
+      });
+
+    }, (err) => {
+      this.fetching = false;
+    }
+    );
   }
 
   sendEmail(playerId: string) {
+    this.fetching = true;
     this.bingoService.sendEmail(this.gameId, playerId).subscribe((r) => {
-      this.bingoSlipEmailStatus = 'SENT';
+      if (r === false) {
+        const player = this.players.filter(p => p.id === playerId)[0];
+        this.emailSendPlayerIdentifier = (player.email) ? player.email : player.name;
+        this.fetching = false;
+      }
+    }, (err) => {
+      this.fetching = false;
     });
   }
 

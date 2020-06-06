@@ -79,13 +79,23 @@
 <div *ngIf="players" class="col-lg-9 all-players-wrapper">
   <h5 class="mb-4">Players in Game</h5>
 
-  Link of Game Room for Players
-  <a href="{{hrefUrl}}gameroom/{{gameId}}" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
+  Link of Game Room for Players :
+  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word; " target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
   <br>
   <div *ngFor="let player of players; index as i;" class="all-players">
     <span style="padding-right: .5em">{{i + 1}}.</span>
     <span class="player-name-style" *ngIf="player.email">{{player.email}}</span>
     <span class="player-name-style" *ngIf="!player.email && player.name">{{player.name}}</span>
+
+    <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
+      <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
+        style=" margin-left: 1em; " [disabled]="fetching">
+        <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem;" *ngIf="fetching">
+          <span class="sr-only"></span>
+        </div>
+        <i class="fa fa-repeat" aria-hidden="true" *ngIf="!fetching"></i></button>
+    </div>
+
     <app-modal [player]="player" [gameId]="gameId" style="margin-left:.5em"></app-modal>
 
     <div class="email-status-style" *ngIf="bingoSlipEmailStatus === 'SENT'"
@@ -95,19 +105,21 @@
       <i class="fa fa-exclamation-triangle exclamation-style" *ngIf="player.bingoSlipEmailStatus == 'NOT_SENT'"
         aria-hidden="true"></i>
     </div>
-
-    <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
-      <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
-        style=" margin-left: 1em; ">
-        <i class="fa fa-repeat" aria-hidden="true"></i></button>
-    </div>
-
-
-
   </div>
+  <div class="mt-4" *ngIf="emailSendPlayerIdentifier" style="color: #f40000;">
+    <i class="fa fa-exclamation-triangle " aria-hidden="true" style="margin-right: .5em"></i>
+    <span>Email Could not be sent to <b>{{emailSendPlayerIdentifier}}</b>. Please try again or you can download and send slips manually.</span>
+  </div>
+
+
+
   <div class="mt-4" *ngIf="bingoSlipEmailStatus === 'NOT_SENT'">
-    <button class="btn btn-success" type="button" (click)="sendEmailToAll()">
-      <i class="fa fa-envelope" aria-hidden="true" style="margin-right: .5em"></i>Email Slips to All players</button>
-  </div>
+    <button class="btn btn-success" type="button" (click)="sendEmailToAll()" [disabled]="fetching">
+      <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem; margin-right: .5em" *ngIf="fetching">
+        <span class="sr-only"></span>
+      </div>
+      <i class="fa fa-envelope" aria-hidden="true" style="margin-right: .5em" *ngIf="!fetching"></i>Email Slips to All players</button>
+      <div class="mt-2" style="font-size: .8em; color: #585555;" *ngIf="fetching">Emailing might take a while. Please keep patience.</div>
+    </div>
 
 </div>

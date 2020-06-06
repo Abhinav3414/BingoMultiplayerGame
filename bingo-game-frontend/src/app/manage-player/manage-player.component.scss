@@ -14,13 +14,13 @@
 
     .all-players {
       display:flex;
+      align-items: center;
+      justify-content: center;
       padding: 0 0 .2em .5em;
-      flex-wrap: wrap;
 
       .player-name-style {
         display: flex;
         flex-grow: 1;
-        max-width: 13em;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

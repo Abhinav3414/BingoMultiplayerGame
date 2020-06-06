@@ -14,6 +14,8 @@ export class ModalComponent implements OnInit {
   slipResponse: any;
   closeResult: string;
 
+  showPlayerId = false;
+
   constructor(private modalService: NgbModal, private bingoService: BingoService) { }
 
   ngOnInit(): void {
@@ -40,6 +42,10 @@ export class ModalComponent implements OnInit {
     } else {
       return `with: ${reason}`;
     }
+  }
+
+  showId() {
+    this.showPlayerId = !this.showPlayerId;
   }
 
   downloadSlipPdf() {

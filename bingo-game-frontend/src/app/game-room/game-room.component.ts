@@ -17,26 +17,36 @@ export class GameRoomComponent implements OnInit {
   subscription: Subscription;
   statusText: string;
 
+  playeruniqueid;
+  slipResponse;
+  lastCall;
+
   constructor(private route: ActivatedRoute, public bingoService: BingoService) {
 
     this.route.url.subscribe((res: any) => {
       this.gameId = res[1].path;
     });
 
-    this.subscription = timer(0, 3000).pipe(
-      switchMap(() => this.bingoService.getAllCalls(this.gameId))
-    ).subscribe(callsDone => {
-      this.callsDone = callsDone;
-      this.calls = [];
-      for (const val of Object.values(this.callsDone)) {
-        this.calls.push(val);
-      }
-
-    });
+    this.subscription = timer(0, 3000).pipe(switchMap(() => this.bingoService.getAllCalls(this.gameId)))
+      .subscribe(callsDone => {
+        this.callsDone = callsDone;
+        this.calls = [];
+        for (const val of Object.values(this.callsDone)) {
+          this.calls.push(val);
+          this.lastCall = val;
+        }
+      });
 
   }
 
   ngOnInit(): void {
+  }
+
+  viewSlips() {
+    this.bingoService.getUserSlips(this.gameId, this.playeruniqueid).subscribe((res) => {
+      console.log(res);
+      this.slipResponse = res;
+    });
   }
 
 }
