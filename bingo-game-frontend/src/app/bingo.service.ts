@@ -119,4 +119,13 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/startCalls', null, { headers: this.headers });
   }
 
+  updateSlipNumber(gameId: string, playerId: any, slipRow: any, slipCol: any, slipId: any): any {
+    const slipInfo = {
+      row: slipRow,
+      col: slipCol,
+      id: slipId
+    };
+    return this.http.post(this.appUrl + '/' + gameId + '/updateSlip/' + playerId, slipInfo);
+  }
+
 }

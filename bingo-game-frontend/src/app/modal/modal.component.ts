@@ -15,6 +15,7 @@ export class ModalComponent implements OnInit {
   closeResult: string;
 
   showPlayerId = false;
+  is75Board = false;
 
   constructor(private modalService: NgbModal, private bingoService: BingoService) { }
 
@@ -24,6 +25,9 @@ export class ModalComponent implements OnInit {
   open(content) {
     this.bingoService.getUserSlips(this.gameId, this.player.id).subscribe((r) => {
       this.slipResponse = r;
+      if (this.slipResponse.responses[0].transformedMatrix[0].length === 5) {
+        this.is75Board = true;
+      }
     });
 
     this.modalService.open(content,

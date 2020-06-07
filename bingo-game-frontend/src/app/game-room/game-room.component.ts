@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { BingoService } from '../bingo.service';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { ReturnStatement } from '@angular/compiler';
 
 @Component({
   selector: 'app-game-room',
@@ -20,6 +21,7 @@ export class GameRoomComponent implements OnInit {
   playeruniqueid;
   slipResponse;
   lastCall;
+  is75Board = false;
 
   constructor(private route: ActivatedRoute, public bingoService: BingoService) {
 
@@ -44,8 +46,20 @@ export class GameRoomComponent implements OnInit {
 
   viewSlips() {
     this.bingoService.getUserSlips(this.gameId, this.playeruniqueid).subscribe((res) => {
-      console.log(res);
       this.slipResponse = res;
+      if (this.slipResponse.responses[0].transformedMatrix[0].length === 5) {
+        this.is75Board = true;
+      }
+    });
+  }
+
+  clickOnNumber(row: number, col: number, slipId: number) {
+    this.bingoService.updateSlipNumber(this.gameId, this.playeruniqueid, row, col, slipId).subscribe((slipRes) => {
+      this.slipResponse.responses.forEach(sr => {
+        if (sr.slipId === slipRes.slipId) {
+          sr.transformedMatrix = slipRes.transformedMatrix;
+        }
+      });
     });
   }
 

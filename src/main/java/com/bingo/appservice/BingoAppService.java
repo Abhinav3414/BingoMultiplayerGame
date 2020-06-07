@@ -30,6 +30,7 @@ import com.bingo.dao.BingoUser;
 import com.bingo.dao.BingoUserType;
 import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.dao.SlipInfoResponse;
 import com.bingo.repository.BingoBoardRepository;
 import com.bingo.repository.BingoGameRepository;
 import com.bingo.repository.BingoSlipRepository;
@@ -485,5 +486,35 @@ public class BingoAppService {
             throw new IllegalAccessError("NOT AUTHORIZED");
         }
 
+    }
+
+    public BingoSlip updateSlipNumber(String gameId, String playerId, SlipInfoResponse slipInfo) {
+
+        List<BingoSlip> playerSlips = bingoSlipRepository.findByUserId(playerId);
+
+        boolean slipPresent =
+                playerSlips.stream().map(ps -> ps.getSlipId()).collect(Collectors.toList()).contains(slipInfo.getId());
+
+        if (!slipPresent) {
+            throw new IllegalAccessError("Not authorized");
+        }
+
+        BingoSlip slip = bingoSlipRepository.findById(slipInfo.getId()).get();
+
+        int[][] matrix = slip.getBingoMatrix();
+
+        if (matrix[slipInfo.getCol()][slipInfo.getRow()] == 0 && slip.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90)) {
+            return slip;
+        }
+
+        matrix[slipInfo.getCol()][slipInfo.getRow()] = (matrix[slipInfo.getCol()][slipInfo.getRow()] >= 1000)
+                ? matrix[slipInfo.getCol()][slipInfo.getRow()] - 1000
+                : matrix[slipInfo.getCol()][slipInfo.getRow()] + 1000;
+
+        slip.setBingoMatrix(matrix);
+
+        bingoSlipRepository.save(slip);
+
+        return slip;
     }
 }

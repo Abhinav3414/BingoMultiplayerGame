@@ -29,9 +29,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.bingo.appservice.BingoAppService;
 import com.bingo.dao.BingoBoardType;
 import com.bingo.dao.BingoGame;
+import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.BingoUser;
 import com.bingo.dao.PlayerResponse;
+import com.bingo.dao.SlipHtmlResponse;
+import com.bingo.dao.SlipInfoResponse;
 import com.bingo.repository.BingoGameRepository;
 
 
@@ -241,6 +244,18 @@ public class BingoRestController {
         bingoAppService.validateGameAccess(gameId, leaderId);
 
         return new ResponseEntity<>(bingoAppService.getUserSlipsWrapper(gameId, playerId), HttpStatus.OK);
+    }
+
+    @PostMapping("{gameId}/updateSlip/{playerId}")
+    public ResponseEntity<SlipHtmlResponse> updateSlipNumber(@PathVariable("gameId") String gameId,
+            @PathVariable("playerId") String playerId, @RequestBody SlipInfoResponse slipInfo) {
+
+        BingoSlip slipRes = bingoAppService.updateSlipNumber(gameId, playerId, slipInfo);
+
+        SlipHtmlResponse res = new SlipHtmlResponse(slipRes.getSlipId(), slipRes.getBingoMatrix(),
+                slipRes.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90));
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
 }

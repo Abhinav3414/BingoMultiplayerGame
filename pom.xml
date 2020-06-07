@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.bingo</groupId>
 	<artifactId>BingoMultiplayerGame</artifactId>
-	<version>v1.0</version>
+	<version>v1.1</version>
 	<name>BingoMultiplayerGame</name>
 	<description>Bingo Project For Multiplayers</description>
 
