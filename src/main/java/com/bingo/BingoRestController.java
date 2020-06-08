@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -161,11 +163,11 @@ public class BingoRestController {
 
     @PostMapping("{gameId}/sendEmailToAll")
     public ResponseEntity<List<String>> sendEmailToAll(@PathVariable("gameId") String gameId,
-            @RequestHeader("X-Requested-With") String leaderId) {
+            @RequestHeader("X-Requested-With") String leaderId, HttpServletRequest request) {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
 
-        List<String> emails = bingoAppService.sendEmailToAll(gameId);
+        List<String> emails = bingoAppService.sendEmailToAll(gameId, getApplicationContextUrl(gameId, request));
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
@@ -178,14 +180,23 @@ public class BingoRestController {
 
     @PostMapping("{gameId}/sendEmail/{playerId}")
     public ResponseEntity<Boolean> sendEmail(@PathVariable("gameId") String gameId,
-            @PathVariable("playerId") String playerId, @RequestHeader("X-Requested-With") String leaderId) {
+            @PathVariable("playerId") String playerId, @RequestHeader("X-Requested-With") String leaderId,
+            HttpServletRequest request) {
 
         bingoAppService.validateGameAccess(gameId, leaderId);
-        List<String> emailsNotSend = bingoAppService.sendEmail(gameId, playerId);
+        List<String> emailsNotSend =
+                bingoAppService.sendEmail(gameId, playerId, getApplicationContextUrl(gameId, request));
 
         boolean isSentSuccess = emailsNotSend.isEmpty() ? true : false;
 
         return new ResponseEntity<>(isSentSuccess, HttpStatus.OK);
+    }
+
+    private String getApplicationContextUrl(String gameId, HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
+        StringBuilder contexturl = new StringBuilder(url.substring(0, url.indexOf("bingo-game") + 11));
+        contexturl.append("#/gameroom/" + gameId);
+        return contexturl.toString();
     }
 
     @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
@@ -239,9 +250,7 @@ public class BingoRestController {
 
     @RequestMapping(value = "{gameId}/playerslips/{playerId}", method = RequestMethod.GET)
     public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("playerId") String playerId,
-            @PathVariable("gameId") String gameId, @RequestHeader("X-Requested-With") String leaderId) {
-
-        bingoAppService.validateGameAccess(gameId, leaderId);
+            @PathVariable("gameId") String gameId) {
 
         return new ResponseEntity<>(bingoAppService.getUserSlipsWrapper(gameId, playerId), HttpStatus.OK);
     }

@@ -396,12 +396,15 @@ public class BingoAppService {
         return calledCallsMap;
     }
 
-    public List<String> sendEmailToAll(String gameId) {
+    public List<String> sendEmailToAll(String gameId, String gameRoomUrl) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
-        List<String> emails = getBoardUserEmails(bGame);
+        List<BingoUser> gamePlayers = bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
+                .stream()
+                .filter(u -> u.getUserType().equals(BingoUserType.PARTICIPANT))
+                .collect(Collectors.toList());
 
-        List<String> emailNotSent = emailService.sendMailToParticipants(emails, bGame.getGameId());
+        List<String> emailNotSent = emailService.sendMailToParticipants(gamePlayers, bGame.getGameId(), gameRoomUrl);
 
         bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
                 .stream()
@@ -445,13 +448,13 @@ public class BingoAppService {
         return emailNotSent;
     }
 
-    public List<String> sendEmail(String gameId, String playerId) {
+    public List<String> sendEmail(String gameId, String playerId, String gameRoomUrl) {
 
         BingoUser bingoUser = bingoUserRepository.findById(playerId).get();
-        List<String> emails = new ArrayList<>();
-        emails.add(bingoUser.getEmail());
+        List<BingoUser> bingoUsers = new ArrayList<>();
+        bingoUsers.add(bingoUser);
 
-        List<String> emailNotSent = emailService.sendMailToParticipants(emails, gameId);
+        List<String> emailNotSent = emailService.sendMailToParticipants(bingoUsers, gameId, gameRoomUrl);
 
         if (emailNotSent.contains(bingoUser.getEmail())) {
             bingoUser.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
@@ -464,7 +467,7 @@ public class BingoAppService {
             System.out.println("Email could not be sent to: ");
             System.out.println(emailNotSent);
         } else {
-            System.out.println("Email has been sent successfully to : " + emails);
+            System.out.println("Email has been sent successfully to : " + bingoUser.getEmail());
         }
 
         return emailNotSent;
@@ -503,7 +506,8 @@ public class BingoAppService {
 
         int[][] matrix = slip.getBingoMatrix();
 
-        if (matrix[slipInfo.getCol()][slipInfo.getRow()] == 0 && slip.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90)) {
+        if (matrix[slipInfo.getCol()][slipInfo.getRow()] == 0
+                && slip.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90)) {
             return slip;
         }
 

@@ -20,7 +20,10 @@
         <i class="fa fa-download" aria-hidden="true" style="margin-right: .5em"></i>Download Slips</button>
     </div>
     <div class="barcode" *ngIf="!showPlayerId"><h2>Libre Barcode</h2></div>
-    <div *ngIf="showPlayerId" class="mb-4 p-1"><a>{{player.id}}</a></div>
+    <div *ngIf="showPlayerId" class="mb-4 p-1">
+      <a appLoadTooltip data-toggle="tooltip" title="Some text"
+      (click)="copyMessage(player.id)" style="cursor: pointer;">{{player.id}}</a>
+    </div>
 
     <div *ngIf="slipResponse" class="slips">
       <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as i;">

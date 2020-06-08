@@ -23,6 +23,8 @@ export class ModalComponent implements OnInit {
   }
 
   open(content) {
+    this.showPlayerId = false;
+
     this.bingoService.getUserSlips(this.gameId, this.player.id).subscribe((r) => {
       this.slipResponse = r;
       if (this.slipResponse.responses[0].transformedMatrix[0].length === 5) {
@@ -46,6 +48,20 @@ export class ModalComponent implements OnInit {
     } else {
       return `with: ${reason}`;
     }
+  }
+
+  copyMessage(val: string) {
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = val;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
   }
 
   showId() {

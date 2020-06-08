@@ -18,6 +18,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.bingo.dao.BingoUser;
+
 
 /**
  * @author Abhinav Gupta
@@ -50,7 +52,7 @@ public class EmailService {
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);// true indicates multipart message
 
-            helper.setFrom("abhinav.g@comakeit.com");
+            helper.setFrom("bingo.multiplayer.game@gmail.com");
             helper.setSubject(subject);
             helper.setTo(toEmail);
             helper.addAttachment(BINGO_SLIP_ATTACHMENT_NAME_PREFIX + toEmail + ".pdf", new ByteArrayResource(fileContent));
@@ -101,25 +103,26 @@ public class EmailService {
 
     }
 
-    public List<String> sendMailToParticipants(List<String> emails, String gameId) {
+    public List<String> sendMailToParticipants(List<BingoUser> users, String gameId, String gameRoomUrl) {
 
         List<String> emailNotSent = new ArrayList<String>();
 
         String contentId = ContentIdGenerator.getContentId();
 
-        String mailMessage = getEmailContent(gameId, contentId);
-
         String mailSubject = EMAIL_SUBJECT;
-
-        emails.forEach(e -> {
-            String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, e, null);
+        
+        users.forEach(bu -> {
+            
+            String mailMessage = getEmailContent(gameId, contentId, bu.getUserId(), gameRoomUrl);
+            
+            String userSlipPdfName = fileIOService.getUserSlipPdfName(gameId, bu.getEmail(), null);
             Path path = Paths.get(userSlipPdfName);
             byte[] content;
             try {
                 content = Files.readAllBytes(path);
-                boolean isMailSent = sendMail(e, mailSubject, mailMessage, content, gameId, contentId);
+                boolean isMailSent = sendMail(bu.getEmail(), mailSubject, mailMessage, content, gameId, contentId);
                 if (!isMailSent) {
-                    emailNotSent.add(e);
+                    emailNotSent.add(bu.getEmail());
                 }
                 TimeUnit.SECONDS.sleep(3);
             } catch (IOException e1) {
@@ -131,17 +134,19 @@ public class EmailService {
         return emailNotSent;
     }
 
-    private String getEmailContent(String gameId, String contentId) {
+    private String getEmailContent(String gameId, String contentId, String playerId, String gameRoomLink) {
         return "Hi,<br />Hope u are having a good day. <br/>"
                 + "Here are your Bingo slips. Kindly check attachment. <br/>"
-                + "Please take a print out or write down the numbers of each ticket separately before the games starts.<br/>"
-                + "Enjoy !!!"
-                + "  <br /><br /><br/> "
-                + "Game id#" + gameId
-                + " <br />"
+                + "Please take a print out or write down the numbers of each ticket separately before the games starts.<br/><br/>"
+                + "OR you can enter your unique player Id in game room to view your slips online.<br/>"
+                + "<b>Uniques Player id : " + playerId + "</b><br /><br />"
+                + "<a href=\"" + gameRoomLink  +"\" target=\"_blank\">Open Game Room</a>"
+                + "<br />"
+                + "Enjoy !!! <br /><br />"
+                + "Game id#" + gameId + " <br />"
                 + "<img height='400' width='400' src=\"cid:" + contentId + "\" />"
                 + "<br /><br />"
-                + "Regards <br />~- &#129505; " + SENDER_NAME;
+                + "Regards <br />~ &#129505; " + SENDER_NAME;
     }
     
     private String getEmailContentForLeader(String line1, String line2, String line3, String gameId) {
