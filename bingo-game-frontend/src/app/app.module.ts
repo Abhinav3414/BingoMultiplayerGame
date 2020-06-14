@@ -22,6 +22,7 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { ShareIconsModule } from 'ngx-sharebuttons/icons';
 import { ShareButtonsConfig } from 'ngx-sharebuttons';
 import { ShareButtonsModule } from 'ngx-sharebuttons/buttons';
+import { HeaderComponent } from './header/header.component';
 
 const customConfig: ShareButtonsConfig = {
   include: ['twitter', 'whatsapp', 'telegram', 'copy'],
@@ -52,7 +53,8 @@ const customConfig: ShareButtonsConfig = {
     ManagePlayerComponent,
     CallNumberComponent,
     ModalComponent,
-    GameRoomComponent
+    GameRoomComponent,
+    HeaderComponent
   ],
   imports: [
     HttpClientModule,

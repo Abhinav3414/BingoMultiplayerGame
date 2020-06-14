@@ -1,0 +1,48 @@
+
+.header-style {
+  background: #4e54c8;
+  color: #eee8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  top: 0.2em;
+
+  svg {
+    color: #e80606;
+    margin: 0.2em .2em 0 .3em;
+  }
+
+  .abhinav-style {
+    z-index: 100;
+    color: white;
+  }
+
+  .navbar-collapse {
+    flex-grow: unset;
+  }
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: white;
+}
+
+.navbar-toggler-icon,
+.navbar-brand:hover,
+.navbar-brand:focus,
+.navbar-brand {
+  color: white;
+}
+
+.modal-dialog {
+  font-size: .9em;
+}
+
+@media (min-width: 576px) {
+ .modal-dialog {
+    max-width: 70vw;
+  }
+}

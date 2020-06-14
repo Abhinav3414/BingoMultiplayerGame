@@ -4,7 +4,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom: .5em;
+  padding: .3em 0;
+  user-select: none;
+  position: absolute;
+  bottom: .3em;
+  width: 100%;
 
   svg {
     color: #e80606;
