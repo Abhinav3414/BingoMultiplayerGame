@@ -1,5 +1,5 @@
 <div class="setup">
-  <div  class="bingo-img-style-wrapper">
+  <div class="bingo-img-style-wrapper">
     <div class="bingo-img-style">
     </div>
   </div>
@@ -13,23 +13,7 @@
       <h4 *ngIf="leaderAssigned" class="ml-4">Hi {{bingoService.getLeader().name}} !!!</h4>
       <h4 *ngIf="!playerSetupComplete" class="ml-4 mb-4" style="padding-left : .5em">Setup your Game</h4>
 
-      <div *ngIf="!leaderAssigned" class="col-md-12 col-lg-7 ml-4">
-        <h5>Welcome!</h5>
-        <h6>Please provide your name and email to proceed</h6>
-        <br>
-        <form [formGroup]="leaderForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <input [class.is-invalid]="leaderForm.get('name').invalid && leaderForm.get('name').touched"
-              class="form-control" formControlName="name" placeholder="Name" />
-          </div>
-          <div class="form-group">
-            <input [class.is-invalid]="leaderForm.get('email').invalid && leaderForm.get('email').touched" type="email"
-              class="form-control" formControlName="email" placeholder="Email" />
-          </div>
-          <button type="submit" class="btn btn-success" [disabled]="leaderForm.status !== 'VALID'">Add me as
-            leader</button>
-        </form>
-      </div>
+      <app-welcome *ngIf="!leaderAssigned" [gameId]="gameId" (leaderAssigned)="getLeaderAssignStatus($event)"></app-welcome>
 
       <div class="m-4 messages" *ngIf="!callsStarted && playerSetupComplete">
         <div class="mb-1">
@@ -159,5 +143,4 @@
 
     </div>
   </div>
-
 </div>

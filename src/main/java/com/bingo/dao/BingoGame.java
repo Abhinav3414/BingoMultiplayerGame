@@ -1,5 +1,8 @@
 package com.bingo.dao;
 
+import java.util.Date;
+
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,8 +31,11 @@ public class BingoGame {
     private boolean haveCallsStarted;
 
     private boolean isBingoBoardReady;
-    
+
     private BingoSlipEmailStatus bingoSlipEmailStatus = BingoSlipEmailStatus.DISABLED;
+
+    @CreatedDate
+    private Date createdAt;
 
     public BingoGame() {
     }
@@ -98,14 +104,20 @@ public class BingoGame {
         this.isBingoBoardReady = isBingoBoardReady;
     }
 
-    
     public BingoSlipEmailStatus getBingoSlipEmailStatus() {
         return bingoSlipEmailStatus;
     }
 
-    
     public void setBingoSlipEmailStatus(BingoSlipEmailStatus bingoSlipEmailStatus) {
         this.bingoSlipEmailStatus = bingoSlipEmailStatus;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
 }

@@ -20,6 +20,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.w3c.tidy.Tidy;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import com.bingo.dao.BingoBoardType;
 import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.SlipHtmlResponse;
@@ -35,7 +36,7 @@ public class SlipToPdfGeneratorService {
 
     private static final String UTF_8 = "UTF-8";
 
-    public void generateSlipPdf(String fileName, String email, BingoGame game, List<SlipHtmlResponse> responses) throws Exception {
+    public void generateSlipPdf(String fileName, String email, BingoGame game, List<SlipHtmlResponse> responses, BingoBoardType bingoBoardType) throws Exception {
 
         Path path = Paths.get(fileName);
         if (Files.exists(path)) {
@@ -68,6 +69,7 @@ public class SlipToPdfGeneratorService {
         bingoData.setEmail(email);
         bingoData.setGameId(game.getGameId());
         bingoData.setResponses(responses);
+        bingoData.setBingoBoardType(bingoBoardType);
 
         Context context = new Context();
         context.setVariable("bingoData", bingoData);

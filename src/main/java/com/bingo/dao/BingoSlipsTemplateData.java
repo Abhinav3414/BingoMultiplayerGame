@@ -11,18 +11,22 @@ import java.util.List;
 public class BingoSlipsTemplateData {
 
     String email;
-    
+
     String gameId;
-    
+
     List<SlipHtmlResponse> responses;
+
+    BingoBoardType bingoBoardType;
 
     public BingoSlipsTemplateData() {
     }
 
-    public BingoSlipsTemplateData(String email, String gameId, List<SlipHtmlResponse> responses) {
+    public BingoSlipsTemplateData(String email, String gameId, List<SlipHtmlResponse> responses,
+            BingoBoardType bingoBoardType) {
         this.email = email;
         this.gameId = gameId;
         this.responses = responses;
+        this.bingoBoardType = bingoBoardType;
     }
 
     public String getEmail() {
@@ -47,6 +51,14 @@ public class BingoSlipsTemplateData {
 
     public void setResponses(List<SlipHtmlResponse> responses) {
         this.responses = responses;
+    }
+
+    public BingoBoardType getBingoBoardType() {
+        return bingoBoardType;
+    }
+
+    public void setBingoBoardType(BingoBoardType bingoBoardType) {
+        this.bingoBoardType = bingoBoardType;
     }
 
 }

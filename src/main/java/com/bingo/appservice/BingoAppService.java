@@ -252,8 +252,9 @@ public class BingoAppService {
     public List<String> generateSlipPDFForUsers(List<String> userIds, BingoGame game) {
         List<String> pdfNotGenerated = new ArrayList<>();
 
-        boolean is90Game = bingoBoardRepository.findById(game.getBingoBoardId()).get().getBingoBoardType()
-                .equals(BingoBoardType.GAMEBOARD_90);
+        BingoBoardType bingoBoardType = bingoBoardRepository.findById(game.getBingoBoardId()).get().getBingoBoardType();
+
+        boolean is90Game = bingoBoardType.equals(BingoBoardType.GAMEBOARD_90);
 
         userIds.forEach(userId -> {
             BingoUser user = bingoUserRepository.findById(userId).get();
@@ -266,7 +267,8 @@ public class BingoAppService {
 
             String emailOrName = user.getEmail() != null ? user.getEmail() : user.getName();
             try {
-                slipToPdfGeneratorService.generateSlipPdf(slipName, emailOrName, game, slipResponses);
+
+                slipToPdfGeneratorService.generateSlipPdf(slipName, emailOrName, game, slipResponses, bingoBoardType);
             } catch (Exception e) {
                 System.out.println("Slip could not be generated for : " + emailOrName);
                 pdfNotGenerated.add(emailOrName);
@@ -369,14 +371,15 @@ public class BingoAppService {
     public BingoSlipsTemplateData getUserSlipsWrapper(String gameId, String playerId) {
 
         List<BingoSlip> userSlips = getUserSlips(playerId);
-        boolean is90Slip = userSlips.get(0).getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90);
+        BingoBoardType bingoSlipType = userSlips.get(0).getBingoSlipType();
+        boolean is90Slip = bingoSlipType.equals(BingoBoardType.GAMEBOARD_90);
 
         List<SlipHtmlResponse> slipResponses = userSlips.stream()
                 .map(us -> {
                     return new SlipHtmlResponse(us.getSlipId(), us.getBingoMatrix(), is90Slip);
                 }).collect(Collectors.toList());
 
-        return new BingoSlipsTemplateData(getPlayerEmail(playerId), gameId, slipResponses);
+        return new BingoSlipsTemplateData(getPlayerEmail(playerId), gameId, slipResponses, bingoSlipType);
     }
 
     public Map<Integer, Integer> getAllCalls(String gameId) {

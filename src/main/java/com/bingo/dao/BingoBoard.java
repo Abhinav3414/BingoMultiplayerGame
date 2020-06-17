@@ -1,11 +1,13 @@
 package com.bingo.dao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -34,6 +36,9 @@ public class BingoBoard {
     private List<Integer> calls = new ArrayList<>();
 
     private int currentCall = -1;
+    
+    @CreatedDate
+    private Date createdAt;
 
     public BingoBoard() {
     }
@@ -108,6 +113,14 @@ public class BingoBoard {
 
     public void setCurrentCall(int currentCall) {
         this.currentCall = currentCall;
+    }
+    
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void generateCallSequence() {

@@ -1,9 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PlayerResponse } from '../models';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { BingoService } from '../bingo.service';
-import { ThrowStmt } from '@angular/compiler';
 
 @Component({
   selector: 'app-setup',
@@ -17,7 +14,6 @@ export class SetupComponent implements OnInit {
   isExcelUploaded = false;
   playerSetupComplete = false;
   bingoBoardReady = false;
-  leader: PlayerResponse;
   callsStarted = false;
   callsDone;
   slipsNeeded = 6;
@@ -27,15 +23,6 @@ export class SetupComponent implements OnInit {
   notAuthorized = false;
   emailSlips = false;
   bingoSlipEmailStatus = 'DISABLED';
-
-  leaderForm = new FormGroup({
-    email: new FormControl('', [
-      Validators.required,
-      Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$')]),
-    name: new FormControl('', [
-      Validators.required
-    ])
-  });
 
   constructor(private route: ActivatedRoute, public bingoService: BingoService, private router: Router) {
 
@@ -72,6 +59,10 @@ export class SetupComponent implements OnInit {
     this.playerSetupComplete = startCall;
   }
 
+  getLeaderAssignStatus(leaderIsAssigned: boolean) {
+    console.log(leaderIsAssigned);
+    this.leaderAssigned = leaderIsAssigned;
+  }
   proceedWithCalls() {
     this.bingoService.startCalls(this.gameId).subscribe(() => {
       this.callsDone = {};
@@ -85,14 +76,6 @@ export class SetupComponent implements OnInit {
 
   onBoardTypeSelectedChange(value: string) {
     this.boardType = value;
-  }
-
-  onSubmit() {
-    this.leader = new PlayerResponse(this.leaderForm.value.name, this.leaderForm.value.email);
-    this.bingoService.assignLeader(this.gameId, this.leader).subscribe((r) => {
-      this.leaderAssigned = true;
-      this.bingoService.setLeader(r);
-    });
   }
 
   setUpBoardTypeAndSlipCount() {

@@ -1,7 +1,9 @@
 package com.bingo.dao;
 
+import java.util.Date;
 import java.util.Set;
 
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -21,6 +23,9 @@ public abstract class BingoSlip {
     protected int[][] bingoMatrix;
 
     protected BingoBoardType bingoSlipType = BingoBoardType.GAMEBOARD_75;
+
+    @CreatedDate
+    private Date createdAt;
 
     public String getSlipId() {
         return slipId;
@@ -60,6 +65,14 @@ public abstract class BingoSlip {
 
     public void setBingoSlipType(BingoBoardType bingoSlipType) {
         this.bingoSlipType = bingoSlipType;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
 }
