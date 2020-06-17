@@ -34,16 +34,25 @@
         <div class="slip-wrapper-style" *ngFor="let res of slipResponse.responses; index as in;">
           <span>Slip No: {{in+1}}</span>
           <table id="slips">
+            <tr *ngIf="is75Board">
+              <th>B</th>
+              <th>I</th>
+              <th>N</th>
+              <th>G</th>
+              <th>O</th>
+            </tr>
             <tr *ngFor="let item of res.transformedMatrix; index as i">
               <td *ngFor="let col of item; index as j;" (click)="clickOnNumber(i, j, res.slipId)">
 
-                <span *ngIf="is75Board && i==2 && j==2">Free</span>
+                <span *ngIf="is75Board && i==2 && j==2" class="free-space-wrapper">
+                  <span  class="free-space-style">Free Space</span>
+                </span>
 
                 <span *ngIf="col!=0 && col<1000">{{col}}</span>
                 <span *ngIf="col!=0 && col>1000">{{col-1000}}</span>
                 <i class="fa fa-times check-style" aria-hidden="true" *ngIf="col>=1000"></i>
               </td>
-            <tr>
+            </tr>
           </table>
           <span style="font-size: 0.8em;display: flex;flex-direction: row-reverse;max-width: 40em;">id# {{res.slipId}} </span>
         </div>

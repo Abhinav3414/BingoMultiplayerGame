@@ -15,16 +15,15 @@
   <div class="card">
     <div class="card-body" style="display: flex; flex-direction: column;">
       <h6 class="card-title">Add players from excel (.xlsx)</h6>
-      <div *ngIf="!playerSetupComplete" style="padding: .5rem 0 0 1.25rem;">
+      <div *ngIf="!playerSetupComplete" class="mb-2" style="padding: .5rem 0 0 1.25rem;">
         You can upload excel if there are many players. <br>
         <b>Note: </b> <I>Excel can only have emails, Your player will be recognised using their emails.</I>
         <br>
         <a (click)="getSampleExcelLink()" style="color: blue; cursor: pointer;">View Sample Excel</a>
       </div>
-      <br>
       <div style="display: flex; flex-wrap: wrap;" class="col-sm-12">
-        <input type="file" style="flex-grow: 1" #fileInput placeholder="Upload file..." />
-        <button type="button" class="btn btn-success" (click)="uploadExcel()">Upload</button>
+        <input type="file" style="flex-grow: 1" class="m-1" #fileInput placeholder="Upload file..." />
+        <button type="button" class="btn btn-success m-1" (click)="uploadExcel()">Upload</button>
       </div>
     </div>
   </div>
@@ -64,10 +63,10 @@
             </div>
           </div>
           <div class="card-footer text-center">
-            <button class="btn btn-primary mr-2" (click)="addPlayer()">Add Player</button>
-            <button class="btn btn-success mr-2" [disabled]="numberOfPLayers < 1 || !isValid()">Submit Players</button>
-            <button class="btn btn-danger mr-2" type="reset" (click)="onReset()">Reset</button>
-            <button class="btn btn-secondary" type="button" (click)="onClear()">Clear</button>
+            <button class="btn btn-primary m-2" (click)="addPlayer()">Add Player</button>
+            <button class="btn btn-success m-2" [disabled]="numberOfPLayers < 1 || !isValid()">Submit Players</button>
+            <button class="btn btn-danger m-2" type="reset" (click)="onReset()">Reset</button>
+            <button class="btn btn-secondary m-2" type="button" (click)="onClear()">Clear</button>
           </div>
         </div>
       </form>

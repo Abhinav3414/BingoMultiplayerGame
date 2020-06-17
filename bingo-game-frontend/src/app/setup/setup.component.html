@@ -122,7 +122,7 @@
           <button type="submit" class="btn btn-success mt-2" (click)="enterExistingGame()">Enter!!!</button>
         </div>
 
-        <div *ngIf="newGame">
+        <div *ngIf="newGame" class="mr-4 ml-4 mb-4">
           <div class="form-group">
             <label for="slipsNeeded">How many slips per user is needed ?</label>
             <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded"

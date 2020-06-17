@@ -1,3 +1,5 @@
+@import "../modal/modal.component.scss";
+
 .gameroom {
   width: 100%;
   overflow: auto;
@@ -24,7 +26,6 @@
     }
   }
 
-
 }
 
 .messages {
@@ -34,14 +35,6 @@
   }
 }
 
-.check-style {
-    position: absolute;
-    font-size: 2.5em;
-    left: 0.2em;
-    top: -0.05em;
-    opacity: 0.35;
-    color: red;
-}
 
 .slip-wrapper {
   display: flex;
@@ -62,35 +55,4 @@
     overflow-y: auto;
     max-height: unset;
   }
-}
-
-#slips {
-	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-	border-collapse: collapse;
-	width: 100%;
-}
-
-#slips td, #slips th {
-	border: 1px solid #d6ff90;;
-	text-align: center;
-  width: 2.5em;
-  height: 2.5em;
-  cursor: pointer;
-  position: relative;
-}
-
-#slips td:nth-child(even) {
-	background-color: #eeffd1;;
-}
-
-#slips td:hover {
-	background-color: #ddd;
-}
-
-#slips th {
-	padding-top: 12px;
-	padding-bottom: 12px;
-	text-align: left;
-	background-color: #4CAF50;
-	color: white;
 }
