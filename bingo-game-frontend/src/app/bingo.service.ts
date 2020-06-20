@@ -35,22 +35,34 @@ export class BingoService {
     return undefined;
   }
 
-  initiateGame(): any {
+  setGameName(gameName: string) {
+    localStorage.setItem('gameName', JSON.stringify(gameName));
+  }
+
+  getGameName(): any {
+    if (localStorage.getItem('gameName')) {
+      return JSON.parse(localStorage.getItem('gameName'));
+    }
+    return undefined;
+  }
+
+  clearLocalStorage() {
     localStorage.removeItem('leader');
-    return this.http.post<string>(this.appUrl + '/initiategame', null);
+    localStorage.removeItem('gameName');
   }
 
-  assignLeader(gameId: string, leader: PlayerResponse) {
-    return this.http.post(this.appUrl + '/' + gameId + '/assignLeader', leader);
+  assignLeader(leader: PlayerResponse) {
+    return this.http.post(this.appUrl + '/assignLeader', leader);
   }
 
-  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number, emailSlips: any) {
+  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number, emailSlips: any, gameName: string) {
 
     const params = new HttpParams();
     params.set('emailSlips', emailSlips);
+    params.set('gameName', gameName);
 
     return this.http.post(this.appUrl + '/' + gameId +
-      '/boardType/' + boardType + '/slipcount/' + slips + '?emailSlips=' + emailSlips, null, { params });
+      '/boardType/' + boardType + '/slipcount/' + slips + '?emailSlips=' + emailSlips + '&gameName=' + gameName, null, { params });
   }
 
   enterGameRoom(gameId: string) {

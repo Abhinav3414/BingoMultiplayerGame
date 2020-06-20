@@ -3,6 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 import { PlayerResponse } from '../models';
 import { BingoService } from '../bingo.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-welcome',
@@ -28,16 +29,18 @@ export class WelcomeComponent implements OnInit {
     ])
   });
 
-  constructor(public bingoService: BingoService, private modalService: NgbModal) { }
+  constructor(public bingoService: BingoService, private modalService: NgbModal, private router: Router) { }
 
   ngOnInit(): void {
   }
 
   onSubmit() {
     this.leader = new PlayerResponse(this.leaderForm.value.name, this.leaderForm.value.email);
-    this.bingoService.assignLeader(this.gameId, this.leader).subscribe((r) => {
+    this.bingoService.assignLeader(this.leader).subscribe((r: any) => {
       this.leaderAssigned.emit(true);
-      this.bingoService.setLeader(r);
+      this.leader.id = r.leaderId;
+      this.bingoService.setLeader(this.leader);
+      this.router.navigate(['game', r.gameId]);
     });
   }
 

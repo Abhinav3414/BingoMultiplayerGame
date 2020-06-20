@@ -23,23 +23,33 @@ export class SetupComponent implements OnInit {
   notAuthorized = false;
   emailSlips = false;
   bingoSlipEmailStatus = 'DISABLED';
+  gameName;
 
   constructor(private route: ActivatedRoute, public bingoService: BingoService, private router: Router) {
 
     this.route.data.subscribe((res) => {
-      const r = res.gameSetupStatus;
-      this.gameId = r.gameId;
-      this.leaderAssigned = r.leaderAssigned;
-      this.isExcelUploaded = r.excelUploaded;
-      this.playerSetupComplete = r.playerSetupComplete;
-      this.callsStarted = r.haveCallsStarted;
-      this.bingoBoardReady = r.bingoBoardReady;
-      this.bingoSlipEmailStatus = r.bingoSlipEmailStatus;
-      if (r.haveCallsStarted) {
-        this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
-          this.callsDone = callsDone;
-        });
+
+      if (res.gameSetupStatus) {
+        const r = res.gameSetupStatus;
+        this.gameId = r.gameId;
+        this.leaderAssigned = r.leaderAssigned;
+        this.isExcelUploaded = r.excelUploaded;
+        this.playerSetupComplete = r.playerSetupComplete;
+        this.callsStarted = r.haveCallsStarted;
+        this.bingoBoardReady = r.bingoBoardReady;
+        this.bingoSlipEmailStatus = r.bingoSlipEmailStatus;
+        if (r.haveCallsStarted) {
+          this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
+            this.callsDone = callsDone;
+          });
+        }
+        this.gameName = r.gameName;
+
+        if (r.gameName && !this.bingoService.getGameName()) {
+          this.bingoService.setGameName(this.gameName);
+        }
       }
+
     });
   }
 
@@ -60,9 +70,9 @@ export class SetupComponent implements OnInit {
   }
 
   getLeaderAssignStatus(leaderIsAssigned: boolean) {
-    console.log(leaderIsAssigned);
     this.leaderAssigned = leaderIsAssigned;
   }
+
   proceedWithCalls() {
     this.bingoService.startCalls(this.gameId).subscribe(() => {
       this.callsDone = {};
@@ -82,9 +92,11 @@ export class SetupComponent implements OnInit {
     if (this.emailSlips) {
       this.bingoSlipEmailStatus = 'NOT_SENT';
     }
-    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded, this.emailSlips).subscribe((r) => {
-      this.bingoBoardReady = true;
-    });
+    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded, this.emailSlips,
+      this.gameName).subscribe((r) => {
+        this.bingoService.setGameName(this.gameName);
+        this.bingoBoardReady = true;
+      });
   }
 
   enterExistingGame() {

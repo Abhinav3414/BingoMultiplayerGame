@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { BingoService } from '../bingo.service';
 
 @Component({
   selector: 'app-header',
@@ -7,9 +8,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor() { }
+  gameName;
+
+  constructor(private bingoService: BingoService) {
+    this.gameName = this.bingoService.getGameName();
+  }
 
   ngOnInit(): void {
+  }
+
+  getGameName() {
+    return this.gameName ? this.gameName : 'Bingo Multiplayer Game';
   }
 
 }

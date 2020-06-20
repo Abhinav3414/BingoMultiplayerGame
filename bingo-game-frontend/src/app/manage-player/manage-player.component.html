@@ -6,20 +6,23 @@
     Players Manually
   </label>
   <label class="btn btn-secondary">
-    <input type="radio" name="options" id="option3" autocomplete="off" (click)="addPlayerFromExcel()"> Add players from
-    excel
+    <input type="radio" name="options" id="option3" autocomplete="off" (click)="addPlayerFromExcel()"> Add Players from
+    Excel
   </label>
 </div>
 
 <div class="col-lg-10" *ngIf="!playerSetupComplete  && isAddPlayerFromExcel ">
   <div class="card">
     <div class="card-body" style="display: flex; flex-direction: column;">
-      <h6 class="card-title">Add players from excel (.xlsx)</h6>
+      <h6 class="card-title">Add Players from Excel (.xlsx)</h6>
       <div *ngIf="!playerSetupComplete" class="mb-2" style="padding: .5rem 0 0 1.25rem;">
         You can upload excel if there are many players. <br>
         <b>Note: </b> <I>Excel can only have emails, Your player will be recognised using their emails.</I>
         <br>
-        <a (click)="getSampleExcelLink()" style="color: blue; cursor: pointer;">View Sample Excel</a>
+
+        <a class="nav-link p-0" (click)="open(viewSampleExcel)"
+          style=" color: blue; text-decoration: underline; cursor: pointer; ">View Sample Excel</a>
+
       </div>
       <div style="display: flex; flex-wrap: wrap;" class="col-sm-12">
         <input type="file" style="flex-grow: 1" class="m-1" #fileInput placeholder="Upload file..." />
@@ -122,3 +125,21 @@
     </div>
 
 </div>
+
+
+<ng-template #viewSampleExcel let-modal>
+  <div class="modal-header">
+    <h6 class="modal-title" id="modal-basic-title">
+      <i class="fa fa-picture-o mr-2" style=" margin-top: 5px; "aria-hidden="true"></i>Sample Excel Format</h6>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+  </div>
+  <div class="modal-body">
+    <div class="m-1 mb-4">
+      <img *ngIf="imageBlobUrl" [src]="imageBlobUrl"  [height]='500'>
+
+      <br><br>
+    </div>
+  </div>
+</ng-template>

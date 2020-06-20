@@ -9,6 +9,14 @@ export class GameSetupResolver implements Resolve<any> {
   }
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<any> {
-    return this.bingoService.getGameSetupStatus(route.paramMap.get('gameId'));
+
+    const gameId = route.paramMap.get('gameId');
+    if (gameId !== 'newGame') {
+      return this.bingoService.getGameSetupStatus(route.paramMap.get('gameId'));
+    } else {
+      return null;
+    }
+
   }
+
 }

@@ -106,7 +106,7 @@ div.footer {
 </style>
 </head>
 <body>
-   <h2>Bingo slips for : [[${bingoData.getEmail()}]]</h2>
+   <h2>Slips for : [[${bingoData.getEmail()}]]</h2>
    <h4>Game id : [[${bingoData.getGameId()}]]</h4>
    <div class="slips">
       <div class="slip-wrapper-style" th:each="slip,iterator: ${bingoData.getResponses()}">

@@ -88,7 +88,7 @@ public class BingoAppService {
     }
 
     public void setUpBoardTypeAndSlipCount(String gameId, BingoBoardType boardType, int slips,
-            boolean shouldEmailSlips) {
+            boolean shouldEmailSlips, String gameName) {
         BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
         bBoard.setBingoBoardType(boardType);
         bBoard.setSlipsPerUser(slips);
@@ -97,6 +97,10 @@ public class BingoAppService {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         System.out.println(bBoard.getCalls());
+        
+        if(gameName!= null && gameName.length()>1) {
+            bGame.setGameName(gameName);
+        }
         bGame.setBingoBoardReady(true);
 
         if (shouldEmailSlips) {

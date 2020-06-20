@@ -18,6 +18,8 @@ public class BingoGame {
     @Id
     private String gameId;
 
+    private String gameName;
+
     private String bingoBoardId;
 
     private boolean isLeaderAssigned;
@@ -46,6 +48,14 @@ public class BingoGame {
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
+    }
+
+    public String getGameName() {
+        return gameName;
+    }
+
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
     }
 
     public String getBingoBoardId() {

@@ -10,17 +10,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(private bingoService: BingoService, private route: ActivatedRoute, private router: Router) { }
+  constructor(private bingoService: BingoService, private route: ActivatedRoute, private router: Router) {
+    this.bingoService.clearLocalStorage();
+  }
 
   ngOnInit(): void {
   }
 
   initiateGame() {
-    this.bingoService.initiateGame().subscribe(
-      res => {
-        this.router.navigate(['/game', res.gameId]);
-      }
-    );
+    this.router.navigate(['game', 'newGame']);
   }
 
 }

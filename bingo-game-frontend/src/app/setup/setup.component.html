@@ -108,6 +108,10 @@
 
         <div *ngIf="newGame" class="mr-4 ml-4 mb-4">
           <div class="form-group">
+            <label for="gameName">Customize your Game Name</label>
+            <input class="form-control" placeholder="Game Name" id="gameName" [(ngModel)]="gameName">
+          </div>
+          <div class="form-group">
             <label for="slipsNeeded">How many slips per user is needed ?</label>
             <select class="form-control" id="slipsNeeded" [(ngModel)]="slipsNeeded"
               (ngModelChange)="onSlipSelectedChange($event)">

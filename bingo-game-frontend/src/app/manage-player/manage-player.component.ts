@@ -2,6 +2,7 @@ import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter }
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { BingoService } from '../bingo.service';
 import { PlayerResponse } from '../models';
+import { NgbModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-manage-player',
@@ -9,6 +10,15 @@ import { PlayerResponse } from '../models';
   styleUrls: ['./manage-player.component.scss']
 })
 export class ManagePlayerComponent implements OnInit {
+
+  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder,
+    private modalService: NgbModal) {
+    this.hrefUrl = window.location.href.substr(0, window.location.href.indexOf('#') + 2);
+  }
+
+  // convenience getters for easy access to form fields
+  get f() { return this.dynamicForm.controls; }
+  get t() { return this.f.players as FormArray; }
 
   @Input() gameId: string;
   @Input() playerSetupComplete: boolean;
@@ -28,9 +38,8 @@ export class ManagePlayerComponent implements OnInit {
   emailSendPlayerIdentifier;
   fetching = false;
 
-  constructor(private bingoService: BingoService, private elem: ElementRef, private formBuilder: FormBuilder) {
-    this.hrefUrl = window.location.href.substr(0, window.location.href.indexOf('#') + 2);
-  }
+  imageBlobUrl;
+  closeResult: string;
 
   ngOnInit(): void {
     this.dynamicForm = this.formBuilder.group({
@@ -46,10 +55,6 @@ export class ManagePlayerComponent implements OnInit {
       });
     }
   }
-
-  // convenience getters for easy access to form fields
-  get f() { return this.dynamicForm.controls; }
-  get t() { return this.f.players as FormArray; }
 
   proceedGame() {
     this.isPlayerSetupReady.emit(this.playerSetupComplete);
@@ -110,14 +115,42 @@ export class ManagePlayerComponent implements OnInit {
     this.t.reset();
   }
 
-  getSampleExcelLink() {
+  createImageFromBlob() {
     this.bingoService.getSampleExcel().subscribe(
       blob => {
-        const blobUrl = window.URL.createObjectURL(blob);
-        window.open(blobUrl, '', 'left=20,top=20,width=700,height=600,toolbar=1,resizable=0');
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          this.imageBlobUrl = reader.result;
+        }, false);
+        if (blob) {
+          reader.readAsDataURL(blob);
+        }
       }
     );
   }
+
+  open(content) {
+
+    this.createImageFromBlob();
+
+    this.modalService.open(content,
+      { ariaLabelledBy: 'modal-basic-title', centered: true, size: 'lg', scrollable: true }).result.then((result) => {
+        this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+  }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return `with: ${reason}`;
+    }
+  }
+
 
   uploadExcel() {
     const file = this.fileInput.nativeElement.files[0];
