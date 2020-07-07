@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PlayerResponse } from './models';
+import { PlayerResponse, GameSetupAttributesResponse } from './models';
 
 @Injectable({
   providedIn: 'root'
@@ -55,14 +55,13 @@ export class BingoService {
     return this.http.post(this.appUrl + '/assignLeader', leader);
   }
 
-  setUpBoardTypeAndSlipCount(gameId: string, boardType: string, slips: number, emailSlips: any, gameName: string) {
+  joinPlayer(gameId: string, player: PlayerResponse) {
+    return this.http.post(this.appUrl + '/' + gameId + '/joinPlayer', player);
+  }
 
-    const params = new HttpParams();
-    params.set('emailSlips', emailSlips);
-    params.set('gameName', gameName);
-
-    return this.http.post(this.appUrl + '/' + gameId +
-      '/boardType/' + boardType + '/slipcount/' + slips + '?emailSlips=' + emailSlips + '&gameName=' + gameName, null, { params });
+  setUpGame(gameId: string, gameSetupAttributes: GameSetupAttributesResponse) {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/setupGame', gameSetupAttributes, { headers: this.headers });
   }
 
   enterGameRoom(gameId: string) {

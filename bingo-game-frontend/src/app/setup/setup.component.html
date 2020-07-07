@@ -79,7 +79,7 @@
     <div class="col-sm-6">
       <br> <br> <br>
 
-      <app-manage-player [gameId]="gameId" [playerSetupComplete]="playerSetupComplete"
+      <app-manage-player [gameId]="gameId" [playerSetupComplete]="playerSetupComplete" [joinGameViaLink]="joinGameViaLink"
         [bingoSlipEmailStatus]="bingoSlipEmailStatus" (isPlayerSetupReady)="getPlayerSetupStatus($event)"
         *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
 
@@ -131,16 +131,23 @@
               <option value="GAMEBOARD_90" selected>Bingo 90 Board Game</option>
             </select>
           </div>
-          <div class="m-1 mb-3" style=" color: gray; font-style: italic; font-size: .9em; ">
+          <div class="m-1 mb-2" style=" color: gray; font-style: italic; font-size: .9em; ">
             (If you check below option, you will have to provide emails for each player mandatorily.)
           </div>
-          <div class="form-check" class="m-1 ml-4 mb-4">
+          <div class="form-check" class="m-1 ml-4 mb-2">
             <input class="form-check-input" type="checkbox" id="sendSlips" [(ngModel)]="emailSlips">
             <label class="form-check-label" for="sendSlips">
               Send Slips to Participants
             </label>
           </div>
-          <button type="submit" class="btn btn-success" (click)="setUpBoardTypeAndSlipCount()">Proceed!!!</button>
+
+          <div class="form-check" class="m-1 ml-4 mb-4">
+            <input class="form-check-input" type="checkbox" id="joinViaLink" [(ngModel)]="joinGameViaLink">
+            <label class="form-check-label" for="joinViaLink">
+              Allow players to join Game via Link
+            </label>
+          </div>
+          <button type="submit" class="btn btn-success" (click)="setUpGame()">Proceed!!!</button>
         </div>
 
       </div>

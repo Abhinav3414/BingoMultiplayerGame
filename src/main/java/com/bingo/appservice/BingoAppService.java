@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,8 +88,9 @@ public class BingoAppService {
         return startedGame;
     }
 
-    public void setUpBoardTypeAndSlipCount(String gameId, BingoBoardType boardType, int slips,
-            boolean shouldEmailSlips, String gameName) {
+    public void setUpGame(String gameId, BingoBoardType boardType, int slips, boolean shouldEmailSlips, String gameName,
+            boolean isJoinGameViaLink) {
+
         BingoBoard bBoard = bingoBoardRepository.findByGameId(gameId);
         bBoard.setBingoBoardType(boardType);
         bBoard.setSlipsPerUser(slips);
@@ -97,16 +99,20 @@ public class BingoAppService {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
         System.out.println(bBoard.getCalls());
-        
-        if(gameName!= null && gameName.length()>1) {
+
+        if (gameName != null && gameName.length() > 1) {
             bGame.setGameName(gameName);
         }
         bGame.setBingoBoardReady(true);
+        bGame.setJoinGameViaLink(isJoinGameViaLink);
 
         if (shouldEmailSlips) {
             bGame.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
         }
         bingoGameRepository.save(bGame);
+
+        fileIOService.createBingoGameFolder(bGame.getGameId());
+        writeCallsToCSV(bGame);
     }
 
     public Integer callNext(String gameId) {
@@ -133,13 +139,12 @@ public class BingoAppService {
 
     public void addManualPlayers(String gameId, List<PlayerResponse> players) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        fileIOService.createBingoGameFolder(bGame.getGameId());
 
         createUsersAndGenerateSlips(gameId, players);
-        createBingoPlayerFolders(bGame);
-        writeCallsToCSV(bGame);
 
-        generatePdfs(bGame);
+        createBingoPlayerFolders(bGame);
+
+        generatePdfs(bGame, getBoardUserIds(bGame));
 
         bGame.setPdfsGenerated(true);
         bGame.setPlayerSetupComplete(true);
@@ -147,9 +152,28 @@ public class BingoAppService {
         bingoGameRepository.save(bGame);
     }
 
+    public BingoUser addPlayer(String gameId, PlayerResponse player) {
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+        BingoUser bPlayer = bingoUserRepository.findByEmailAndBoardIdLike(player.getEmail(), bGame.getBingoBoardId());
+        if (bPlayer != null) {
+            return bPlayer;
+        }
+
+        List<PlayerResponse> players = Arrays.asList(player);
+        createUsersAndGenerateSlips(gameId, players);
+
+        BingoUser bingoPlayer =
+                bingoUserRepository.findByEmailAndBoardIdLike(player.getEmail(), bGame.getBingoBoardId());
+        createBingoPlayerFolder(bGame, bingoPlayer.getEmail());
+
+        generatePdfs(bGame, Arrays.asList(bingoPlayer.getUserId()));
+        bingoGameRepository.save(bGame);
+        return bingoPlayer;
+    }
+
     public void addPlayersFromExcel(MultipartFile file, String gameId) {
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
-        fileIOService.createBingoGameFolder(bGame.getGameId());
 
         // normalize the file path
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -181,8 +205,8 @@ public class BingoAppService {
 
         createUsersAndGenerateSlips(gameId, players);
         createBingoPlayerFolders(bGame);
-        writeCallsToCSV(bGame);
-        generatePdfs(bGame);
+
+        generatePdfs(bGame, getBoardUserIds(bGame));
 
         bGame.setPdfsGenerated(true);
         bGame.setPlayerSetupComplete(true);
@@ -190,8 +214,8 @@ public class BingoAppService {
         bingoGameRepository.save(bGame);
     }
 
-    public void generatePdfs(BingoGame bGame) {
-        List<String> userIds = getBoardUserIds(bGame);
+    public void generatePdfs(BingoGame bGame, List<String> userIds) {
+
         List<String> pdfNotGenerated = generateSlipPDFForUsers(userIds, bGame);
 
         if (pdfNotGenerated.isEmpty()) {
@@ -210,6 +234,7 @@ public class BingoAppService {
 
         BingoGame bGame = bingoGameRepository.findById(gameId).get();
 
+        // create user
         players.forEach(p -> {
             BingoUser newPlayer = new BingoUser(p.getName(), p.getEmail(), bGame.getGameId(), bGame.getBingoBoardId());
             newPlayer.setBingoSlipEmailStatus(bGame.getBingoSlipEmailStatus());
@@ -220,11 +245,18 @@ public class BingoAppService {
 
         Optional<BingoBoard> bingoBoard = bingoBoardRepository.findById(bGame.getBingoBoardId());
 
-        bingoBoard.get().setUserIds(userIds);
+        List<String> bingoUserIds = bingoBoard.get().getUserIds();
 
-        bingoUserRepository.findByBoardId(bGame.getBingoBoardId()).forEach(u -> {
-            generateSlipsForUser(u, bGame);
-        });
+        userIds.forEach(u -> bingoUserIds.add(u));
+
+        bingoBoard.get().setUserIds(bingoUserIds);
+
+        bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
+                .stream().filter(p -> userIds.contains(p.getUserId()))
+                .forEach(u -> {
+                    System.out.println(u.getEmail());
+                    generateSlipsForUser(u, bGame);
+                });
 
         bingoBoardRepository.save(bingoBoard.get());
     }
@@ -291,6 +323,11 @@ public class BingoAppService {
                 .forEach(e -> {
                     fileIOService.createUserFolder(game.getGameId(), bingoFolderName, e);
                 });
+    }
+
+    public void createBingoPlayerFolder(BingoGame game, String playerEmail) {
+        String bingoFolderName = fileIOService.getBingoFolder(game.getGameId());
+        fileIOService.createUserFolder(game.getGameId(), bingoFolderName, playerEmail);
     }
 
     private void writeCallsToCSV(BingoGame game) {
@@ -384,6 +421,15 @@ public class BingoAppService {
                 }).collect(Collectors.toList());
 
         return new BingoSlipsTemplateData(getPlayerEmail(playerId), gameId, slipResponses, bingoSlipType);
+    }
+
+    public BingoSlipsTemplateData getUserSlipsWrapperByEmail(String gameId, String playerEmail) {
+
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+        BingoUser player = bingoUserRepository.findByEmailAndBoardIdLike(playerEmail, bGame.getBingoBoardId());
+
+        return getUserSlipsWrapper(gameId, player.getUserId());
     }
 
     public Map<Integer, Integer> getAllCalls(String gameId) {

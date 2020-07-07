@@ -8,7 +8,7 @@ import { GameRoomComponent } from './game-room/game-room.component';
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'game/:gameId', component: SetupComponent, resolve: { gameSetupStatus: GameSetupResolver } },
-  { path: 'gameroom/:gameId', component: GameRoomComponent }
+  { path: 'gameroom/:gameId', component: GameRoomComponent, resolve: { gameSetupStatus: GameSetupResolver } }
 ];
 
 @NgModule({

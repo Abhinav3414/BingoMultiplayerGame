@@ -35,6 +35,7 @@ import com.bingo.dao.BingoGame;
 import com.bingo.dao.BingoSlip;
 import com.bingo.dao.BingoSlipsTemplateData;
 import com.bingo.dao.BingoUser;
+import com.bingo.dao.GameSetupAttributesResponse;
 import com.bingo.dao.PlayerResponse;
 import com.bingo.dao.SlipHtmlResponse;
 import com.bingo.dao.SlipInfoResponse;
@@ -50,217 +51,235 @@ import com.bingo.repository.BingoGameRepository;
 @RestController
 public class BingoRestController {
 
-  @Autowired
-  private BingoGameRepository bingoGameRepository;
+    @Autowired
+    private BingoGameRepository bingoGameRepository;
 
-  @Autowired
-  private BingoAppService bingoAppService;
+    @Autowired
+    private BingoAppService bingoAppService;
 
-  @PostMapping("/assignLeader")
-  public ResponseEntity<Map<String, String>> assignLeader(@RequestBody PlayerResponse leader) {
+    @PostMapping("/assignLeader")
+    public ResponseEntity<Map<String, String>> assignLeader(@RequestBody PlayerResponse leader) {
 
-    BingoGame game = bingoAppService.startGame();
+        BingoGame game = bingoAppService.startGame();
 
-    BingoUser bLeader = bingoAppService.setLeader(game.getGameId(), leader);
+        BingoUser bLeader = bingoAppService.setLeader(game.getGameId(), leader);
 
-    if (bLeader != null) {
-      new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail(),
-          bLeader.getBingoSlipEmailStatus());
+        if (bLeader != null) {
+            new PlayerResponse(bLeader.getUserId(), bLeader.getName(), bLeader.getEmail(),
+                    bLeader.getBingoSlipEmailStatus());
 
-      Map<String, String> res = new HashMap<String, String>();
-      res.put("gameId", game.getGameId());
-      res.put("leaderId", bLeader.getUserId());
-      Collections.unmodifiableMap(res);
-      return new ResponseEntity<>(res, HttpStatus.OK);
+            Map<String, String> res = new HashMap<>();
+            res.put("gameId", game.getGameId());
+            res.put("leaderId", bLeader.getUserId());
+            Collections.unmodifiableMap(res);
+            return new ResponseEntity<>(res, HttpStatus.OK);
 
-    }
-    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-  }
-
-  @PostMapping("{gameId}/boardType/{boardType}/slipcount/{slips}")
-  public ResponseEntity<PlayerResponse> setUpBoardTypeAndSlipCount(@PathVariable("gameId") String gameId,
-      @PathVariable("boardType") BingoBoardType boardType, @PathVariable("slips") int slips,
-      @RequestParam(required = false, value = "emailSlips") boolean emailSlips,
-      @RequestParam(required = false, value = "gameName") String gameName) {
-
-    bingoAppService.setUpBoardTypeAndSlipCount(gameId, boardType, slips, emailSlips, gameName);
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @PostMapping("{gameId}/startCalls")
-  public ResponseEntity<PlayerResponse> startCalls(@PathVariable("gameId") String gameId,
-      @RequestHeader("X-Requested-With") String leaderId) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-    BingoGame bGame = bingoGameRepository.findById(gameId).get();
-    bGame.setHaveCallsStarted(true);
-    bingoGameRepository.save(bGame);
-
-    return new ResponseEntity<>(HttpStatus.OK);
-  }
-
-  @RequestMapping(value = "{gameId}/callNext", method = RequestMethod.POST)
-  public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId,
-      @RequestHeader("X-Requested-With") String leaderId) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-
-    return new ResponseEntity<>(bingoAppService.callNext(gameId), HttpStatus.OK);
-  }
-
-  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getallcalls")
-  public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
-
-    Map<Integer, Integer> allCallsMap = bingoAppService.getAllCalls(gameId);
-
-    return new ResponseEntity<>(allCallsMap, HttpStatus.OK);
-  }
-
-  @PostMapping("{gameId}/entergameroom/{leaderEmail}")
-  public ResponseEntity<PlayerResponse> enterGameRoom(@PathVariable("gameId") String gameId,
-      @PathVariable("leaderEmail") String leaderEmail) {
-    PlayerResponse res = null;
-    try {
-      res = bingoAppService.enterGameRoom(gameId, leaderEmail);
-      return new ResponseEntity<>(res, HttpStatus.OK);
-    } catch (Exception e) {
-      return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
-    }
-  }
-
-  @GetMapping("{gameId}/gameSetupStatus")
-  public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
-    BingoGame bGame = bingoGameRepository.findById(gameId).get();
-    return new ResponseEntity<>(bGame, HttpStatus.OK);
-  }
-
-  @RequestMapping(value = "/download/{gameId}/{userId}", method = RequestMethod.GET)
-  @ResponseBody
-  public ResponseEntity<FileSystemResource> downloadBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
-      @PathVariable("userId") String userId, @RequestHeader("X-Requested-With") String leaderId)
-      throws IOException {
-    bingoAppService.validateGameAccess(gameId, leaderId);
-
-    String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userId);
-    FileSystemResource file = new FileSystemResource(new File(slipName));
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.add("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf");
-    headers.add("Access-Control-Expose-Headers", "Content-Disposition");
-
-    return ResponseEntity
-        .ok()
-        .contentLength(file.contentLength())
-        .contentType(
-            MediaType.parseMediaType("application/pdf"))
-        .headers(headers)
-        .body(file);
-  }
-
-  @PostMapping("{gameId}/sendEmailToAll")
-  public ResponseEntity<List<String>> sendEmailToAll(@PathVariable("gameId") String gameId,
-      @RequestHeader("X-Requested-With") String leaderId, HttpServletRequest request) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-
-    List<String> emails = bingoAppService.sendEmailToAll(gameId, getApplicationContextUrl(gameId, request));
-
-    BingoGame bGame = bingoGameRepository.findById(gameId).get();
-
-    if (bGame.isHaveCallsStarted() == false) {
-      bGame.setHaveCallsStarted(true);
-      bingoGameRepository.save(bGame);
-    }
-    return new ResponseEntity<>(emails, HttpStatus.OK);
-  }
-
-  @PostMapping("{gameId}/sendEmail/{playerId}")
-  public ResponseEntity<Boolean> sendEmail(@PathVariable("gameId") String gameId,
-      @PathVariable("playerId") String playerId, @RequestHeader("X-Requested-With") String leaderId,
-      HttpServletRequest request) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-    List<String> emailsNotSend =
-        bingoAppService.sendEmail(gameId, playerId, getApplicationContextUrl(gameId, request));
-
-    boolean isSentSuccess = emailsNotSend.isEmpty() ? true : false;
-
-    return new ResponseEntity<>(isSentSuccess, HttpStatus.OK);
-  }
-
-  private String getApplicationContextUrl(String gameId, HttpServletRequest request) {
-    String url = request.getRequestURL().toString();
-    StringBuilder contexturl = new StringBuilder(url.substring(0, url.indexOf("bingo-game") + 11));
-    contexturl.append("#/gameroom/" + gameId);
-    return contexturl.toString();
-  }
-
-  @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
-  public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
-
-    ClassPathResource imageFile = new ClassPathResource("excel-instructions-image.png");
-    byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
-    return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
-  }
-
-  @ResponseBody
-  @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
-  public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId,
-      @RequestBody List<PlayerResponse> players,
-      @RequestHeader("X-Requested-With") String leaderId) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-    bingoAppService.addManualPlayers(gameId, players);
-
-    return ResponseEntity.ok().build();
-  }
-
-  @ResponseBody
-  @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
-  public ResponseEntity<String> uploadExcelFile(@RequestParam(required = false) MultipartFile file,
-      @PathVariable("gameId") String gameId,
-      @RequestHeader("X-Requested-With") String leaderId) {
-
-    bingoAppService.validateGameAccess(gameId, leaderId);
-
-    if (file == null || file.isEmpty()) {
-      return ResponseEntity.notFound().build();
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    bingoAppService.addPlayersFromExcel(file, gameId);
+    @PostMapping("{gameId}/joinPlayer")
+    public ResponseEntity<PlayerResponse> joinPlayer(@PathVariable("gameId") String gameId,
+            @RequestBody PlayerResponse player) {
 
-    return ResponseEntity.ok().build();
-  }
+        BingoUser bPlayer = bingoAppService.addPlayer(gameId, player);
 
-  @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
+        PlayerResponse playerResponse = new PlayerResponse(bPlayer.getUserId(), bPlayer.getName(),
+                bPlayer.getEmail(), bPlayer.getBingoSlipEmailStatus());
 
-  public ResponseEntity<List<PlayerResponse>> getBingoPlayers(@PathVariable("gameId") String gameId,
-      @RequestHeader("X-Requested-With") String leaderId) {
+        return new ResponseEntity<>(playerResponse, HttpStatus.OK);
+    }
 
-    bingoAppService.validateGameAccess(gameId, leaderId);
+    @GetMapping("{gameId}/gameSetupStatus")
+    public ResponseEntity<BingoGame> gameSetupStatus(@PathVariable("gameId") String gameId) {
+        BingoGame bGame = bingoGameRepository.findById(gameId).orElse(null);
+        return new ResponseEntity<>(bGame, HttpStatus.OK);
+    }
 
-    List<PlayerResponse> bingoBoardPlayers = bingoAppService.getBingoBoardPlayers(gameId);
+    @PostMapping("{gameId}/setupGame")
+    public ResponseEntity<Map<String, String>> setupGame(@PathVariable("gameId") String gameId,
+            @RequestBody GameSetupAttributesResponse gameSetupAttributes,
+            @RequestHeader("X-Requested-With") String leaderId) {
 
-    return new ResponseEntity<>(bingoBoardPlayers, HttpStatus.OK);
-  }
+        bingoAppService.validateGameAccess(gameId, leaderId);
 
-  @RequestMapping(value = "{gameId}/playerslips/{playerId}", method = RequestMethod.GET)
-  public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("playerId") String playerId,
-      @PathVariable("gameId") String gameId) {
+        bingoAppService.setUpGame(gameId, gameSetupAttributes.getBoardType(), gameSetupAttributes.getSlips(),
+                gameSetupAttributes.isEmailSlips(), gameSetupAttributes.getGameName(),
+                gameSetupAttributes.isJoinGameViaLink());
 
-    return new ResponseEntity<>(bingoAppService.getUserSlipsWrapper(gameId, playerId), HttpStatus.OK);
-  }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-  @PostMapping("{gameId}/updateSlip/{playerId}")
-  public ResponseEntity<SlipHtmlResponse> updateSlipNumber(@PathVariable("gameId") String gameId,
-      @PathVariable("playerId") String playerId, @RequestBody SlipInfoResponse slipInfo) {
+    @PostMapping("{gameId}/startCalls")
+    public ResponseEntity<PlayerResponse> startCalls(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
 
-    BingoSlip slipRes = bingoAppService.updateSlipNumber(gameId, playerId, slipInfo);
+        bingoAppService.validateGameAccess(gameId, leaderId);
+        BingoGame bGame = bingoGameRepository.findById(gameId).orElse(null);
+        if (bGame != null) {
+            bGame.setHaveCallsStarted(true);
+            bingoGameRepository.save(bGame);
+        }
 
-    SlipHtmlResponse res = new SlipHtmlResponse(slipRes.getSlipId(), slipRes.getBingoMatrix(),
-        slipRes.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90));
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
-    return new ResponseEntity<>(res, HttpStatus.OK);
-  }
+    @PostMapping("{gameId}/callNext")
+    public @ResponseBody ResponseEntity<Integer> callNext(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        return new ResponseEntity<>(bingoAppService.callNext(gameId), HttpStatus.OK);
+    }
+
+    @GetMapping("{gameId}/getallcalls")
+    public ResponseEntity<Map<Integer, Integer>> getAllCalls(@PathVariable("gameId") String gameId) {
+
+        Map<Integer, Integer> allCallsMap = bingoAppService.getAllCalls(gameId);
+
+        return new ResponseEntity<>(allCallsMap, HttpStatus.OK);
+    }
+
+    @PostMapping("{gameId}/entergameroom/{leaderEmail}")
+    public ResponseEntity<PlayerResponse> enterGameRoom(@PathVariable("gameId") String gameId,
+            @PathVariable("leaderEmail") String leaderEmail) {
+        PlayerResponse res = null;
+        try {
+            res = bingoAppService.enterGameRoom(gameId, leaderEmail);
+            return new ResponseEntity<>(res, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(res, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @GetMapping("/download/{gameId}/{userId}")
+    @ResponseBody
+    public ResponseEntity<FileSystemResource> downloadBingoUserSlipsForGame(@PathVariable("gameId") String gameId,
+            @PathVariable("userId") String userId, @RequestHeader("X-Requested-With") String leaderId)
+            throws IOException {
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        String slipName = bingoAppService.getBingoUserSlipsForGame(gameId, userId);
+        FileSystemResource file = new FileSystemResource(new File(slipName));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=bingo_slips_" + gameId + ".pdf");
+        headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+
+        return ResponseEntity
+                .ok()
+                .contentLength(file.contentLength())
+                .contentType(
+                        MediaType.parseMediaType("application/pdf"))
+                .headers(headers)
+                .body(file);
+    }
+
+    @PostMapping("{gameId}/sendEmailToAll")
+    public ResponseEntity<List<String>> sendEmailToAll(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId, HttpServletRequest request) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        List<String> emails = bingoAppService.sendEmailToAll(gameId, getApplicationContextUrl(gameId, request));
+
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+
+        if (bGame.isHaveCallsStarted() == false) {
+            bGame.setHaveCallsStarted(true);
+            bingoGameRepository.save(bGame);
+        }
+        return new ResponseEntity<>(emails, HttpStatus.OK);
+    }
+
+    @PostMapping("{gameId}/sendEmail/{playerId}")
+    public ResponseEntity<Boolean> sendEmail(@PathVariable("gameId") String gameId,
+            @PathVariable("playerId") String playerId, @RequestHeader("X-Requested-With") String leaderId,
+            HttpServletRequest request) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+        List<String> emailsNotSend =
+                bingoAppService.sendEmail(gameId, playerId, getApplicationContextUrl(gameId, request));
+
+        boolean isSentSuccess = emailsNotSend.isEmpty() ? true : false;
+
+        return new ResponseEntity<>(isSentSuccess, HttpStatus.OK);
+    }
+
+    private String getApplicationContextUrl(String gameId, HttpServletRequest request) {
+        String url = request.getRequestURL().toString();
+        StringBuilder contexturl = new StringBuilder(url.substring(0, url.indexOf("bingo-game") + 11));
+        contexturl.append("#/gameroom/" + gameId);
+        return contexturl.toString();
+    }
+
+    @RequestMapping(value = "/sampleexcel", method = RequestMethod.GET)
+    public @ResponseBody ResponseEntity<byte[]> getSampleExcel() throws IOException {
+
+        ClassPathResource imageFile = new ClassPathResource("excel-instructions-image.png");
+        byte[] imageBytes = StreamUtils.copyToByteArray(imageFile.getInputStream());
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageBytes);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
+    public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId,
+            @RequestBody List<PlayerResponse> players,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+        bingoAppService.addManualPlayers(gameId, players);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "{gameId}/gamesetup/uploadExcelFile", method = RequestMethod.POST)
+    public ResponseEntity<String> uploadExcelFile(@RequestParam(required = false) MultipartFile file,
+            @PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        bingoAppService.addPlayersFromExcel(file, gameId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, path = "{gameId}/getBingoPlayers")
+
+    public ResponseEntity<List<PlayerResponse>> getBingoPlayers(@PathVariable("gameId") String gameId,
+            @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+
+        List<PlayerResponse> bingoBoardPlayers = bingoAppService.getBingoBoardPlayers(gameId);
+
+        return new ResponseEntity<>(bingoBoardPlayers, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "{gameId}/playerslips/{playerId}", method = RequestMethod.GET)
+    public ResponseEntity<BingoSlipsTemplateData> getUserSlips(@PathVariable("playerId") String playerId,
+            @PathVariable("gameId") String gameId) {
+
+        return new ResponseEntity<>(bingoAppService.getUserSlipsWrapper(gameId, playerId), HttpStatus.OK);
+    }
+
+    @PostMapping("{gameId}/updateSlip/{playerId}")
+    public ResponseEntity<SlipHtmlResponse> updateSlipNumber(@PathVariable("gameId") String gameId,
+            @PathVariable("playerId") String playerId, @RequestBody SlipInfoResponse slipInfo) {
+
+        BingoSlip slipRes = bingoAppService.updateSlipNumber(gameId, playerId, slipInfo);
+
+        SlipHtmlResponse res = new SlipHtmlResponse(slipRes.getSlipId(), slipRes.getBingoMatrix(),
+                slipRes.getBingoSlipType().equals(BingoBoardType.GAMEBOARD_90));
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
 
 }

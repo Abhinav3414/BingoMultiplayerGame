@@ -34,6 +34,8 @@ public class BingoGame {
 
     private boolean isBingoBoardReady;
 
+    private boolean joinGameViaLink;
+
     private BingoSlipEmailStatus bingoSlipEmailStatus = BingoSlipEmailStatus.DISABLED;
 
     @CreatedDate
@@ -120,6 +122,14 @@ public class BingoGame {
 
     public void setBingoSlipEmailStatus(BingoSlipEmailStatus bingoSlipEmailStatus) {
         this.bingoSlipEmailStatus = bingoSlipEmailStatus;
+    }
+
+    public boolean isJoinGameViaLink() {
+        return joinGameViaLink;
+    }
+
+    public void setJoinGameViaLink(boolean joinGameViaLink) {
+        this.joinGameViaLink = joinGameViaLink;
     }
 
     public Date getCreatedAt() {

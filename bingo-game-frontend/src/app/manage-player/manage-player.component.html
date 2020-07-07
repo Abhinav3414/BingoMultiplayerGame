@@ -1,5 +1,10 @@
 <h5 *ngIf="!playerSetupComplete" style="padding-left: 1.25rem;" class="mb-3">Manage Players for Game</h5>
 
+<div *ngIf="!playerSetupComplete" class="m-4">
+  Use below link to join Game :
+  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word;" class="mb-4" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
+</div>
+
 <div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons" *ngIf="!playerSetupComplete">
   <label class="btn btn-secondary active">
     <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="addPlayerManually()"> Add
@@ -76,38 +81,49 @@
 
     </div>
   </div>
+
 </div>
 
 <div *ngIf="players" class="col-lg-9 all-players-wrapper">
   <h5 class="mb-4">Players in Game</h5>
 
   Link of Game Room for Players :
-  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word; " target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
-  <br>
-  <div *ngFor="let player of players; index as i;" class="all-players">
-    <span style="padding-right: .5em">{{i + 1}}.</span>
-    <span class="player-name-style" *ngIf="player.email">{{player.email}}</span>
-    <span class="player-name-style" *ngIf="!player.email && player.name">{{player.name}}</span>
+  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word;" class="mb-4" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
 
-    <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
-      <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
-        style=" margin-left: 1em; " [disabled]="fetching">
-        <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem;" *ngIf="fetching">
-          <span class="sr-only"></span>
-        </div>
-        <i class="fa fa-repeat" aria-hidden="true" *ngIf="!fetching"></i></button>
+  <div class="players-list-wrapper">
+    <div *ngFor="let player of players; index as i;" class="all-players">
+      <span style="padding-right: .5em">{{i + 1}}.</span>
+      <span class="player-name-style" *ngIf="player.email">{{player.email}}</span>
+      <span class="player-name-style" *ngIf="!player.email && player.name">{{player.name}}</span>
+
+      <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
+        <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
+          style=" margin-left: 1em; " [disabled]="fetching">
+          <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem;" *ngIf="fetching">
+            <span class="sr-only"></span>
+          </div>
+          <i class="fa fa-repeat" aria-hidden="true" *ngIf="!fetching"></i>
+        </button>
+      </div>
+
+      <div *ngIf="bingoSlipEmailStatus === 'NOT_SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
+        <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Send Email"
+          style=" margin-left: 1em; " [disabled]="fetching">
+          <i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+      </div>
+
+      <app-modal [player]="player" [gameId]="gameId" style="margin-left:.5em"></app-modal>
+
+      <div class="email-status-style" *ngIf="bingoSlipEmailStatus === 'SENT'"
+        [ngClass]="{'success': player.bingoSlipEmailStatus === 'SENT', 'fail': player.bingoSlipEmailStatus === 'NOT_SENT'}">
+        <i class="fa fa-envelope-o" style=" position: absolute; " aria-hidden="true"></i>
+        <i class="fa fa-check check-style" *ngIf="player.bingoSlipEmailStatus == 'SENT'" aria-hidden="true"></i>
+        <i class="fa fa-exclamation-triangle exclamation-style" *ngIf="player.bingoSlipEmailStatus == 'NOT_SENT'"
+          aria-hidden="true"></i>
+      </div>
     </div>
 
-    <app-modal [player]="player" [gameId]="gameId" style="margin-left:.5em"></app-modal>
-
-    <div class="email-status-style" *ngIf="bingoSlipEmailStatus === 'SENT'"
-      [ngClass]="{'success': player.bingoSlipEmailStatus === 'SENT', 'fail': player.bingoSlipEmailStatus === 'NOT_SENT'}">
-      <i class="fa fa-envelope-o" style=" position: absolute; " aria-hidden="true"></i>
-      <i class="fa fa-check check-style" *ngIf="player.bingoSlipEmailStatus == 'SENT'" aria-hidden="true"></i>
-      <i class="fa fa-exclamation-triangle exclamation-style" *ngIf="player.bingoSlipEmailStatus == 'NOT_SENT'"
-        aria-hidden="true"></i>
-    </div>
-  </div>
+</div>
   <div class="mt-4" *ngIf="emailSendPlayerIdentifier" style="color: #f40000;">
     <i class="fa fa-exclamation-triangle " aria-hidden="true" style="margin-right: .5em"></i>
     <span>Email Could not be sent to <b>{{emailSendPlayerIdentifier}}</b>. Please try again or you can download and send slips manually.</span>

@@ -8,10 +8,15 @@
 .all-players-wrapper {
     display: flex;
     flex-direction: column;
-
     flex-grow: 1;
     height: 100%;
     padding-left: 1.25rem;
+
+    .players-list-wrapper {
+      display: flex;
+      max-height: 45vh;
+      flex-direction: column;
+      overflow: auto;
 
     .all-players {
       display:flex;
@@ -49,6 +54,6 @@
         color: red;
       }
     }
-
+  }
 
 }

@@ -23,6 +23,7 @@ export class ManagePlayerComponent implements OnInit {
   @Input() gameId: string;
   @Input() playerSetupComplete: boolean;
   @Input() bingoSlipEmailStatus: string;
+  @Input() joinGameViaLink: boolean;
   @ViewChild('fileInput') fileInput: ElementRef;
   @Output() isPlayerSetupReady = new EventEmitter<boolean>();
 
@@ -212,15 +213,20 @@ export class ManagePlayerComponent implements OnInit {
   }
 
   sendEmail(playerId: string) {
-    this.fetching = true;
+    //  this.fetching = true;
+    this.emailSendPlayerIdentifier = undefined;
+
     this.bingoService.sendEmail(this.gameId, playerId).subscribe((r) => {
+      const player = this.players.filter(p => p.id === playerId)[0];
+
       if (r === false) {
-        const player = this.players.filter(p => p.id === playerId)[0];
         this.emailSendPlayerIdentifier = (player.email) ? player.email : player.name;
-        this.fetching = false;
+        // this.fetching = false;
+      } else {
+        player.bingoSlipEmailStatus = 'SENT';
       }
     }, (err) => {
-      this.fetching = false;
+      // this.fetching = false;
     });
   }
 

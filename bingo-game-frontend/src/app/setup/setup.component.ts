@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BingoService } from '../bingo.service';
+import { GameSetupAttributesResponse } from '../models';
 
 @Component({
   selector: 'app-setup',
@@ -24,8 +25,9 @@ export class SetupComponent implements OnInit {
   emailSlips = false;
   bingoSlipEmailStatus = 'DISABLED';
   gameName;
+  joinGameViaLink;
 
-  constructor(private route: ActivatedRoute, public bingoService: BingoService, private router: Router) {
+  constructor(private route: ActivatedRoute, private router: Router, public bingoService: BingoService) {
 
     this.route.data.subscribe((res) => {
 
@@ -88,15 +90,18 @@ export class SetupComponent implements OnInit {
     this.boardType = value;
   }
 
-  setUpBoardTypeAndSlipCount() {
+  setUpGame() {
     if (this.emailSlips) {
       this.bingoSlipEmailStatus = 'NOT_SENT';
     }
-    this.bingoService.setUpBoardTypeAndSlipCount(this.gameId, this.boardType, this.slipsNeeded, this.emailSlips,
-      this.gameName).subscribe((r) => {
-        this.bingoService.setGameName(this.gameName);
-        this.bingoBoardReady = true;
-      });
+
+    const gameSetupAttributes = new GameSetupAttributesResponse(this.gameId, this.boardType, this.slipsNeeded, this.emailSlips,
+      this.gameName, this.joinGameViaLink);
+
+    this.bingoService.setUpGame(this.gameId, gameSetupAttributes).subscribe((r) => {
+      this.bingoService.setGameName(this.gameName);
+      this.bingoBoardReady = true;
+    });
   }
 
   enterExistingGame() {

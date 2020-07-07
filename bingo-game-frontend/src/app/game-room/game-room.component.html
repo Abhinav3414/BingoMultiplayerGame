@@ -20,14 +20,19 @@
     </div>
     <div class="col-sm-8">
 
-      <div class="form-group col-sm-8 col-md-6 col-lg-4">
+      <div class="form-group col-sm-8 col-md-6 col-lg-4" *ngIf="!joinGameViaLink">
         <label for="enterExistingGame">Enter Your Unique Id to view your slips:</label>
         <div style=" display: flex; ">
           <input class="form-control" placeholder="player id" id="playeruniqueid"
           [(ngModel)]="playeruniqueid" />
           <button type="submit" class="btn btn-success ml-2" (click)="viewSlips()">Submit</button>
         </div>
+      </div>
 
+      <div class="form-group col-sm-8 col-md-6 col-lg-4" *ngIf="joinGameViaLink">
+        <div style="display: flex;justify-content: center;">
+          <button type="submit" class="btn btn-success" data-toggle="modal" data-target="#joinGame">Join Game</button>
+        </div>
       </div>
 
       <div *ngIf="slipResponse" class="slip-wrapper" >
@@ -68,3 +73,37 @@
 </div>
 
 
+
+<div class="modal fade" id="joinGame">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="m-0">Enter Player Details</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+
+        <div class="form-group">
+          <input class="form-control" placeholder="Player Name" id="playerName" [(ngModel)]="playerName">
+        </div>
+
+        <div class="form-group">
+          <input class="form-control" placeholder="Player Email" id="playerEmail" [(ngModel)]="playerEmail">
+        </div>
+
+       <button type="button" class="btn btn-success" data-dismiss="modal" (click)="joinPlayer()">Join Game</button>
+
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> -->
+      </div>
+
+    </div>
+  </div>
+</div>
