@@ -230,4 +230,11 @@ export class ManagePlayerComponent implements OnInit {
     });
   }
 
+  completePlayerSetup() {
+    this.bingoService.completePlayerSetup(this.gameId).subscribe((r) => {
+      this.playerSetupComplete = true;
+      this.proceedGame();
+    });
+  }
+
 }

@@ -24,15 +24,11 @@ public class BingoGame {
 
     private boolean isLeaderAssigned;
 
-    private boolean isExcelUploaded;
-
     private boolean pdfsGenerated;
 
     private boolean isPlayerSetupComplete;
 
     private boolean haveCallsStarted;
-
-    private boolean isBingoBoardReady;
 
     private boolean joinGameViaLink;
 
@@ -68,14 +64,6 @@ public class BingoGame {
         this.bingoBoardId = bingoBoardId;
     }
 
-    public boolean isExcelUploaded() {
-        return isExcelUploaded;
-    }
-
-    public void setExcelUploaded(boolean isExcelUploaded) {
-        this.isExcelUploaded = isExcelUploaded;
-    }
-
     public boolean isPdfsGenerated() {
         return pdfsGenerated;
     }
@@ -106,14 +94,6 @@ public class BingoGame {
 
     public void setHaveCallsStarted(boolean haveCallsStarted) {
         this.haveCallsStarted = haveCallsStarted;
-    }
-
-    public boolean isBingoBoardReady() {
-        return isBingoBoardReady;
-    }
-
-    public void setBingoBoardReady(boolean isBingoBoardReady) {
-        this.isBingoBoardReady = isBingoBoardReady;
     }
 
     public BingoSlipEmailStatus getBingoSlipEmailStatus() {

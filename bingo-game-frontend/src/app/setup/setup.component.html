@@ -76,14 +76,13 @@
       <app-call-number *ngIf="callsStarted && callsDone" [gameId]="gameId" [callsDone]="callsDone"></app-call-number>
 
     </div>
-    <div class="col-sm-6">
-      <br> <br> <br>
+    <div class="col-sm-6 pt-4">
 
       <app-manage-player [gameId]="gameId" [playerSetupComplete]="playerSetupComplete" [joinGameViaLink]="joinGameViaLink"
         [bingoSlipEmailStatus]="bingoSlipEmailStatus" (isPlayerSetupReady)="getPlayerSetupStatus($event)"
-        *ngIf="leaderAssigned && bingoBoardReady"></app-manage-player>
+        *ngIf="leaderAssigned && playerSetupComplete"></app-manage-player>
 
-      <div *ngIf="leaderAssigned && !bingoBoardReady" class="col-sm-8">
+      <div *ngIf="leaderAssigned && !playerSetupComplete" class="col-sm-8">
 
         <div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons">
           <label class="btn btn-secondary active">

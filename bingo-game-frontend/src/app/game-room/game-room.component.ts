@@ -84,7 +84,8 @@ export class GameRoomComponent implements OnInit {
       const playerResponse = new PlayerResponse(this.playerName, this.playerEmail);
       this.bingoService.joinPlayer(this.gameId, playerResponse).subscribe((res: any) => {
 
-        this.bingoService.getUserSlips(this.gameId, res.id).subscribe((r) => {
+        this.playeruniqueid = res.id;
+        this.bingoService.getUserSlips(this.gameId, this.playeruniqueid).subscribe((r) => {
           this.slipResponse = r;
           if (this.slipResponse.responses[0].transformedMatrix[0].length === 5) {
             this.is75Board = true;

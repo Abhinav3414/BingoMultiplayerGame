@@ -109,6 +109,15 @@ public class BingoRestController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    
+    @PostMapping("{gameId}/completePlayerSetup")
+    public ResponseEntity<String> completePlayerSetup(@PathVariable("gameId") String gameId, @RequestHeader("X-Requested-With") String leaderId) {
+
+        bingoAppService.validateGameAccess(gameId, leaderId);
+        bingoAppService.completePlayerSetup(gameId);
+
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("{gameId}/startCalls")
     public ResponseEntity<PlayerResponse> startCalls(@PathVariable("gameId") String gameId,
@@ -223,7 +232,7 @@ public class BingoRestController {
     }
 
     @ResponseBody
-    @RequestMapping(value = "{gameId}/gamesetup/addPlayers", method = RequestMethod.POST)
+    @PostMapping("{gameId}/gamesetup/addPlayers")
     public ResponseEntity<String> addPlayers(@PathVariable("gameId") String gameId,
             @RequestBody List<PlayerResponse> players,
             @RequestHeader("X-Requested-With") String leaderId) {

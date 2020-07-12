@@ -64,6 +64,12 @@ export class BingoService {
     return this.http.post(this.appUrl + '/' + gameId + '/setupGame', gameSetupAttributes, { headers: this.headers });
   }
 
+
+  completePlayerSetup(gameId: string) {
+    const reqHeader = (this.getLeader()) ? this.getHeaderWithXRequest(this.getLeader().id) : this.headers;
+    return this.http.post(this.appUrl + '/' + gameId + '/completePlayerSetup', null, { headers: this.headers });
+  }
+
   enterGameRoom(gameId: string) {
     const leaderEmail = this.getLeader() ? this.getLeader().email : undefined;
     return this.http.post(this.appUrl + '/' + gameId + '/entergameroom/' + leaderEmail, null);

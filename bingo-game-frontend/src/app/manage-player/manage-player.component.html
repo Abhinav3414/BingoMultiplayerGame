@@ -1,11 +1,19 @@
 <h5 *ngIf="!playerSetupComplete" style="padding-left: 1.25rem;" class="mb-3">Manage Players for Game</h5>
 
-<div *ngIf="!playerSetupComplete" class="m-4">
-  Use below link to join Game :
-  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word;" class="mb-4" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
+<div *ngIf="!playerSetupComplete && joinGameViaLink" class="mt-2 ml-4 mb-2">
+  Link to join Game : <br>
+  <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word;" class="mb-4"
+    target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
+
+  <div class="mt-2">
+    <span class="mb-2">If you do not want to add players using below methods then press continue:</span>
+    <br>
+    <button type="button" class="btn btn-success m-1" (click)="completePlayerSetup()">Continue</button>
+  </div>
+
 </div>
 
-<div class="btn-group btn-group-toggle col-lg-10 pb-4" data-toggle="buttons" *ngIf="!playerSetupComplete">
+<div class="btn-group btn-group-toggle col-lg-10 pb-2" data-toggle="buttons" *ngIf="!playerSetupComplete">
   <label class="btn btn-secondary active">
     <input type="radio" name="options" id="option1" autocomplete="off" checked (click)="addPlayerManually()"> Add
     Players Manually
@@ -38,8 +46,8 @@
 </div>
 
 <div class="col-lg-10" *ngIf="!playerSetupComplete && isAddPlayerFromManually"
-  style="max-height: 65vh; overflow-y: auto;">
-  <div class="card">
+ >
+  <div class="card" style=" max-height: 55vh; overflow: auto; ">
     <div class="card-body" style="display: flex; flex-direction: column;">
       <h6 class="card-title">Add Players Manually</h6>
 
@@ -84,13 +92,15 @@
 
 </div>
 
-<div *ngIf="players" class="col-lg-9 all-players-wrapper">
+<div *ngIf="playerSetupComplete" class="col-lg-9 all-players-wrapper">
   <h5 class="mb-4">Players in Game</h5>
 
-  Link of Game Room for Players :
+  Game Room link for Players :
   <a href="{{hrefUrl}}gameroom/{{gameId}}" style=" word-wrap: break-word;" class="mb-4" target="_blank">{{hrefUrl}}gameroom/{{gameId}}</a>
 
+  <div *ngIf="players.length===0" style="color: gray;font-style: italic;"> No players joined yet</div>
   <div class="players-list-wrapper">
+
     <div *ngFor="let player of players; index as i;" class="all-players">
       <span style="padding-right: .5em">{{i + 1}}.</span>
       <span class="player-name-style" *ngIf="player.email">{{player.email}}</span>
@@ -98,7 +108,16 @@
 
       <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'NOT_SENT'">
         <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Try Again to mail"
-          style=" margin-left: 1em; " [disabled]="fetching">
+          [disabled]="fetching">
+          <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem;" *ngIf="fetching">
+            <span class="sr-only"></span>
+          </div>
+          <i class="fa fa-paper-plane" aria-hidden="true" *ngIf="!fetching"></i>
+        </button>
+      </div>
+      <div *ngIf="bingoSlipEmailStatus === 'SENT' && player.bingoSlipEmailStatus === 'SENT'">
+        <button class="btn btn-success" type="button" (click)="sendEmail(player.id)" title="Send Email again"
+          [disabled]="fetching">
           <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem;" *ngIf="fetching">
             <span class="sr-only"></span>
           </div>
@@ -131,7 +150,7 @@
 
 
 
-  <div class="mt-4" *ngIf="bingoSlipEmailStatus === 'NOT_SENT'">
+  <div class="mt-4" *ngIf="bingoSlipEmailStatus === 'NOT_SENT' && players.length > 0">
     <button class="btn btn-success" type="button" (click)="sendEmailToAll()" [disabled]="fetching">
       <div class="spinner-border" role="status" style=" width: 1rem; height: 1rem; margin-right: .5em" *ngIf="fetching">
         <span class="sr-only"></span>

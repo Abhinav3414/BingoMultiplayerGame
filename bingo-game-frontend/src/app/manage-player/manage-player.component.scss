@@ -21,15 +21,14 @@
     .all-players {
       display:flex;
       align-items: center;
-      justify-content: center;
-      padding: 0 0 .2em .5em;
+      padding: 0 0 .2em 0;
 
       .player-name-style {
         display: flex;
-        flex-grow: 1;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        width: 50%;
       }
 
       .email-status-style {
@@ -41,7 +40,7 @@
         .exclamation-style {
           font-size: .7em;
           position: relative;
-          left: 1em;
+          left: .7em;
         }
         .check-style {
           font-size: 0.8em;

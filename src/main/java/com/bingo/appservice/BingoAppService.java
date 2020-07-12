@@ -103,7 +103,6 @@ public class BingoAppService {
         if (gameName != null && gameName.length() > 1) {
             bGame.setGameName(gameName);
         }
-        bGame.setBingoBoardReady(true);
         bGame.setJoinGameViaLink(isJoinGameViaLink);
 
         if (shouldEmailSlips) {
@@ -185,7 +184,6 @@ public class BingoAppService {
                 Path path = Paths.get(UPLOAD_DIR + '/' + fileIOService.getBingoFolder(gameId) + '/'
                         + BingoAppService.EMAILS_BINGO_USERS_XLSX);
                 Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                bGame.setExcelUploaded(true);
                 bingoGameRepository.save(bGame);
                 System.out.println("Excel is read successfully and saved in memory");
             } catch (IOException e) {
@@ -237,7 +235,12 @@ public class BingoAppService {
         // create user
         players.forEach(p -> {
             BingoUser newPlayer = new BingoUser(p.getName(), p.getEmail(), bGame.getGameId(), bGame.getBingoBoardId());
-            newPlayer.setBingoSlipEmailStatus(bGame.getBingoSlipEmailStatus());
+            
+            if(bGame.getBingoSlipEmailStatus().equals(BingoSlipEmailStatus.DISABLED)) {
+                newPlayer.setBingoSlipEmailStatus(bGame.getBingoSlipEmailStatus());
+            }
+            
+            newPlayer.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
 
             BingoUser bu = bingoUserRepository.save(newPlayer);
             userIds.add(bu.getUserId());
@@ -254,7 +257,6 @@ public class BingoAppService {
         bingoUserRepository.findByBoardId(bGame.getBingoBoardId())
                 .stream().filter(p -> userIds.contains(p.getUserId()))
                 .forEach(u -> {
-                    System.out.println(u.getEmail());
                     generateSlipsForUser(u, bGame);
                 });
 
@@ -573,5 +575,11 @@ public class BingoAppService {
         bingoSlipRepository.save(slip);
 
         return slip;
+    }
+
+    public void completePlayerSetup(String gameId) {
+        BingoGame bGame = bingoGameRepository.findById(gameId).get();
+        bGame.setPlayerSetupComplete(true);
+        bingoGameRepository.save(bGame);
     }
 }
