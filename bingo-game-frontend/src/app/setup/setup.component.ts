@@ -24,6 +24,7 @@ export class SetupComponent implements OnInit {
   bingoSlipEmailStatus = 'DISABLED';
   gameName;
   joinGameViaLink;
+  bingoBoardReady = false;
 
   constructor(private route: ActivatedRoute, private router: Router, public bingoService: BingoService) {
 
@@ -37,6 +38,7 @@ export class SetupComponent implements OnInit {
         this.callsStarted = r.haveCallsStarted;
         this.bingoSlipEmailStatus = r.bingoSlipEmailStatus;
         this.joinGameViaLink = r.joinGameViaLink;
+        this.bingoBoardReady = r.bingoBoardReady;
         if (r.haveCallsStarted) {
           this.bingoService.getAllCalls(this.gameId).subscribe((callsDone: any) => {
             this.callsDone = callsDone;
@@ -97,6 +99,7 @@ export class SetupComponent implements OnInit {
 
     this.bingoService.setUpGame(this.gameId, gameSetupAttributes).subscribe((r) => {
       this.bingoService.setGameName(this.gameName);
+      this.bingoBoardReady = true;
     });
   }
 
@@ -104,6 +107,7 @@ export class SetupComponent implements OnInit {
     this.bingoService.enterGameRoom(this.existingGameId).subscribe((r) => {
       this.bingoService.setLeader(r);
       this.gameId = this.existingGameId;
+      this.bingoBoardReady = true;
       this.router.navigate(['game', this.existingGameId]).then(() => {
         window.location.reload();
       });

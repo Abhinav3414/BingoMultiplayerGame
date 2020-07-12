@@ -80,6 +80,7 @@ public class BingoAppService {
         BingoGame bGame = new BingoGame();
         bGame.setBingoBoardId(bb.getBoardId());
 
+        bGame.setJoinGameViaLink(true);
         BingoGame startedGame = bingoGameRepository.save(bGame);
         bb.setGameId(startedGame.getGameId());
         bingoBoardRepository.save(bb);
@@ -104,6 +105,7 @@ public class BingoAppService {
             bGame.setGameName(gameName);
         }
         bGame.setJoinGameViaLink(isJoinGameViaLink);
+        bGame.setBingoBoardReady(true);
 
         if (shouldEmailSlips) {
             bGame.setBingoSlipEmailStatus(BingoSlipEmailStatus.NOT_SENT);
