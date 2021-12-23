@@ -59,8 +59,13 @@ public class EmailService {
                     new ByteArrayResource(fileContent));
             helper.setText(textMessage, true);// true indicates body is html
 
-            ClassPathResource classPathResource = new ClassPathResource("bingo_game_image.jpg");
-            helper.addInline(contentId, classPathResource);
+			try {
+				ClassPathResource classPathResource = new ClassPathResource("bingo_game_image.jpg");
+				helper.addInline(contentId, classPathResource);
+			} catch (Exception e) {
+				System.out.println("Could not attach image : bingo_game_image.jpg");
+				e.printStackTrace();
+			}
 
             javaMailSender.send(message);
 
