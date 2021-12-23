@@ -60,10 +60,10 @@ public class EmailService {
             helper.setText(textMessage, true);// true indicates body is html
 
 			try {
-				ClassPathResource classPathResource = new ClassPathResource("bingo_game_image.jpg");
+				ClassPathResource classPathResource = new ClassPathResource("abingo_game_image.jpg");
 				helper.addInline(contentId, classPathResource);
 			} catch (Exception e) {
-				System.out.println("Could not attach image : bingo_game_image.jpg");
+				System.out.println("Could not attach image : abingo_game_image.jpg");
 				e.printStackTrace();
 			}
 

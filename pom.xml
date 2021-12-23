@@ -172,9 +172,9 @@
                         <outputDirectory>${basedir}/src/main/resources/static</outputDirectory>
                         <resources>
                             <resource>
-                                <directory>/bingo-game-frontend/dist/bingo-game-frontend</directory>
+                                <directory>${basedir}/bingo-game-frontend/dist/bingo-game-frontend</directory>
                                 <includes>
-                                    <include>**/*</include>
+                                    <include>**/*.*</include>
                                 </includes>
                             </resource>
                         </resources>
